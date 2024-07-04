@@ -1,0 +1,9 @@
+{
+    "C_Cpp.default.compilerPath": "riscv-none-elf-gcc",
+    "files.associations": {
+        "Doxyfile": "doxyfile",
+        "stdlib.h": "c",
+        "driver.h": "c",
+        "image.h": "c"
+    },
+}

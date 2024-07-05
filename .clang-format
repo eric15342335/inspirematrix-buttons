@@ -1,48 +1,25 @@
-# Basic style rules by Charles Lohr
-# Additions and modifications by Sam Ellicott
-#
-# For information about the definitions of rules
-# See: https://clang.llvm.org/docs/ClangFormatStyleOptions.html
+﻿Language: Cpp
 
-BasedOnStyle: Microsoft
-AccessModifierOffset: -4
-
-# Basic general rules
-ColumnLimit: '120'
+UseTab: Never
+IndentWidth: 4
 TabWidth: 4
-UseTab: AlignWithSpaces 
-BreakBeforeBraces: Allman
-PointerAlignment: Right
-MaxEmptyLinesToKeep: 2
+
+ColumnLimit: 88
+AlignAfterOpenBracket: DontAlign
 IndentCaseLabels: true
 
-# Allignment rules
-AlignAfterOpenBracket: DontAlign
-AlignTrailingComments: false
-AlignConsecutiveAssignments: false
-AlignConsecutiveMacros: false
-AlignEscapedNewlines: Left
-AlignOperands: AlignAfterOperator
+BreakBeforeBraces: Custom
+BraceWrapping:
+    BeforeElse: true
+    
+DerivePointerAlignment: false
+PointerAlignment: Middle
 
-# Rules for brackets/parentheses
-SpaceInEmptyParentheses: false
-SpacesInAngles: true
-SpacesInCStyleCastParentheses: false
-SpacesInContainerLiterals: true
-SpacesInParentheses: true
-SpacesInSquareBrackets: false
+SortIncludes: true
+IncludeBlocks: Regroup
 
-# Short statement rules
-AllowShortBlocksOnASingleLine: Never 
-AllowShortIfStatementsOnASingleLine: WithoutElse 
-AllowShortCaseLabelsOnASingleLine: true
-AllowShortLoopsOnASingleLine: true
-
-# Other Rules
-FixNamespaceComments: true
-AllowAllParametersOfDeclarationOnNextLine: false
-AlwaysBreakTemplateDeclarations: 'Yes'
-BreakBeforeBinaryOperators: None
-BreakConstructorInitializers: BeforeComma
-ExperimentalAutoDetectBinPacking: false
-NamespaceIndentation: None
+MaxEmptyLinesToKeep: 1
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeParens: ControlStatements
+ReflowComments: true
+SortUsingDeclarations: true

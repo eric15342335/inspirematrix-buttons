@@ -16,26 +16,29 @@ The timing on the SPI bus is not terribly variable, the best I was able to find 
 
 ## Usage
 
-If you are including this in main, simply 
+If you are including this in main, simply
+
 ```c
 #define WS2812DMA_IMPLEMENTATION
 #include "ws2812b_dma_spi_led_driver.h"
 ```
 
 You will need to implement the following two functions, as callbacks from the ISR.
+
 ```c
 uint32_t CallbackWS2812BLED( int ledno );
 ```
 
 You will also need to call
+
 ```c
 InitWS2812DMA();
 ```
 
 Then, when you want to update the LEDs, call:
+
 ```c
 WS2812BStart( int num_leds );
 ```
 
 If you want to see if it's done sending, examine `WS2812BLEDInUse`.
-

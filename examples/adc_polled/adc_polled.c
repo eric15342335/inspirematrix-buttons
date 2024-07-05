@@ -144,6 +144,39 @@ int buttons[] = {BUTTON_0, BUTTON_1, BUTTON_2, BUTTON_3, BUTTON_4, BUTTON_5, BUT
     BUTTON_50, BUTTON_51, BUTTON_52, BUTTON_53, BUTTON_54, BUTTON_55, BUTTON_56,
     BUTTON_57, BUTTON_58, BUTTON_59, BUTTON_60, BUTTON_61, BUTTON_62, BUTTON_63};
 
+#define WS2812BSIMPLE_IMPLEMENTATION
+#define FUNCONF_SYSTICK_USE_HCLK 1
+#include "ws2812b_simple.h"
+
+#define NUM_LEDS 64 // Define the number of LEDs in your strip
+
+typedef struct color_256 {
+    uint8_t r;
+    uint8_t g;
+    uint8_t b;
+} color_t;
+
+color_t led_array[NUM_LEDS] = {0};
+
+void set_color(uint8_t led, uint8_t r, uint8_t g, uint8_t b) {
+    led_array[led].r = r;
+    led_array[led].g = g;
+    led_array[led].b = b;
+}
+
+void clear(void) {
+    for (int i = 0; i < NUM_LEDS; i++) {
+        set_color(i, 0, 0, 0);
+    }
+}
+
+void send(void) {
+    // WS2812BSimpleSend( GPIOC, 6, led_array, NUM_LEDS*3 );
+    WS2812BSimpleSend(GPIOC, 6, (uint8_t *)led_array, NUM_LEDS * 3);
+}
+
+uint8_t toggle[NUM_LEDS] = {0};
+
 /*
  * entry
  */
@@ -166,11 +199,13 @@ int main() {
     GPIOD->CFGLR &= ~(0xf << (4 * 0));
     GPIOD->CFGLR |= (GPIO_Speed_10MHz | GPIO_CNF_OUT_PP) << (4 * 0);
     printf("looping...\n\r");
+    clear();
     while (1) {
-        GPIOD->BSHR = 1; // Turn on GPIOs
+        /*GPIOD->BSHR = 1; // Turn on GPIOs
         Delay_Ms(300);
         GPIOD->BSHR = (1 << 16); // Turn off GPIODs
-        Delay_Ms(300);
+        Delay_Ms(300);*/
+        Delay_Ms(100);
         int adc = adc_get();
         printf("Count: %lu adc: %d\n\r", count++, adc);
 #define abs(x) ((x) < 0 ? -(x) : (x))
@@ -200,5 +235,13 @@ int main() {
         }
         // Print the closest button pressed
         printf("Button pressed: %d\n\r", closestButton);
+        // Set the color of the LED strip to the button pressed
+        // disabled 35 and 36
+        if (closestButton != -1) {
+            if (!toggle[closestButton]) set_color(closestButton, 255, 0, 0);
+            else set_color(closestButton, 0, 0, 0);
+            toggle[closestButton] = !toggle[closestButton];
+        }
+        send();
     }
 }

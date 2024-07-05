@@ -7,7 +7,7 @@
 #define WS2812DMA_IMPLEMENTATION
 //#define WSRBG //For WS2816C's.
 #define WSGRB // For SK6805-EC15
-#define NR_LEDS 191
+#define NR_LEDS 66
 
 #include "ws2812b_dma_spi_led_driver.h"
 
@@ -28,8 +28,17 @@ uint32_t WS2812BLEDCallback( int ledno )
 	uint32_t ice  = 0x7f0000 | ((rsbase>>1)<<8) | ((rsbase>>1));
 
 	// Because this chip doesn't natively support multiplies, we are going to avoid tweening of 1..254.
-	printf("fire: %x, ice: %x, tween: %d, ledno: %d\n", fire, ice, tween, ledno);
-    Delay_Ms( 300 );
+	// printf("fire: %x, ice: %x, tween: %d, ledno: %d\n", fire, ice, tween, ledno);
+    /*
+    fire: 5dff, ice: 7f7e7e, tween: -191, ledno: 72
+    fire: 5dff, ice: 7f7e7e, tween: -191, ledno: 73
+    fire: 5dff, ice: 7f7d7d, tween: -191, ledno: 74
+    fire: 5dff, ice: 7f7c7c, tween: -191, ledno: 75
+    fire: 5aff, ice: 7f7b7b, tween: -191, ledno: 76
+    fire: 5aff, ice: 7f7b7b, tween: -191, ledno: 77
+    fire: 5aff, ice: 7f7b7b, tween: -191, ledno: 78
+    */
+    // Delay_Ms( 300 );
     return TweenHexColors( fire, ice, ((tween + ledno)>0)?255:0 ); // Where "tween" is a value from 0 ... 255
 }
 

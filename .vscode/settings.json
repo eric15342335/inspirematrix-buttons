@@ -4,6 +4,9 @@
         "Doxyfile": "doxyfile",
         "stdlib.h": "c",
         "driver.h": "c",
-        "image.h": "c"
+        "image.h": "c",
+        "ch32v003fun.h": "c",
+        "color_utilities.h": "c",
+        "ws2812b_dma_spi_led_driver.h": "c"
     },
 }

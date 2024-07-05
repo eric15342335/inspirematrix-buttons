@@ -200,6 +200,7 @@ int main() {
     GPIOD->CFGLR |= (GPIO_Speed_10MHz | GPIO_CNF_OUT_PP) << (4 * 0);
     printf("looping...\n\r");
     clear();
+    send();
     while (1) {
         /*GPIOD->BSHR = 1; // Turn on GPIOs
         Delay_Ms(300);
@@ -207,7 +208,7 @@ int main() {
         Delay_Ms(300);*/
         Delay_Ms(100);
         int adc = adc_get();
-        printf("Count: %lu adc: %d\n\r", count++, adc);
+        //printf("Count: %lu adc: %d\n\r", count++, adc);
 #define abs(x) ((x) < 0 ? -(x) : (x))
         // Find out which button is pressed via the ADC value
         // perform binary search
@@ -234,9 +235,10 @@ int main() {
             }
         }
         // Print the closest button pressed
-        printf("Button pressed: %d\n\r", closestButton);
+        //printf("Button pressed: %d\n\r", closestButton);
         // Set the color of the LED strip to the button pressed
         // disabled 35 and 36
+        if (502 <= adc && adc <= 507) continue;
         if (closestButton != -1) {
             if (!toggle[closestButton]) set_color(closestButton, 255, 0, 0);
             else set_color(closestButton, 0, 0, 0);

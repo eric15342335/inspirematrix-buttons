@@ -4,7 +4,7 @@ UseTab: Never
 IndentWidth: 4
 TabWidth: 4
 
-ColumnLimit: 88
+ColumnLimit: 120
 AlignAfterOpenBracket: DontAlign
 IndentCaseLabels: true
 

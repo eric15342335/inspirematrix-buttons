@@ -44,7 +44,7 @@ void fill(color_t color) {
 }
 
 void send(void) {
-    WS2812BSimpleSend(GPIOC, 1, (uint8_t *)led_array, NUM_LEDS * 3);
+    WS2812BSimpleSend(GPIOC, 2, (uint8_t *)led_array, NUM_LEDS * 3);
 }
 
 void adc_cal(void) {

@@ -1306,10 +1306,21 @@ void SetupUART( int uartBRR )
 #ifdef CH32V003
 	// Enable GPIOD and UART.
 	RCC->APB2PCENR |= RCC_APB2Periph_GPIOD | RCC_APB2Periph_USART1;
-
+#ifndef CH32V003J4M6_USE_PD6_AS_UART_TX
 	// Push-Pull, 10MHz Output, GPIO D5, with AutoFunction
 	GPIOD->CFGLR &= ~(0xf<<(4*5));
 	GPIOD->CFGLR |= (GPIO_Speed_10MHz | GPIO_CNF_OUT_PP_AF)<<(4*5);
+#else
+    // Remap PD6 as UTX
+    // [SUPER IMPORTANT !!!!!!!!!!!!! SEE BELOW]
+    // Ensure you're providing a clock to the AFIO peripheral! Save yourself an 
+    // hour of troubleshooting!
+    RCC->APB2PCENR |= RCC_APB2Periph_AFIO;
+    AFIO->PCFR1 &= ~(0<<24);
+    AFIO->PCFR1 |= (1<<21);
+	GPIOD->CFGLR &= ~(0xf<<(4*6));
+	GPIOD->CFGLR |= (GPIO_Speed_10MHz | GPIO_CNF_OUT_PP_AF)<<(4*6);
+#endif
 #elif defined(CH32X03x)
 	RCC->APB2PCENR |= RCC_APB2Periph_GPIOB | RCC_APB2Periph_USART1;
 

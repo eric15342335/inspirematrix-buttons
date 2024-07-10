@@ -5,12 +5,12 @@
 #define WS2812BSIMPLE_IMPLEMENTATION
 #define FUNCONF_SYSTICK_USE_HCLK 1
 #include "ch32v003fun.h"
-#include <stdio.h>
 #include "ws2812b_simple.h"
 
-#define BUTTON_NONE 4
-#define BUTTON_DEVIATION 6
-// real deviation = BUTTON_DEVIATION * abs( BUTTON_NUM - BUTTON_NONE ) / BUTTON_NONE
+#include <stdio.h>
+#define abs(x) ((x) < 0 ? -(x) : (x))
+#define BUTTON_NONE 10
+#define BUTTON_DEVIATION 4
 #define BUTTON_0 1019
 #define BUTTON_1 995
 #define BUTTON_2 970
@@ -46,7 +46,7 @@
 #define BUTTON_32 439
 #define BUTTON_33 425
 #define BUTTON_34 412
-#define BUTTON_35 399 // Special value. This button should have no deviation.
+#define BUTTON_35 399
 #define BUTTON_36 387
 #define BUTTON_37 372
 #define BUTTON_38 360
@@ -74,7 +74,7 @@
 #define BUTTON_60 62
 #define BUTTON_61 48
 #define BUTTON_62 32
-#define BUTTON_63 15
+#define BUTTON_63 20
 
 void adc_cal(void) {
     // Reset calibration
@@ -88,14 +88,12 @@ void adc_cal(void) {
         ;
 }
 
-/*
- * initialize adc for polling
- */
+// initialize adc for polling
 void adc_init(void) {
     // ADCCLK = 24 MHz => RCC_ADCPRE = 0: divide by 2
     RCC->CFGR0 &= ~(0x1F << 11);
 
-    // Enable GPIOC and ADC
+    // Enable GPIOD and ADC
     RCC->APB2PCENR |= RCC_APB2Periph_GPIOD | RCC_APB2Periph_ADC1;
 
     // PD2 is analog input chl 3?
@@ -122,9 +120,7 @@ void adc_init(void) {
     // should be ready for SW conversion now
 }
 
-/*
- * start conversion, wait and return result
- */
+// start conversion, wait and return result
 uint16_t adc_get(void) {
     // start sw conversion (auto clears)
     ADC1->CTLR2 |= ADC_SWSTART;
@@ -137,16 +133,16 @@ uint16_t adc_get(void) {
     return ADC1->RDATAR;
 }
 
+// Define the number of LEDs in your strip
+#define NUM_LEDS 64
 // Declare a list which contains all the buttons
-int buttons[] = {BUTTON_0, BUTTON_1, BUTTON_2, BUTTON_3, BUTTON_4, BUTTON_5, BUTTON_6, BUTTON_7, BUTTON_8, BUTTON_9,
-    BUTTON_10, BUTTON_11, BUTTON_12, BUTTON_13, BUTTON_14, BUTTON_15, BUTTON_16, BUTTON_17, BUTTON_18, BUTTON_19,
-    BUTTON_20, BUTTON_21, BUTTON_22, BUTTON_23, BUTTON_24, BUTTON_25, BUTTON_26, BUTTON_27, BUTTON_28, BUTTON_29,
-    BUTTON_30, BUTTON_31, BUTTON_32, BUTTON_33, BUTTON_34, BUTTON_35, BUTTON_36, BUTTON_37, BUTTON_38, BUTTON_39,
-    BUTTON_40, BUTTON_41, BUTTON_42, BUTTON_43, BUTTON_44, BUTTON_45, BUTTON_46, BUTTON_47, BUTTON_48, BUTTON_49,
-    BUTTON_50, BUTTON_51, BUTTON_52, BUTTON_53, BUTTON_54, BUTTON_55, BUTTON_56, BUTTON_57, BUTTON_58, BUTTON_59,
-    BUTTON_60, BUTTON_61, BUTTON_62, BUTTON_63};
-
-#define NUM_LEDS 64 // Define the number of LEDs in your strip
+int buttons[NUM_LEDS] = {BUTTON_0, BUTTON_1, BUTTON_2, BUTTON_3, BUTTON_4, BUTTON_5, BUTTON_6, BUTTON_7, BUTTON_8,
+    BUTTON_9, BUTTON_10, BUTTON_11, BUTTON_12, BUTTON_13, BUTTON_14, BUTTON_15, BUTTON_16, BUTTON_17, BUTTON_18,
+    BUTTON_19, BUTTON_20, BUTTON_21, BUTTON_22, BUTTON_23, BUTTON_24, BUTTON_25, BUTTON_26, BUTTON_27, BUTTON_28,
+    BUTTON_29, BUTTON_30, BUTTON_31, BUTTON_32, BUTTON_33, BUTTON_34, BUTTON_35, BUTTON_36, BUTTON_37, BUTTON_38,
+    BUTTON_39, BUTTON_40, BUTTON_41, BUTTON_42, BUTTON_43, BUTTON_44, BUTTON_45, BUTTON_46, BUTTON_47, BUTTON_48,
+    BUTTON_49, BUTTON_50, BUTTON_51, BUTTON_52, BUTTON_53, BUTTON_54, BUTTON_55, BUTTON_56, BUTTON_57, BUTTON_58,
+    BUTTON_59, BUTTON_60, BUTTON_61, BUTTON_62, BUTTON_63};
 
 typedef struct color_256 {
     uint8_t r;
@@ -156,15 +152,18 @@ typedef struct color_256 {
 
 color_t led_array[NUM_LEDS] = {0};
 
-void set_color(uint8_t led, uint8_t r, uint8_t g, uint8_t b) {
-    led_array[led].r = r;
-    led_array[led].g = g;
-    led_array[led].b = b;
+void set_color(uint8_t led, color_t color) {
+    led_array[led].r = color.r;
+    led_array[led].g = color.g;
+    led_array[led].b = color.b;
 }
+
+color_t onColor = {5, 5, 5};
+color_t offColor = {0, 0, 0};
 
 void clear(void) {
     for (int i = 0; i < NUM_LEDS; i++) {
-        set_color(i, 10, 0, 0);
+        set_color(i, offColor);
     }
 }
 
@@ -179,17 +178,16 @@ int get_num_toggle(int adc) {
     // calculate num of '1' in toggle[]
     int count = 0;
     for (int i = 0; i < NUM_LEDS; i++) {
-        if (toggle[i] == 1) {
+        if (toggle[i] == 1)
             count++;
-        }
     }
-    if (adc>500) count=0-count;
-    return count;
+    if (adc > 500)
+        count = 0 - count;
+    // return count;
+    return 0;
 }
 
-/*
- * entry
- */
+// entry point
 int main() {
     uint32_t count = 0;
 
@@ -212,26 +210,26 @@ int main() {
     clear();
     send();
     while (1) {
-        //GPIOD->BSHR = 1; // Turn on GPIOs
-        Delay_Ms(200);
-        //GPIOD->BSHR = (1 << 16); // Turn off GPIODs
-        // Delay_Ms(300);
-        int adc, adc2;
-#define abs(x) ((x) < 0 ? -(x) : (x))
+        // GPIOD->BSHR = 1; // Turn on GPIOs
+        // GPIOD->BSHR = (1 << 16); // Turn off GPIODs
+        // Delay_Ms(1);
+        int adc;
         while (1) {
+            int adc2;
             adc = adc_get();
-            Delay_Ms(10);
+            //printf("adc: %d\n", adc);
+            Delay_Us(1);
             adc2 = adc_get();
             // Check if the ADC value is the same
-            if (adc==adc2)
+            if (adc == adc2)
                 break;
         }
-        adc += 4;
-        // if (adc != adc_get()) continue;
-        // Delay_Ms(300);
-        printf("Count: %lu adc: %d, new adc:%d\n", count++, adc, adc-get_num_toggle(adc));
-        // apply some hysteresis to the ADC value
-        //adc -= get_num_toggle(adc);
+        // adc += 4;
+        //  if (adc != adc_get()) continue;
+        //  Delay_Ms(300);
+        // printf("Count: %lu adc: %d, new adc:%d\n", count++, adc, adc-get_num_toggle(adc));
+        //  apply some hysteresis to the ADC value
+        // adc -= get_num_toggle(adc);
 
         // Find out which button is pressed via the ADC value
         // Perform linear search
@@ -248,19 +246,21 @@ int main() {
                 }
             }
             if (button == -1) {
-                printf("No button pressed\n\r");
+                // printf("No button pressed\n\r");
                 continue;
             }
         }
+        Delay_Ms(20);
         // Print the closest button pressed
+        printf("Count: %lu adc: %d, new adc:%d\n", count++, adc, adc - get_num_toggle(adc));
         printf("Button pressed: %d, deviation: %d\n\r", button, abs(adc - buttons[button]));
         // Set the color of the LED strip to the button pressed
         // disabled 35 and 36
         // if (500 <= adc && adc <= 510) continue;
         if (!toggle[button])
-            set_color(button, 255, 0, 0);
+            set_color(button, onColor);
         else
-            set_color(button, 0, 0, 0);
+            set_color(button, offColor);
         toggle[button] = !toggle[button];
         send();
         /*

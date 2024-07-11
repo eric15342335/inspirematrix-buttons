@@ -168,7 +168,8 @@ CFLAGS+= \
 	-I$(CH32V003FUN)/../extralibs \
 	-I$(CH32V003FUN) \
 	-nostdlib \
-	-I. -Wall $(EXTRA_CFLAGS) 
+	-I. -Wall $(EXTRA_CFLAGS) \
+	-Wshadow -Wswitch -Wfloat-equal
 
 LDFLAGS+=-T $(LINKER_SCRIPT) -Wl,--gc-sections
 FILES_TO_COMPILE:=$(SYSTEM_C) $(TARGET).$(TARGET_EXT) $(ADDITIONAL_C_FILES) 

@@ -168,9 +168,9 @@ color_t led_array[NUM_LEDS] = {0};
  */
 void set_color(uint8_t led, color_t color) {
     /// @todo Remove the brightness scaling
-    led_array[led].r = color.r / 5;
-    led_array[led].g = color.g / 5;
-    led_array[led].b = color.b / 5;
+    led_array[led].r = color.r / 4;
+    led_array[led].g = color.g / 4;
+    led_array[led].b = color.b / 4;
 }
 
 /**
@@ -191,81 +191,40 @@ void send(void) {
 
 /// @brief
 static const color_t colors[] = {
-    {0x00, 0x1F, 0x5F},
-    {0x00, 0x2F, 0x5F},
-    {0x5F, 0x2F, 0x00},
-    {0x5F, 0x00, 0x00},
-    {0x2F, 0x00, 0x5F},
-    {0x00, 0x00, 0x5F},
-    {0x00, 0x00, 0x2F},
-    {0x00, 0x00, 0x00},
-    {0x00, 0x4F, 0x7F},
-    {0x00, 0x4F, 0x7F},
-    {0x7F, 0x4F, 0x00},
-    {0x7F, 0x00, 0x00},
-    {0x4F, 0x00, 0x7F},
-    {0x00, 0x00, 0x7F},
-    {0x00, 0x00, 0x4F},
-    {0x1F, 0x1F, 0x1F},
-    {0x00, 0x6F, 0x9F},
-    {0x00, 0x6F, 0x9F},
-    {0x9F, 0x6F, 0x00},
-    {0x9F, 0x00, 0x00},
-    {0x6F, 0x00, 0x9F},
-    {0x00, 0x00, 0x9F},
-    {0x00, 0x00, 0x6F},
-    {0x3F, 0x3F, 0x3F},
-    {0x00, 0x8F, 0xBF},
-    {0x00, 0x8F, 0xBF},
-    {0xBF, 0x8F, 0x00},
-    {0xBF, 0x00, 0x00},
-    {0x8F, 0x00, 0xBF},
-    {0x00, 0x00, 0xBF},
-    {0x00, 0x00, 0x8F},
-    {0x5F, 0x5F, 0x5F},
-    {0x00, 0xAF, 0xDF},
-    {0x00, 0xAF, 0xDF},
-    {0xDF, 0xAF, 0x00},
-    {0xDF, 0x00, 0x00},
-    {0xAF, 0x00, 0xDF},
-    {0x00, 0x00, 0xDF},
-    {0x00, 0x00, 0xAF},
-    {0x7F, 0x7F, 0x7F},
-    {0x00, 0xCF, 0xFF},
-    {0x00, 0xCF, 0xFF},
-    {0xFF, 0xCF, 0x00},
-    {0xFF, 0x00, 0x00},
-    {0xCF, 0x00, 0xFF},
-    {0x00, 0x00, 0xFF},
-    {0x00, 0x00, 0xCF},
-    {0x9F, 0x9F, 0x9F},
-    {0x20, 0xDF, 0xFF},
-    {0x20, 0xDF, 0xFF},
-    {0xFF, 0xDF, 0x20},
-    {0xFF, 0x20, 0x20},
-    {0xDF, 0x20, 0xFF},
-    {0x20, 0x20, 0xFF},
-    {0x20, 0x20, 0xDF},
-    {0xBF, 0xBF, 0xBF},
-    {0x40, 0xEF, 0xFF},
-    {0x40, 0xEF, 0xFF},
-    {0xFF, 0xEF, 0x40},
-    {0xFF, 0x40, 0x40},
-    {0xEF, 0x40, 0xFF},
-    {0x40, 0x40, 0xFF},
-    {0x40, 0x40, 0xEF},
-    {0xDF, 0xDF, 0xDF},
+    // Red (8 shades)
+    {255, 0, 0}, {223, 0, 0}, {191, 0, 0}, {159, 0, 0}, {127, 0, 0}, {95, 0, 0}, {63, 0, 0}, {31, 0, 0},
+    
+    // Green (8 shades)
+    {0, 255, 0}, {0, 223, 0}, {0, 191, 0}, {0, 159, 0}, {0, 127, 0}, {0, 95, 0}, {0, 63, 0}, {0, 31, 0},
+    
+    // Blue (8 shades)
+    {0, 0, 255}, {0, 0, 223}, {0, 0, 191}, {0, 0, 159}, {0, 0, 127}, {0, 0, 95}, {0, 0, 63}, {0, 0, 31},
+    
+    // Yellow (8 shades)
+    {255, 255, 0}, {223, 223, 0}, {191, 191, 0}, {159, 159, 0}, {127, 127, 0}, {95, 95, 0}, {63, 63, 0}, {31, 31, 0},
+    
+    // Cyan (8 shades)
+    {0, 255, 255}, {0, 223, 223}, {0, 191, 191}, {0, 159, 159}, {0, 127, 127}, {0, 95, 95}, {0, 63, 63}, {0, 31, 31},
+    
+    // Magenta (8 shades)
+    {255, 0, 255}, {223, 0, 223}, {191, 0, 191}, {159, 0, 159}, {127, 0, 127}, {95, 0, 95}, {63, 0, 63}, {31, 0, 31},
+    
+    // White (8 shades)
+    {255, 255, 255}, {223, 223, 223}, {191, 191, 191}, {159, 159, 159}, {127, 127, 127}, {95, 95, 95}, {63, 63, 63}, {31, 31, 31},
+    
+    // Orange (8 shades)
+    {255, 127, 0}, {223, 111, 0}, {191, 95, 0}, {159, 79, 0}, {127, 63, 0}, {95, 47, 0}, {63, 31, 0}, {31, 15, 0}
 };
 /// @brief Index of the foreground color
-static uint8_t foregroundColorIndex = 0;
+static uint8_t foregroundColorIndex = 8;
 /// @brief Index of the background color
-static uint8_t backgroundColorIndex = 1;
+static uint8_t backgroundColorIndex = 7;
 /// @brief Number of colors in the color array
 static const uint16_t num_colors = sizeof(colors) / sizeof(colors[0]);
 
 /// @brief Change the foreground color to the next color in the color array
 void nextForegroundColor(void) {
-    foregroundColorIndex = (num_colors + foregroundColorIndex + 1) % num_colors;
+    foregroundColorIndex = (num_colors + foregroundColorIndex + 2) % num_colors;
     // fore&background cannot be the same
     if (foregroundColorIndex == backgroundColorIndex) {
         nextForegroundColor();
@@ -274,7 +233,7 @@ void nextForegroundColor(void) {
 
 /// @brief Change the background color to the next color in the color array
 void nextBackgroundColor(void) {
-    backgroundColorIndex = (num_colors + backgroundColorIndex + 1) % num_colors;
+    backgroundColorIndex = (num_colors + backgroundColorIndex + 2) % num_colors;
     // fore&background cannot be the same
     if (foregroundColorIndex == backgroundColorIndex) {
         nextBackgroundColor();
@@ -292,21 +251,17 @@ void clear(void) {
 uint8_t toggle[NUM_LEDS] = {0};
 
 /** @brief Get the number of toggles for the LED strip
- * @param adc The ADC value
- * @return The number of toggled on LEDs
- * @note This function is not used in the main loop
+ * @return The number of toggled on LED
  */
-int get_num_toggle(int adc) {
+uint16_t get_num_toggle(void) {
     // calculate num of '1' in toggle[]
-    int count = 0;
-    for (int i = 0; i < NUM_LEDS; i++) {
+    uint16_t count = 0;
+    for (uint16_t i = 0; i < NUM_LEDS; i++) {
         if (toggle[i] == 1)
             count++;
     }
-    if (adc > 500)
-        count = 0 - count;
-    // return count;
-    return 0; // Disabled for now
+    return count;
+    // return 0; // Disabled for now
 }
 #define CH32V003F4P6_ENABLE_ONBOARD_LIGHT
 void onBoardLightInit(void) {
@@ -330,6 +285,29 @@ void onBoardLightOff(void) {
 #endif
 }
 
+/// @brief Biggest value in provided color argument
+uint8_t max_color_value(color_t color) {
+    uint8_t max = 0;
+    if (color.r > max) {
+        max = color.r;
+    }
+    if (color.g > max) {
+        max = color.g;
+    }
+    if (color.b > max) {
+        max = color.b;
+    }
+    return max;
+}
+
+/// @brief Get the brightness offset for the LED strip
+int get_brightness_offset(void) {
+    // Get the brightness offset from the ADC value
+
+    return get_num_toggle() / 32 * max_color_value(colors[foregroundColorIndex]) / 0xFF
+           + (NUM_LEDS - get_num_toggle()) / 32 * max_color_value(colors[backgroundColorIndex]) / 0xFF;
+}
+
 /// @brief Main function
 int main(void) {
     // Number of times the loop has run
@@ -345,12 +323,15 @@ int main(void) {
     printf("done.\n\r");
 
     clear();
-    fill_color(colors[backgroundColorIndex]);
     send();
-    Delay_Ms(200);
+    Delay_Ms(50);
     onBoardLightOff();
 
     clear();
+    for (int i = 0; i < NUM_LEDS; i++) {
+        set_color(i, toggle[i] ? colors[foregroundColorIndex] : colors[backgroundColorIndex]);
+    }
+    set_color(7, colors[foregroundColorIndex]);
     send();
 
     printf("looping...\n\r");
@@ -362,14 +343,14 @@ int main(void) {
             uint16_t adc2;
             adc = adc_get();
             // printf("adc: %d\n", adc);
-            Delay_Us(1);
+            Delay_Us(5);
             adc2 = adc_get();
             // Check if the ADC value is the same
             if (adc == adc2)
                 break;
         }
         // Apply offset to the ADC value
-        // adc += 4;
+        adc += get_brightness_offset();
         // printf("Count: %lu adc: %d, new adc:%d\n", count++, adc, adc-get_num_toggle(adc));
         // apply some hysteresis to the ADC value
         // adc -= get_num_toggle(adc);

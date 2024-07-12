@@ -45,8 +45,6 @@ color_t led_array[NUM_LEDS] = {0};
 uint8_t foregroundColorIndex = 8;
 /// @brief Index of the background color
 uint8_t backgroundColorIndex = 7;
-/// @brief Number of colors in the color array
-const uint16_t num_colors = sizeof(colors) / sizeof(colors[0]);
 
 /// @brief Array of toggles for each LED
 uint8_t toggle[NUM_LEDS] = {0};
@@ -67,8 +65,6 @@ int main(void) {
 
     clear();
     send();
-    Delay_Ms(50);
-    onBoardLightOff();
 
     clear();
     // Force the button to be foreground color
@@ -78,6 +74,8 @@ int main(void) {
             i, toggle[i] ? colors[foregroundColorIndex] : colors[backgroundColorIndex]);
     }
     send();
+    Delay_Ms(50);
+    onBoardLightOff();
 
     printf("looping...\n\r");
     while (1) {
@@ -193,11 +191,11 @@ void adc_init(void) {
     // ADCCLK = 24 MHz => RCC_ADCPRE = 0: divide by 2
     RCC->CFGR0 &= ~(0x1F << 11);
 
-    // Enable GPIOD and ADC
+    // Enable GPIOC and ADC
     RCC->APB2PCENR |= RCC_APB2Periph_GPIOD | RCC_APB2Periph_ADC1;
 
     // PD2 is analog input chl 3?
-    GPIOC->CFGLR &= ~(0xF << (4 * 2)); // CNF = 00: Analog, MODE = 00: Input
+    GPIOD->CFGLR &= ~(0xF << (4 * 2)); // CNF = 00: Analog, MODE = 00: Input
 
     // Reset the ADC to init all regs
     RCC->APB2PRSTR |= RCC_APB2Periph_ADC1;

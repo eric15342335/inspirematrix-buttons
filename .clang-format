@@ -4,13 +4,13 @@ UseTab: Never
 IndentWidth: 4
 TabWidth: 4
 
-ColumnLimit: 120
+ColumnLimit: 90
 AlignAfterOpenBracket: DontAlign
 IndentCaseLabels: true
 
 BreakBeforeBraces: Custom
 BraceWrapping:
-    BeforeElse: true
+  BeforeElse: true
     
 DerivePointerAlignment: false
 PointerAlignment: Middle

@@ -12,6 +12,7 @@
 #define WS2812BSIMPLE_IMPLEMENTATION
 /// Required for the WS2812B Simple implementation to work
 #define FUNCONF_SYSTICK_USE_HCLK 1
+// #define FUNCONF_USE_5V_VDD 1
 #include "ch32v003fun.h"
 #include "ws2812b_simple.h"
 
@@ -328,10 +329,11 @@ int main(void) {
     onBoardLightOff();
 
     clear();
+    // Force the button to be foreground color
+    toggle[7] = 1;
     for (int i = 0; i < NUM_LEDS; i++) {
         set_color(i, toggle[i] ? colors[foregroundColorIndex] : colors[backgroundColorIndex]);
     }
-    set_color(7, colors[foregroundColorIndex]);
     send();
 
     printf("looping...\n\r");

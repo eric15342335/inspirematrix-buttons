@@ -4,7 +4,6 @@ TARGET_MCU?=CH32V003
 TARGET_EXT?=c
 
 CH32V003FUN?=../ch32v003fun
-MINICHLINK?=$(CH32V003FUN)/../minichlink
 
 WRITE_SECTION?=flash
 SYSTEM_C?=$(CH32V003FUN)/ch32v003fun.c
@@ -144,8 +143,6 @@ endif
 
 CFLAGS+= \
 	$(CFLAGS_ARCH) -static-libgcc \
-	-I$(NEWLIB) \
-	-I$(CH32V003FUN)/../extralibs \
 	-I$(CH32V003FUN) \
 	-nostdlib \
 	-I. -Wall $(EXTRA_CFLAGS) \

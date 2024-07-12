@@ -1,6 +1,6 @@
 all : flash
 
-TARGET:= ws2812bdemo
+TARGET:= paintDirectionKeys
 
 include ../../ch32v003fun/ch32v003fun.mk
 

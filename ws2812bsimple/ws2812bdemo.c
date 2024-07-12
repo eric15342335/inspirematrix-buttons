@@ -1,9 +1,7 @@
-
-#include "ch32v003fun.h"
-#include "color_utilities.h"
-#include "funconfig.h"
 #define WS2812BSIMPLE_IMPLEMENTATION
 #define FUNCONF_SYSTICK_USE_HCLK 1
+#include "ch32v003fun.h"
+#include "color_utilities.h"
 #include "ws2812b_simple.h"
 
 #define NUM_LEDS 64 // Define the number of LEDs in your strip
@@ -34,14 +32,6 @@ void send(void) {
 
 int main() {
 	SystemInit();
-
-	// Enable GPIOD (for debugging)
-	/*RCC->APB2PCENR |= RCC_APB2Periph_GPIOD;
-	GPIOD->CFGLR &= ~(0xf<<(4*0));
-	GPIOD->CFGLR |= (GPIO_Speed_10MHz | GPIO_CNF_OUT_PP)<<(4*0);
-
-	GPIOD->BSHR = 1;	 // Turn on GPIOD0*/
-
     while (1) {
         for (int i = 0; i < NUM_LEDS; i++) {
             set_color(i, 255, 0, 0);

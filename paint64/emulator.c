@@ -49,8 +49,6 @@ uint8_t backgroundColorIndex = 24;
 
 /// @brief Main function
 int main(void) {
-    // Number of times the loop has run
-    uint32_t count = 0;
     SystemInit();
     clear();
     // Force the button to be foreground color
@@ -115,8 +113,9 @@ void adc_init(void) {
 uint16_t adc_get(void) {
     // Get user input of button number (0-63)
     // and return its ADC reading value
-    int button;
-    scanf("%d", &button);
+    uint8_t button;
+    scanf("%hhd", &button);
+    printf("\n");
     return buttons[button];
 }
 
@@ -171,12 +170,17 @@ void fill_color(color_t color) {
 void send(void) {
     // WS2812BSimpleSend(GPIOC, 6, (uint8_t *)led_array, NUM_LEDS * 3);
 #define BORDER_X 2
+    printf("\\y");
+    for (uint8_t i = horizontalButtons; i > 0; i--) {
+        printf("%d", i-1);
+    }
+    printf(" \nx");
     for (uint8_t i = 0; i < horizontalButtons + BORDER_X; i++) {
         printf("-");
     }
     printf("\n");
     for (uint8_t y = verticalButtons; y > 0; y--) {
-        printf("|");
+        printf("%d|", y - 1);
         for (uint8_t x = horizontalButtons; x > 0; x--) {
             uint8_t led = (y - 1) * horizontalButtons + (x - 1);
             if (led < NUM_LEDS &&
@@ -188,8 +192,27 @@ void send(void) {
                 printf(" ");
             }
         }
-        printf("|\n");
+        printf("|");
+        if (y == verticalButtons / 2 ) {
+            printf("   foreground: \033[38;2;%d;%d;%dm\u2588\033[0m",
+                colors[foregroundColorIndex].r, colors[foregroundColorIndex].g,
+                colors[foregroundColorIndex].b);
+            printf(", RGB(%d, %d, %d)", colors[foregroundColorIndex].r,
+                colors[foregroundColorIndex].g, colors[foregroundColorIndex].b);
+        }
+        if (y == verticalButtons / 2 + 1) {
+            printf("   background: \033[38;2;%d;%d;%dm\u2588\033[0m",
+                colors[backgroundColorIndex].r, colors[backgroundColorIndex].g,
+                colors[backgroundColorIndex].b);
+            printf(", RGB(%d, %d, %d)", colors[backgroundColorIndex].r,
+                colors[backgroundColorIndex].g, colors[backgroundColorIndex].b);
+        }
+        if (y == verticalButtons / 2 + 2) {
+            printf("   button calculation: y*%d+x", horizontalButtons);
+        }
+        printf("\n");
     }
+    printf(" ");
     for (uint8_t i = 0; i < horizontalButtons + BORDER_X; i++) {
         printf("-");
     }

@@ -1,8 +1,7 @@
 /// @brief Hardcoded colors for the LED strip
 #pragma once
-#define unsigned char uint8_t
-#define unsigned short uint16_t
 
+#include <stdint.h>
 /// @brief Structure to hold RGB color values
 typedef struct color_256 {
     uint8_t r;

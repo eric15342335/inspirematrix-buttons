@@ -12996,3 +12996,5 @@ Examples:
 #endif
 
 
+// @todo make this clear/configurable
+#include "ch32v003fun_extension.h"

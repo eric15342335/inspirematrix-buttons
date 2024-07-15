@@ -1,13 +1,18 @@
 /// @brief Hardcoded colors for the LED strip
 #pragma once
-
+#include "buttons.h"
 #include <stdint.h>
+
 /// @brief Structure to hold RGB color values
 typedef struct color_256 {
     uint8_t r;
     uint8_t g;
     uint8_t b;
 } color_t;
+
+
+/// @brief Array of colors for the LED strip, for sending to the LED strip
+color_t led_array[NUM_LEDS] = {0};
 
 /// @brief Array of colors for the LED strip, for sending to the LED strip
 static const color_t colors[] = {

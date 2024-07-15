@@ -6,9 +6,6 @@
 *.lst
 *.bin
 *.map
-minichlink/minichlink
-minichlink/minichlink.so
-compile_commands.json
-.clangd
-.cache
+*.o
+*.exe
 ch32v003fun/generated_*.ld

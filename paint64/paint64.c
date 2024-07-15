@@ -24,9 +24,6 @@
 
 // Prototypes
 #define abs(x) ((x) < 0 ? -(x) : (x))
-void adc_cal(void);
-void adc_init(void);
-uint16_t adc_get(void);
 void nextForegroundColor(void);
 void nextBackgroundColor(void);
 void set_color(uint8_t led, color_t color);
@@ -39,8 +36,6 @@ void onBoardLightOff(void);
 int get_brightness_offset(void);
 uint16_t get_num_toggle(void);
 
-/// @brief Array of colors for the LED strip, for sending to the LED strip
-color_t led_array[NUM_LEDS] = {0};
 /// @brief Index of the foreground color
 uint8_t foregroundColorIndex = 8;
 /// @brief Index of the background color
@@ -69,12 +64,22 @@ int main(void) {
     clear();
     // Force the button to be foreground color
     toggle[7] = 1;
+    /*for (uint8_t intensity = 255; intensity >0; intensity--) {
+        for (int i = 0; i < NUM_LEDS; i++) {
+            set_color(i, (color_t){intensity, intensity, intensity});    
+            send();
+            Delay_Ms(1);
+        }
+    }*/
     for (int i = 0; i < NUM_LEDS; i++) {
-        set_color(
-            i, toggle[i] ? colors[foregroundColorIndex] : colors[backgroundColorIndex]);
+        set_color(i, (color_t) {255,255,255});
     }
+    Delay_Ms(1);
     send();
-    Delay_Ms(50);
+    clear();
+    Delay_Ms(1);
+    send();
+    //Delay_Ms(5000);
     onBoardLightOff();
 
     printf("looping...\n\r");
@@ -85,8 +90,8 @@ int main(void) {
         while (1) {
             uint16_t adc2;
             adc = adc_get();
-            // printf("adc: %d\n", adc);
-            Delay_Us(5);
+            //printf("adc: %d\n", adc);
+            Delay_Us(1);
             adc2 = adc_get();
             // Check if the ADC value is the same
             if (adc == adc2)
@@ -174,61 +179,6 @@ int main(void) {
         printf("\n");*/
     }
 }
-void adc_cal(void) {
-    // Reset calibration
-    ADC1->CTLR2 |= ADC_RSTCAL;
-    while (ADC1->CTLR2 & ADC_RSTCAL)
-        ;
-
-    // Calibrate
-    ADC1->CTLR2 |= ADC_CAL;
-    while (ADC1->CTLR2 & ADC_CAL)
-        ;
-}
-
-/// @brief initialize adc for polling
-void adc_init(void) {
-    // ADCCLK = 24 MHz => RCC_ADCPRE = 0: divide by 2
-    RCC->CFGR0 &= ~(0x1F << 11);
-
-    // Enable GPIOC and ADC
-    RCC->APB2PCENR |= RCC_APB2Periph_GPIOD | RCC_APB2Periph_ADC1;
-
-    // PD2 is analog input chl 3?
-    GPIOD->CFGLR &= ~(0xF << (4 * 2)); // CNF = 00: Analog, MODE = 00: Input
-
-    // Reset the ADC to init all regs
-    RCC->APB2PRSTR |= RCC_APB2Periph_ADC1;
-    RCC->APB2PRSTR &= ~RCC_APB2Periph_ADC1;
-
-    // Set up single conversion on chl 3
-    ADC1->RSQR1 = 0;
-    ADC1->RSQR2 = 0;
-    ADC1->RSQR3 = 3; // 0-9 for 8 ext inputs and two internals
-
-    // set sampling time for chl 3
-    ADC1->SAMPTR2 &= ~(ADC_SMP0 << (3 * 3));
-    ADC1->SAMPTR2 |= 7 << (3 * 3); // 0:7 => 3/9/15/30/43/57/73/241 cycles
-
-    // turn on ADC and set rule group to software trigger
-    ADC1->CTLR2 |= ADC_ADON | ADC_EXTSEL;
-
-    adc_cal();
-    // should be ready for SW conversion now
-}
-
-/// @brief start conversion, wait and return result
-uint16_t adc_get(void) {
-    /// start sw conversion (auto clears)
-    ADC1->CTLR2 |= ADC_SWSTART;
-
-    /// wait for conversion complete
-    while (!(ADC1->STATR & ADC_EOC))
-        ;
-
-    /// get result
-    return ADC1->RDATAR;
-}
 
 /**
  * @brief Set the color of the LED strip
@@ -255,6 +205,7 @@ void fill_color(color_t color) {
 /// @brief Send the color values to the LED strip
 void send(void) {
     // WS2812BSimpleSend( GPIOC, 6, led_array, NUM_LEDS*3 );
+    Delay_Us(1);
     WS2812BSimpleSend(GPIOC, 6, (uint8_t *)led_array, NUM_LEDS * 3);
 }
 

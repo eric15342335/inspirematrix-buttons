@@ -1,0 +1,14 @@
+CC = gcc
+INCLUDES = -I../emulator -I../common
+CFLAGS = -g -Wall -Wextra -Wshadow $(INCLUDES)
+
+emulator: emulator.o
+	$(CC) $(CFLAGS) -o emulator emulator.o
+
+emulator.o: emulator.c
+	$(CC) $(CFLAGS) -c emulator.c
+
+clean:
+	rm -f *.o emulator *.exe
+
+.PHONY: clean

@@ -76,10 +76,9 @@ int main(void) {
     }
     Delay_Ms(1);
     send();
-    clear();
+    /*clear();
     Delay_Ms(1);
-    send();
-    //Delay_Ms(5000);
+    send();*/
     onBoardLightOff();
 
     printf("looping...\n\r");

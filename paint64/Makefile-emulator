@@ -5,7 +5,7 @@ CFLAGS = -g -Wall -Wextra -Wshadow $(INCLUDES)
 emulator: emulator.o
 	$(CC) $(CFLAGS) -o emulator emulator.o
 
-emulator.o: emulator.c
+emulator.o: emulator.c ../emulator/*
 	$(CC) $(CFLAGS) -c emulator.c
 
 clean:

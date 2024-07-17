@@ -78,7 +78,7 @@ int main(void) {
                     break;
                 }
             }
-            DLY_ms(100);
+            DLY_ms(150);
             if (isOtherButtons(keyStatus)) {
                 break;
             }

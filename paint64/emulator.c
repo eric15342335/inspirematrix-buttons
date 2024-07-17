@@ -8,31 +8,6 @@
 #include "ws2812b_simple.h"
 #include <stdio.h>
 
-#ifdef _WIN32
-#define NOMINMAX 1          // Prevent Windows.h from defining min and max macros
-#define WIN32_LEAN_AND_MEAN // Exclude rarely-used stuff from Windows headers
-#include <windows.h>
-void SystemInit(void) {
-    // Set the console to UTF-8 mode
-    SetConsoleOutputCP(65001);
-    // Get the current console mode
-    DWORD consoleMode;
-    GetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), &consoleMode);
-    // Enable virtual terminal processing
-    consoleMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-    SetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), consoleMode);
-}
-#define Delay_Ms(milliseconds) Sleep(milliseconds)
-#define Delay_Us(microseconds) Sleep((microseconds) / 1000)
-#else
-#include <unistd.h>
-#include <stdlib.h>
-#define Delay_Ms(milliseconds) usleep((milliseconds) * 1000)
-#define Delay_Us(microseconds) usleep(microseconds)
-#endif
-
-#define SystemInit() // Do nothing
-
 // Prototypes
 void adc_cal(void);
 void adc_init(void);
@@ -118,74 +93,4 @@ void nextBackgroundColor(void) {
     if (foregroundColorIndex == backgroundColorIndex) {
         nextBackgroundColor();
     }
-}
-
-/// @brief Clear the LED strip to No Color
-void clear(void) {
-    for (int i = 0; i < NUM_LEDS; i++) {
-        set_color(i, (color_t){0, 0, 0});
-    }
-}
-
-/**
- * @brief Fill the LED strip with a single color
- * @param color The color to fill the LED strip with, in RGB format `color_t`
- */
-void fill_color(color_t color) {
-    for (int i = 0; i < NUM_LEDS; i++) {
-        set_color(i, color);
-    }
-}
-
-/// @brief Send the color values to the LED strip
-void send(void) {
-    // WS2812BSimpleSend(GPIOC, 6, (uint8_t *)led_array, NUM_LEDS * 3);
-#define BORDER_X 2
-    printf("\\y");
-    for (uint8_t i = horizontalButtons; i > 0; i--) {
-        printf("%d", i-1);
-    }
-    printf(" \nx");
-    for (uint8_t i = 0; i < horizontalButtons + BORDER_X; i++) {
-        printf("-");
-    }
-    printf("\n");
-    for (uint8_t y = verticalButtons; y > 0; y--) {
-        printf("%d|", y - 1);
-        for (uint8_t x = horizontalButtons; x > 0; x--) {
-            uint8_t led = (y - 1) * horizontalButtons + (x - 1);
-            if (led < NUM_LEDS &&
-                (led_array[led].r || led_array[led].g || led_array[led].b)) {
-                printf("\e[38;2;%d;%d;%dm\u2588\x1b[0m", led_array[led].r,
-                    led_array[led].g, led_array[led].b);
-            }
-            else {
-                printf(" ");
-            }
-        }
-        printf("|");
-        if (y == verticalButtons / 2 ) {
-            printf("   foreground: \e[38;2;%d;%d;%dm\x1b[0m",
-                colors[foregroundColorIndex].r, colors[foregroundColorIndex].g,
-                colors[foregroundColorIndex].b);
-            printf(", RGB(%d, %d, %d)", colors[foregroundColorIndex].r,
-                colors[foregroundColorIndex].g, colors[foregroundColorIndex].b);
-        }
-        if (y == verticalButtons / 2 + 1) {
-            printf("   background: \e[38;2;%d;%d;%dm\x1b[0m",
-                colors[backgroundColorIndex].r, colors[backgroundColorIndex].g,
-                colors[backgroundColorIndex].b);
-            printf(", RGB(%d, %d, %d)", colors[backgroundColorIndex].r,
-                colors[backgroundColorIndex].g, colors[backgroundColorIndex].b);
-        }
-        if (y == verticalButtons / 2 + 2) {
-            printf("   button calculation: y*%d+x", horizontalButtons);
-        }
-        printf("\n");
-    }
-    printf(" ");
-    for (uint8_t i = 0; i < horizontalButtons + BORDER_X; i++) {
-        printf("-");
-    }
-    printf("\n");
 }

@@ -53,7 +53,7 @@ void send(void) {
             uint8_t led = (y - 1) * horizontalButtons + (x - 1);
             if (led < NUM_LEDS &&
                 (led_array[led].r || led_array[led].g || led_array[led].b)) {
-                printf("\033[38;2;%d;%d;%dm\u2588\033[0m", led_array[led].r,
+                printf("\e[38;2;%d;%d;%dm\u2588\x1b[0m", led_array[led].r,
                     led_array[led].g, led_array[led].b);
             }
             else {
@@ -62,14 +62,14 @@ void send(void) {
         }
         printf("|");
         if (y == verticalButtons / 2 ) {
-            printf("   foreground: \033[38;2;%d;%d;%dm\u2588\033[0m",
+            printf("   foreground: \e[38;2;%d;%d;%dm\x1b[0m",
                 colors[foregroundColorIndex].r, colors[foregroundColorIndex].g,
                 colors[foregroundColorIndex].b);
             printf(", RGB(%d, %d, %d)", colors[foregroundColorIndex].r,
                 colors[foregroundColorIndex].g, colors[foregroundColorIndex].b);
         }
         if (y == verticalButtons / 2 + 1) {
-            printf("   background: \033[38;2;%d;%d;%dm\u2588\033[0m",
+            printf("   background: \e[38;2;%d;%d;%dm\x1b[0m",
                 colors[backgroundColorIndex].r, colors[backgroundColorIndex].g,
                 colors[backgroundColorIndex].b);
             printf(", RGB(%d, %d, %d)", colors[backgroundColorIndex].r,

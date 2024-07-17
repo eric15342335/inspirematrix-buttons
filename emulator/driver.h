@@ -3,18 +3,38 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+
+#ifdef _WIN32
+#define NOMINMAX 1          // Prevent Windows.h from defining min and max macros
+#define WIN32_LEAN_AND_MEAN // Exclude rarely-used stuff from Windows headers
+#include <windows.h>
+void SystemInit(void) {
+    // Set the console to UTF-8 mode
+    SetConsoleOutputCP(65001);
+    // Get the current console mode
+    DWORD consoleMode;
+    GetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), &consoleMode);
+    // Enable virtual terminal processing
+    consoleMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+    SetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), consoleMode);
+}
+#define Delay_Ms(milliseconds) Sleep(milliseconds)
+#define Delay_Us(microseconds) Sleep((microseconds) / 1000)
+#else
+#include <unistd.h>
+#include <stdlib.h>
+#define Delay_Ms(milliseconds) usleep((milliseconds) * 1000)
+#define Delay_Us(microseconds) usleep(microseconds)
+#endif
+
+#define SystemInit() // Do nothing
+
+
 #ifdef _WIN32
 #include <windows.h>
-#define JOY_init()
+#define JOY_init() SystemInit()
 #define DLY_ms(milliseconds) Sleep(milliseconds)
 #define JOY_sound(freq, dur) Beep(freq, dur)
-
-#define JOY_act_pressed() is_key_pressed('F')
-#define JOY_act_released() !is_key_pressed('F')
-#define JOY_up_pressed() is_key_pressed('W')
-#define JOY_down_pressed() is_key_pressed('S')
-#define JOY_left_pressed() is_key_pressed('A')
-#define JOY_right_pressed() is_key_pressed('D')
 
 static inline bool is_key_pressed(char capitalkey) {
     SHORT result =

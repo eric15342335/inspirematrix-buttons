@@ -10,3 +10,4 @@
 *.exe
 ch32v003fun/generated_*.ld
 ht1388/
+.DS_Store

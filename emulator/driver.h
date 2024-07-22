@@ -2,6 +2,7 @@
 
 #include <stdbool.h>
 #include <stdlib.h>
+#include "ws2812b_simple.h"
 
 
 #ifdef _WIN32
@@ -27,9 +28,6 @@ void SystemInit(void) {
 #define Delay_Us(microseconds) usleep(microseconds)
 #endif
 
-#define SystemInit() // Do nothing
-
-
 #ifdef _WIN32
 #include <windows.h>
 #define JOY_init() SystemInit()
@@ -46,7 +44,7 @@ static inline bool is_key_pressed(char capitalkey) {
 #include "system_mac.h"
 #include <unistd.h>
 
-#define JOY_init() pthread_init()
+#define SystemInit() //do nothing
 #define DLY_ms(milliseconds) usleep(milliseconds * 1000)
 
 #define JOY_act_pressed() is_key_pressed(F_Key)
@@ -63,3 +61,30 @@ static inline bool is_key_pressed(char capitalkey) {
 #define JOY_pad_released()                                                             \
     (!JOY_up_pressed() && !JOY_down_pressed() && !JOY_left_pressed() && !JOY_right_pressed())
 #define JOY_all_released() (JOY_act_released && !JOY_pad_released)
+
+void ADC_calibrate(void) {
+    // Do nothing
+}
+
+void ADC_init(void) {
+    // Do nothing
+}
+
+uint16_t ADC_read(void) {
+    // Get user input of button number (0-63)
+    // and return its ADC reading value
+    uint8_t button;
+    scanf("%hhd", &button);
+    printf("\n");
+    return buttons[button];
+}
+
+int8_t matrix_pressed(void) {
+    uint16_t adc_value = ADC_read();
+    for (uint8_t i = 0; i < 64; i++) {
+        if (buttons[i] == adc_value) {
+            return i;
+        }
+    }
+    return -1;
+}

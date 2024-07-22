@@ -1,4 +1,5 @@
 #pragma once
+#include <stdio.h>
 #include "colors.h"
 #include "buttons.h"
 #include "ch32v003fun.h"

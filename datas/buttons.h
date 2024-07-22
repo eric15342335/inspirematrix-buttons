@@ -70,7 +70,7 @@
 
 #define horizontalButtons 8
 #define verticalButtons 8
-#define NUM_LEDS horizontalButtons * verticalButtons
+#define NUM_LEDS (horizontalButtons * verticalButtons)
 
 /// @brief Array of buttons corresponding to the ADC values, for linear searching
 const int buttons[NUM_LEDS] = {BUTTON_0, BUTTON_1, BUTTON_2, BUTTON_3, BUTTON_4, BUTTON_5,

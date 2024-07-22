@@ -4,11 +4,6 @@
 
 #define abs(x) ((x) < 0 ? -(x) : (x))
 
-// prototype
-void ADC_calibrate(void);
-void ADC_init(void);
-uint16_t ADC_read(void);
-
 #ifdef WS2812BSIMPLE_IMPLEMENTATION
 #include "funconfig.h"
 #if FUNCONF_SYSTICK_USE_HCLK != 1
@@ -53,6 +48,7 @@ void ADC_init(void) {
 /// @brief start conversion, wait and return result
 uint16_t ADC_read(void) {
     ADC1->RSQR3 = 3;
+    Delay_Us(200);
     /// start sw conversion (auto clears)
     ADC1->CTLR2 |= ADC_SWSTART;
     /// wait for conversion complete
@@ -90,6 +86,7 @@ void ADC_init_PAD(void) {
 // start conversion, wait and return result
 uint16_t adc_get_pad(void) {
     ADC1->RSQR3 = 2; // 0-9 for 8 ext inputs and two internals
+    Delay_Us(200);
     // start sw conversion (auto clears)
     ADC1->CTLR2 |= ADC_SWSTART;
     // wait for conversion complete
@@ -148,6 +145,26 @@ static inline uint8_t JOY_right_pressed(void) {
  return(   ((val > JOY_E  - JOY_DEV) && (val < JOY_E  + JOY_DEV))
          | ((val > JOY_NE - JOY_DEV) && (val < JOY_NE + JOY_DEV))
          | ((val > JOY_SE - JOY_DEV) && (val < JOY_SE + JOY_DEV)) );
+}
+
+int8_t matrix_pressed(void) {
+    uint16_t adc;
+    while (1) {
+        uint16_t adc2;
+        adc = ADC_read();
+        Delay_Us(1);
+        adc2 = ADC_read();
+        if (adc == adc2)
+            break;
+    }
+    int8_t no_button_pressed = -1;
+    for (int8_t i = 0; i < 64; i++) {
+        int deviation = abs(adc - buttons[i]);
+        if (deviation <= BUTTON_DEVIATION) {
+            return i;
+        }
+    }
+    return no_button_pressed;
 }
 
 #endif

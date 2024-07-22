@@ -11,6 +11,7 @@
         "ws2812b_simple.h": "c",
         "funconfig.h": "c",
         "stdint.h": "c",
-        "unistd.h": "c"
+        "unistd.h": "c",
+        "compare": "c"
     },
 }

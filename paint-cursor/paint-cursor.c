@@ -15,13 +15,12 @@ uint8_t toggle[NUM_LEDS] = {0};
 
 int main(void) {
     SystemInit();
-    ADC_init_PAD();
-    gpio_init_act();
+    ADC_init();
     fill_color(onColor);
-    send();
+    WS2812BSimpleSend(GPIOC, 2, (uint8_t *)led_array, NUM_LEDS * 3);
     Delay_Ms(100);
     clear();
-    send();
+    WS2812BSimpleSend(GPIOC, 2, (uint8_t *)led_array, NUM_LEDS * 3);
     while (1) {
         clear();
         printf("ADC reading: %d; ", adc_get_pad());
@@ -45,7 +44,7 @@ int main(void) {
         for (int i = 0; i < NUM_LEDS; i++)
             set_color(i, toggle[i] ? onColor : offColor);
         set_color(currentposition, pointerColor);
-        send();
+        WS2812BSimpleSend(GPIOC, 2, (uint8_t *)led_array, NUM_LEDS * 3);
         Delay_Ms(10);
     }
 }

@@ -1,6 +1,7 @@
 #pragma once
 #include "ch32v003fun.h"
 #include "buttons.h"
+#include "ch32v003_GPIO_branchless.h"
 
 #define abs(x) ((x) < 0 ? -(x) : (x))
 
@@ -9,92 +10,6 @@
 #if FUNCONF_SYSTICK_USE_HCLK != 1
 #error WS2812B Driver Requires FUNCONF_SYSTICK_USE_HCLK
 #endif
-
-void ADC_calibrate(void) {
-    // Reset calibration
-    ADC1->CTLR2 |= ADC_RSTCAL;
-    while (ADC1->CTLR2 & ADC_RSTCAL)
-        ;
-    // Calibrate
-    ADC1->CTLR2 |= ADC_CAL;
-    while (ADC1->CTLR2 & ADC_CAL)
-        ;
-}
-
-/// @brief initialize adc for polling
-void ADC_init(void) {
-    // ADCCLK = 24 MHz => RCC_ADCPRE = 0: divide by 2
-    RCC->CFGR0 &= ~(0x1F << 11);
-    // Enable GPIOC and ADC
-    RCC->APB2PCENR |= RCC_APB2Periph_GPIOD | RCC_APB2Periph_ADC1;
-    // PD2 is analog input chl 3?
-    GPIOD->CFGLR &= ~(0xF << (4 * 2)); // CNF = 00: Analog, MODE = 00: Input
-    // Reset the ADC to init all regs
-    RCC->APB2PRSTR |= RCC_APB2Periph_ADC1;
-    RCC->APB2PRSTR &= ~RCC_APB2Periph_ADC1;
-    // Set up single conversion on chl 3
-    ADC1->RSQR1 = 0;
-    ADC1->RSQR2 = 0;
-    ADC1->RSQR3 = 3; // 0-9 for 8 ext inputs and two internals
-    // set sampling time for chl 3
-    ADC1->SAMPTR2 &= ~(ADC_SMP0 << (3 * 3));
-    ADC1->SAMPTR2 |= 7 << (3 * 3); // 0:7 => 3/9/15/30/43/57/73/241 cycles
-    // turn on ADC and set rule group to software trigger
-    ADC1->CTLR2 |= ADC_ADON | ADC_EXTSEL;
-    ADC_calibrate();
-    // should be ready for SW conversion now
-}
-
-/// @brief start conversion, wait and return result
-uint16_t ADC_read(void) {
-    ADC1->RSQR3 = 3;
-    Delay_Us(200);
-    /// start sw conversion (auto clears)
-    ADC1->CTLR2 |= ADC_SWSTART;
-    /// wait for conversion complete
-    while (!(ADC1->STATR & ADC_EOC))
-        ;
-    /// get result
-    return ADC1->RDATAR;
-}
-
-// initialize adc for polling
-void ADC_init_PAD(void) {
-    // ADCCLK = 24 MHz => RCC_ADCPRE = 0: divide by 2
-    RCC->CFGR0 &= ~(0x1F << 11);
-    // Enable GPIOC and ADC
-    RCC->APB2PCENR |= RCC_APB2Periph_GPIOC | RCC_APB2Periph_ADC1;
-    // PC4 is analog input chl 2
-    GPIOC->CFGLR &= ~(0xF << (4 * 4)); // CNF = 00: Analog, MODE = 00: Input
-    // Reset the ADC to init all regs
-    RCC->APB2PRSTR |= RCC_APB2Periph_ADC1;
-    RCC->APB2PRSTR &= ~RCC_APB2Periph_ADC1;
-    uint8_t channel = 2;
-    // Set up single conversion on chl 2
-    ADC1->RSQR1 = 0;
-    ADC1->RSQR2 = 0;
-    ADC1->RSQR3 = channel; // 0-9 for 8 ext inputs and two internals
-    // set sampling time for chl 2
-    ADC1->SAMPTR2 &= ~(ADC_SMP0 << (3 * channel));
-    ADC1->SAMPTR2 |= 7 << (3 * channel); // 0:7 => 3/9/15/30/43/57/73/241 cycles
-    // turn on ADC and set rule group to sw trig
-    ADC1->CTLR2 |= ADC_ADON | ADC_EXTSEL;
-    ADC_calibrate();
-    // should be ready for SW conversion now
-}
-
-// start conversion, wait and return result
-uint16_t adc_get_pad(void) {
-    ADC1->RSQR3 = 2; // 0-9 for 8 ext inputs and two internals
-    Delay_Us(200);
-    // start sw conversion (auto clears)
-    ADC1->CTLR2 |= ADC_SWSTART;
-    // wait for conversion complete
-    while (!(ADC1->STATR & ADC_EOC))
-        ;
-    // get result
-    return ADC1->RDATAR;
-}
 
 // README: ACT Button is connected to PA2 !!!!!
 void gpio_init_act(void) {
@@ -110,6 +25,18 @@ uint32_t gpio_act_pressed(void) {
     // check the value of pa2 is low
     //return ((GPIOA->INDR & (1 << 2)) == 0);
     return !(GPIOA->INDR >> 2);
+}
+void ADC_init(void) {
+    gpio_init_act();
+    GPIO_ADCinit();
+}
+
+uint16_t ADC_read(void) {
+    return GPIO_analogRead(GPIO_Ain7_D4);
+}
+
+uint16_t adc_get_pad(void) {
+    return GPIO_analogRead(GPIO_Ain2_C4);
 }
 
 // Buttons
@@ -146,7 +73,7 @@ static inline uint8_t JOY_right_pressed(void) {
          | ((val > JOY_NE - JOY_DEV) && (val < JOY_NE + JOY_DEV))
          | ((val > JOY_SE - JOY_DEV) && (val < JOY_SE + JOY_DEV)) );
 }
-
+#include <stdio.h>
 int8_t matrix_pressed(void) {
     uint16_t adc;
     while (1) {
@@ -157,6 +84,7 @@ int8_t matrix_pressed(void) {
         if (adc == adc2)
             break;
     }
+    Delay_Ms(10);
     int8_t no_button_pressed = -1;
     for (int8_t i = 0; i < 64; i++) {
         int deviation = abs(adc - buttons[i]);

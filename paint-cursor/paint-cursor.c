@@ -1,10 +1,7 @@
 #define WS2812BSIMPLE_IMPLEMENTATION
 #define FUNCONF_SYSTICK_USE_HCLK 1
-#include "ch32v003fun.h"
-#include "ws2812b_simple.h"
 #include <stdio.h>
-#include "buttons.h"
-#include "colors.h"
+#include "driver.h"
 
 color_t onColor = {5, 5, 5};
 color_t offColor = {0, 0, 0};

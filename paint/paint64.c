@@ -64,21 +64,11 @@ int main(void) {
     clear();
     // Force the button to be foreground color
     toggle[7] = 1;
-    /*for (uint8_t intensity = 255; intensity >0; intensity--) {
-        for (int i = 0; i < NUM_LEDS; i++) {
-            set_color(i, (color_t){intensity, intensity, intensity});    
-            send();
-            Delay_Ms(1);
-        }
-    }*/
     for (int i = 0; i < NUM_LEDS; i++) {
         set_color(i, (color_t) {255,255,255});
     }
     Delay_Ms(1);
     send();
-    /*clear();
-    Delay_Ms(1);
-    send();*/
     onBoardLightOff();
 
     printf("looping...\n\r");
@@ -89,12 +79,13 @@ int main(void) {
         while (1) {
             uint16_t adc2;
             adc = adc_get();
-            //printf("adc: %d\n", adc);
+            printf("adc: %d\n", adc);
             Delay_Us(1);
-            adc2 = adc_get();
+            adc2 = adc_get_pad();
+            printf("adc2: %d\n", adc2);
             // Check if the ADC value is the same
-            if (adc == adc2)
-                break;
+            //if (adc == adc2)
+            //    break;
         }
         // Apply offset to the ADC value
         adc += get_brightness_offset();

@@ -1,5 +1,6 @@
 #pragma once
 #include "ch32v003fun.h"
+#include "buttons.h"
 
 // prototype
 void adc_cal(void);
@@ -62,6 +63,7 @@ void adc_init(void) {
 
 /// @brief start conversion, wait and return result
 uint16_t adc_get(void) {
+    ADC1->RSQR3 = 3; // 0-9 for 8 ext inputs and two internals
     /// start sw conversion (auto clears)
     ADC1->CTLR2 |= ADC_SWSTART;
 
@@ -108,6 +110,7 @@ void adc_init_pad(void) {
 
 // start conversion, wait and return result
 uint16_t adc_get_pad(void) {
+    ADC1->RSQR3 = 2; // 0-9 for 8 ext inputs and two internals
     // start sw conversion (auto clears)
     ADC1->CTLR2 |= ADC_SWSTART;
 
@@ -134,6 +137,42 @@ uint32_t gpio_act_pressed(void) {
     // check the value of pa2 is low
     //return ((GPIOA->INDR & (1 << 2)) == 0);
     return !(GPIOA->INDR >> 2);
+}
+
+
+// Buttons
+#define JOY_act_pressed()         (gpio_act_pressed())
+#define JOY_act_released()        (!gpio_act_pressed())
+#define JOY_pad_pressed()         (adc_get_pad() > 10)
+#define JOY_pad_released()        (adc_get_pad() <= 10)
+#define JOY_all_released()        (JOY_act_released() && JOY_pad_released())
+
+static inline uint8_t JOY_up_pressed(void) {
+ uint16_t val = adc_get_pad();
+ return(   ((val > JOY_N  - JOY_DEV) && (val < JOY_N  + JOY_DEV))
+         | ((val > JOY_NE - JOY_DEV) && (val < JOY_NE + JOY_DEV))
+         | ((val > JOY_NW - JOY_DEV) && (val < JOY_NW + JOY_DEV)) );
+}
+
+static inline uint8_t JOY_down_pressed(void) {
+ uint16_t val = adc_get_pad();
+ return(   ((val > JOY_S  - JOY_DEV) && (val < JOY_S  + JOY_DEV))
+         | ((val > JOY_SE - JOY_DEV) && (val < JOY_SE + JOY_DEV))
+         | ((val > JOY_SW - JOY_DEV) && (val < JOY_SW + JOY_DEV)) );
+}
+
+static inline uint8_t JOY_left_pressed(void) {
+ uint16_t val = adc_get_pad();
+ return(   ((val > JOY_W  - JOY_DEV) && (val < JOY_W  + JOY_DEV))
+         | ((val > JOY_NW - JOY_DEV) && (val < JOY_NW + JOY_DEV))
+         | ((val > JOY_SW - JOY_DEV) && (val < JOY_SW + JOY_DEV)) );
+}
+
+static inline uint8_t JOY_right_pressed(void) {
+ uint16_t val = adc_get_pad();
+ return(   ((val > JOY_E  - JOY_DEV) && (val < JOY_E  + JOY_DEV))
+         | ((val > JOY_NE - JOY_DEV) && (val < JOY_NE + JOY_DEV))
+         | ((val > JOY_SE - JOY_DEV) && (val < JOY_SE + JOY_DEV)) );
 }
 
 #endif

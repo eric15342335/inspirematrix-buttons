@@ -5,15 +5,15 @@ LDFLAGS =
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S), Darwin)
-    LDFLAGS += -framework AudioToolbox -framework CoreFoundation -framework ApplicationServices -pthread
+    LDFLAGS += -framework CoreFoundation -framework ApplicationServices -pthread
 endif
 
 SRCS = paint-cursor.c
 TARGET = paint-cursor
 
-SRCS += $(wildcard ../emulator/include/*.c)
+SRCS += $(wildcard ../emulator/*.c)
 ifneq ($(UNAME_S), Darwin)
-SRCS := $(filter-out ../emulator/include/system_mac.c,$(SRCS))
+SRCS := $(filter-out ../emulator/system_mac.c,$(SRCS))
 endif
 OBJS = $(SRCS:.c=.o)
 # Default target

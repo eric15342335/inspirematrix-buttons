@@ -62,14 +62,14 @@ void send(void) {
         }
         printf("|");
         if (y == verticalButtons / 2 ) {
-            printf("   foreground: \e[38;2;%d;%d;%dm\x1b[0m",
+            printf("   foreground: \e[38;2;%d;%d;%dm\u2588\x1b[0m",
                 colors[foregroundColorIndex].r, colors[foregroundColorIndex].g,
                 colors[foregroundColorIndex].b);
             printf(", RGB(%d, %d, %d)", colors[foregroundColorIndex].r,
                 colors[foregroundColorIndex].g, colors[foregroundColorIndex].b);
         }
         if (y == verticalButtons / 2 + 1) {
-            printf("   background: \e[38;2;%d;%d;%dm\x1b[0m",
+            printf("   background: \e[38;2;%d;%d;%dm\u2588\x1b[0m",
                 colors[backgroundColorIndex].r, colors[backgroundColorIndex].g,
                 colors[backgroundColorIndex].b);
             printf(", RGB(%d, %d, %d)", colors[backgroundColorIndex].r,

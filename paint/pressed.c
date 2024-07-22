@@ -1,7 +1,7 @@
 #include "driver.h"
 #include <stdio.h>
 #include <stdint.h>
-
+// gcc pressed.c -I../emulator -I../datas
 enum {
     buttonUP = 'I',
     buttonDOWN = 'K',

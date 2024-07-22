@@ -8,13 +8,28 @@ ifeq ($(UNAME_S), Darwin)
     LDFLAGS += -framework AudioToolbox -framework CoreFoundation -framework ApplicationServices -pthread
 endif
 
-paint-cursor: paint-cursor.o
-	$(CC) $(CFLAGS) $(LDFLAGS) -o paint-cursor paint-cursor.o
+SRCS = paint-cursor.c
+TARGET = paint-cursor
 
-paint-cursor.o: paint-cursor.c ../emulator/*
-	$(CC) $(CFLAGS) -c paint-cursor.c
+SRCS += $(wildcard ../emulator/include/*.c)
+ifneq ($(UNAME_S), Darwin)
+SRCS := $(filter-out ../emulator/include/system_mac.c,$(SRCS))
+endif
+OBJS = $(SRCS:.c=.o)
+# Default target
+all: $(TARGET)
 
+# Linking
+$(TARGET): $(OBJS)
+	$(CC) $(OBJS) $(LDFLAGS) -o $(TARGET)
+
+# Compiling
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Clean up
 clean:
-	rm -f *.o paint-cursor *.exe
+	rm -f $(OBJS) $(TARGET)
 
-.PHONY: clean
+# Phony targets
+.PHONY: all clean

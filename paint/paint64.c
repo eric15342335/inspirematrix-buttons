@@ -32,7 +32,6 @@ int main(void) {
     ADC_init();
     clear();
     WS2812BSimpleSend(GPIOC, 2, (uint8_t *)led_array, NUM_LEDS * 3);
-    toggle[7] = 1;
     fill_color(colors[foregroundColorIndex]);
     Delay_Ms(1);
     WS2812BSimpleSend(GPIOC, 2, (uint8_t *)led_array, NUM_LEDS * 3);

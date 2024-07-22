@@ -6,6 +6,10 @@
 void WS2812BSimpleSend(GPIO_TypeDef *port, int pin, uint8_t *data, int len_in_bytes) {
     (void) port;
     (void) pin;
+    if (len_in_bytes != NUM_LEDS * 3) {
+        printf("Error: len_in_bytes != NUM_LEDS * 3\n");
+        exit(1);
+    }
     #define BORDER_X 2
     printf("\\x");
     for (uint8_t i = horizontalButtons; i > 0; i--) {

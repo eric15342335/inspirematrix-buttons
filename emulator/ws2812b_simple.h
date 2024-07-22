@@ -11,6 +11,7 @@ void WS2812BSimpleSend(GPIO_TypeDef *port, int pin, uint8_t *data, int len_in_by
         printf("Error: len_in_bytes != NUM_LEDS * 3\n");
         exit(1);
     }
+    printf("\033[2J\033[H");
     #define BORDER_X 2
     printf("\\x");
     for (uint8_t i = horizontalButtons; i > 0; i--) {
@@ -28,11 +29,7 @@ void WS2812BSimpleSend(GPIO_TypeDef *port, int pin, uint8_t *data, int len_in_by
             printf("\e[38;2;%d;%d;%dm\u2588\x1b[0m", data[led * 3], data[led * 3 + 1], data[led * 3 + 2]);
             //printf("r:%d g:%d b:%d ", data[led * 3], data[led * 3 + 1], data[led * 3 + 2]);
         }
-        printf("|");
-        if (y == verticalButtons / 2 + 2) {
-            printf("   button calculation: y*%d+x", horizontalButtons);
-        }
-        printf("\n");
+        printf("|\n");
     }
     printf(" ");
     for (uint8_t i = 0; i < horizontalButtons + BORDER_X; i++) {

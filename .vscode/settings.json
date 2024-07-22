@@ -12,6 +12,7 @@
         "funconfig.h": "c",
         "stdint.h": "c",
         "unistd.h": "c",
-        "compare": "c"
+        "compare": "c",
+        "colors.h": "c"
     },
 }

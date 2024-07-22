@@ -21,6 +21,7 @@ void SystemInit(void) {
 }
 #define Delay_Ms(milliseconds) Sleep(milliseconds)
 #define Delay_Us(microseconds) Sleep((microseconds) / 1000)
+
 #else
 #include <unistd.h>
 #include <stdlib.h>
@@ -39,6 +40,12 @@ static inline bool is_key_pressed(char capitalkey) {
         GetAsyncKeyState((int)capitalkey); // windows.h requires capital letters
     return (result & 0x8000) != 0;
 }
+#define JOY_act_pressed() is_key_pressed('F')
+#define JOY_act_released() !is_key_pressed('F')
+#define JOY_up_pressed() is_key_pressed('W')
+#define JOY_down_pressed() is_key_pressed('S')
+#define JOY_left_pressed() is_key_pressed('A')
+#define JOY_right_pressed() is_key_pressed('D')
 
 #else
 #include "system_mac.h"
@@ -60,7 +67,7 @@ static inline bool is_key_pressed(char capitalkey) {
     (JOY_up_pressed() || JOY_down_pressed() || JOY_left_pressed() || JOY_right_pressed())
 #define JOY_pad_released()                                                             \
     (!JOY_up_pressed() && !JOY_down_pressed() && !JOY_left_pressed() && !JOY_right_pressed())
-#define JOY_all_released() (JOY_act_released && !JOY_pad_released)
+#define JOY_all_released() (JOY_act_released() && !JOY_pad_released())
 
 void ADC_calibrate(void) {
     // Do nothing
@@ -87,4 +94,8 @@ int8_t matrix_pressed(void) {
         }
     }
     return -1;
+}
+
+uint8_t adc_get_pad(void) {
+    return 0;
 }

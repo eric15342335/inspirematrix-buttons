@@ -2,6 +2,7 @@
 #define FUNCONF_SYSTICK_USE_HCLK 1
 #include "buttons.h"
 #include "ch32v003fun.h"
+#include "driver.h"
 #include "colors.h"
 #include "ws2812b_simple.h"
 

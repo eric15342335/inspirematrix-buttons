@@ -145,7 +145,7 @@ CFLAGS+= \
 	$(CFLAGS_ARCH) -static-libgcc \
 	-I$(CH32V003FUN) \
 	-nostdlib \
-	-I. -I../datas -Wall $(EXTRA_CFLAGS) \
+	-I. -I../data -Wall $(EXTRA_CFLAGS) \
 	-Wshadow -Wswitch -Wfloat-equal
 
 LDFLAGS+=-T $(LINKER_SCRIPT) -Wl,--gc-sections
@@ -160,7 +160,6 @@ $(TARGET).bin : $(TARGET).elf
 
 $(GENERATED_LD_FILE) :
 	$(PREFIX)-gcc -E -P -x c -DTARGET_MCU=$(TARGET_MCU) -DMCU_PACKAGE=$(MCU_PACKAGE) -DTARGET_MCU_LD=$(TARGET_MCU_LD) $(CH32V003FUN)/ch32v003fun.ld > $(GENERATED_LD_FILE)
-
 
 $(TARGET).elf : $(FILES_TO_COMPILE) $(LINKER_SCRIPT) $(EXTRA_ELF_DEPENDENCIES)
 	$(PREFIX)-gcc -o $@ $(FILES_TO_COMPILE) $(CFLAGS) $(LDFLAGS)

@@ -7,12 +7,11 @@
  * Original description (preserved):
  * Example for using ADC with polling
  * 03-27-2023 E. Brombaugh
- */
+*/
 
 #define WS2812BSIMPLE_IMPLEMENTATION
 /// Required for the WS2812B Simple implementation to work
 #define FUNCONF_SYSTICK_USE_HCLK 1
-// #define FUNCONF_USE_5V_VDD 1
 // My custom define, see onBoardLight*() functions;
 #define CH32V003F4P6_ENABLE_ONBOARD_LIGHT
 #include "buttons.h"
@@ -22,26 +21,58 @@
 
 #include <stdio.h>
 
-// Prototypes
-void nextForegroundColor(void);
-void nextBackgroundColor(void);
-void send(void);
-void clear(void);
-void onBoardLightInit(void);
-void onBoardLightOn(void);
-void onBoardLightOff(void);
-
 /// @brief Index of the foreground color
 uint8_t foregroundColorIndex = 8;
 /// @brief Index of the background color
 uint8_t backgroundColorIndex = 7;
 
+/// @brief Change the foreground color to the next color in the color array
+void nextForegroundColor(void) {
+    foregroundColorIndex = (num_colors + foregroundColorIndex + 2) % num_colors;
+    // fore&background cannot be the same
+    if (foregroundColorIndex == backgroundColorIndex) {
+        nextForegroundColor();
+    }
+}
+
+/// @brief Change the background color to the next color in the color array
+void nextBackgroundColor(void) {
+    backgroundColorIndex = (num_colors + backgroundColorIndex + 2) % num_colors;
+    // fore&background cannot be the same
+    if (foregroundColorIndex == backgroundColorIndex) {
+        nextBackgroundColor();
+    }
+}
+
+#ifdef CH32V003F4P6_ENABLE_ONBOARD_LIGHT
+void onBoardLightInit(void) {
+    // Enable PD4 light
+    RCC->APB2PCENR |= RCC_APB2Periph_GPIOD;
+    // GPIO D4 Push-Pull
+    GPIOD->CFGLR &= ~(0xf << (4 * 4));
+    GPIOD->CFGLR |= (GPIO_Speed_10MHz | GPIO_CNF_OUT_PP) << (4 * 4);
+}
+void onBoardLightOn(void) { GPIOD->BSHR = (1 << 4); }
+void onBoardLightOff(void) {
+    // Turn off the light on the MCU
+    GPIOD->BSHR = (1 << (4 + 16));
+}
+#else
+void onBoardLightInit(void) {}
+void onBoardLightOn(void) {}
+void onBoardLightOff(void) {}
+#endif
+
+/// @brief Send the color values to the LED strip
+void send(void) {
+    Delay_Us(1);
+    WS2812BSimpleSend(GPIOC, 6, (uint8_t *)led_array, NUM_LEDS * 3);
+}
+
 /// @brief Array of toggles for each LED
 uint8_t toggle[NUM_LEDS] = {0};
 
-/// @brief Main function
 int main(void) {
-    // Number of times the loop has run
     uint32_t count = 0;
     SystemInit();
     onBoardLightInit();
@@ -116,62 +147,3 @@ int main(void) {
         send();
     }
 }
-
-/// @brief Send the color values to the LED strip
-void send(void) {
-    Delay_Us(1);
-    WS2812BSimpleSend(GPIOC, 6, (uint8_t *)led_array, NUM_LEDS * 3);
-}
-
-/// @brief Change the foreground color to the next color in the color array
-void nextForegroundColor(void) {
-    foregroundColorIndex = (num_colors + foregroundColorIndex + 2) % num_colors;
-    // fore&background cannot be the same
-    if (foregroundColorIndex == backgroundColorIndex) {
-        nextForegroundColor();
-    }
-}
-
-/// @brief Change the background color to the next color in the color array
-void nextBackgroundColor(void) {
-    backgroundColorIndex = (num_colors + backgroundColorIndex + 2) % num_colors;
-    // fore&background cannot be the same
-    if (foregroundColorIndex == backgroundColorIndex) {
-        nextBackgroundColor();
-    }
-}
-
-
-/// @brief Biggest value in provided color argument
-uint8_t max_color_value(color_t color) {
-    uint8_t max = 0;
-    if (color.r > max) {
-        max = color.r;
-    }
-    if (color.g > max) {
-        max = color.g;
-    }
-    if (color.b > max) {
-        max = color.b;
-    }
-    return max;
-}
-
-#ifdef CH32V003F4P6_ENABLE_ONBOARD_LIGHT
-void onBoardLightInit(void) {
-    // Enable PD4 light
-    RCC->APB2PCENR |= RCC_APB2Periph_GPIOD;
-    // GPIO D4 Push-Pull
-    GPIOD->CFGLR &= ~(0xf << (4 * 4));
-    GPIOD->CFGLR |= (GPIO_Speed_10MHz | GPIO_CNF_OUT_PP) << (4 * 4);
-}
-void onBoardLightOn(void) { GPIOD->BSHR = (1 << 4); }
-void onBoardLightOff(void) {
-    // Turn off the light on the MCU
-    GPIOD->BSHR = (1 << (4 + 16));
-}
-#else
-void onBoardLightInit(void) {}
-void onBoardLightOn(void) {}
-void onBoardLightOff(void) {}
-#endif

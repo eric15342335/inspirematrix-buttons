@@ -23,15 +23,15 @@ void SystemInit(void) {
 #define SystemInit() // Do nothing
 #endif
 
-void adc_cal(void) {
+void ADC_calibrate(void) {
     // Do nothing
 }
 
-void adc_init(void) {
+void ADC_init(void) {
     // Do nothing
 }
 
-uint16_t adc_get(void) {
+uint16_t ADC_read(void) {
     // Get user input of button number (0-63)
     // and return its ADC reading value
     uint8_t button;

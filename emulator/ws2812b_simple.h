@@ -2,35 +2,6 @@
 #include "colors.h"
 #include "buttons.h"
 
-/**
- * @brief Set the color of the LED strip
- * @param led Which LED to set the color of
- * @param color The color to set the LED to, in RGB format `color_t`
- */
-void set_color(uint8_t led, color_t color) {
-    /// @todo Remove the brightness scaling
-    led_array[led].r = color.r;
-    led_array[led].g = color.g;
-    led_array[led].b = color.b;
-}
-
-/// @brief Clear the LED strip to No Color
-void clear(void) {
-    for (int i = 0; i < NUM_LEDS; i++) {
-        set_color(i, (color_t){0, 0, 0});
-    }
-}
-
-/**
- * @brief Fill the LED strip with a single color
- * @param color The color to fill the LED strip with, in RGB format `color_t`
- */
-void fill_color(color_t color) {
-    for (int i = 0; i < NUM_LEDS; i++) {
-        set_color(i, color);
-    }
-}
-
 extern uint8_t foregroundColorIndex;
 extern uint8_t backgroundColorIndex;
 

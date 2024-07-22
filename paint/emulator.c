@@ -9,9 +9,9 @@
 #include <stdio.h>
 
 // Prototypes
-void adc_cal(void);
-void adc_init(void);
-uint16_t adc_get(void);
+void ADC_calibrate(void);
+void ADC_init(void);
+uint16_t ADC_read(void);
 void nextForegroundColor(void);
 void nextBackgroundColor(void);
 
@@ -34,7 +34,7 @@ int main(void) {
     }
     send();
     while (1) {
-        uint16_t adc = adc_get();
+        uint16_t adc = ADC_read();
         int button = -1;
         if (abs(adc - BUTTON_NONE) <= BUTTON_DEVIATION) {
             continue;

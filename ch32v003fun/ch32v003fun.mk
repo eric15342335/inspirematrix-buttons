@@ -9,6 +9,26 @@ WRITE_SECTION?=flash
 SYSTEM_C?=$(CH32V003FUN)/ch32v003fun.c
 CFLAGS?=-g -Os -flto -ffunction-sections -fdata-sections -fmessage-length=0 -msmall-data-limit=8
 
+# Fedora places newlib in a different location
+ifneq ($(wildcard /etc/fedora-release),)
+	NEWLIB?=/usr/arm-none-eabi/include
+else
+	NEWLIB?=/usr/include/newlib
+endif
+
+
+TARGET_MCU?=CH32V003
+TARGET_EXT?=c
+
+CH32V003FUN?=../../ch32v003fun
+MINICHLINK?=$(CH32V003FUN)/../minichlink
+
+WRITE_SECTION?=flash
+SYSTEM_C?=$(CH32V003FUN)/ch32v003fun.c
+
+CFLAGS?=-g -Os -flto -ffunction-sections -fdata-sections -fmessage-length=0 -msmall-data-limit=8
+LDFLAGS+=-Wl,--print-memory-usage
+
 ifeq ($(TARGET_MCU),CH32V003)
 	CFLAGS_ARCH+=-march=rv32ec -mabi=ilp32e -DCH32V003=1
 	GENERATED_LD_FILE?=$(CH32V003FUN)/generated_ch32v003.ld
@@ -143,6 +163,8 @@ endif
 
 CFLAGS+= \
 	$(CFLAGS_ARCH) -static-libgcc \
+	-I$(NEWLIB) \
+	-I$(CH32V003FUN)/../extralibs \
 	-I$(CH32V003FUN) \
 	-nostdlib \
 	-I. -I../data -Wall $(EXTRA_CFLAGS) \
@@ -152,16 +174,59 @@ LDFLAGS+=-T $(LINKER_SCRIPT) -Wl,--gc-sections
 FILES_TO_COMPILE:=$(SYSTEM_C) $(TARGET).$(TARGET_EXT) $(ADDITIONAL_C_FILES) 
 
 $(TARGET).bin : $(TARGET).elf
-	$(PREFIX)-size $^
 	$(PREFIX)-objdump -S $^ > $(TARGET).lst
 	$(PREFIX)-objdump -t $^ > $(TARGET).map
 	$(PREFIX)-objcopy -O binary $< $(TARGET).bin
 	$(PREFIX)-objcopy -O ihex $< $(TARGET).hex
 
+ifeq ($(OS),Windows_NT)
+closechlink :
+	-taskkill /F /IM minichlink.exe /T
+else
+closechlink :
+	-killall minichlink
+endif
+
+terminal : monitor
+
+monitor :
+	$(MINICHLINK)/minichlink -T
+
+unbrick :
+	$(MINICHLINK)/minichlink -u
+
+gdbserver : 
+	-$(MINICHLINK)/minichlink -baG
+
+clangd :
+	make clean
+	bear -- make build
+	@echo "CompileFlags:" > .clangd
+	@echo "  Remove: [-march=*, -mabi=*]" >> .clangd
+
+clangd_clean :
+	rm -f compile_commands.json .clangd
+	rm -rf .cache
+
+FLASH_COMMAND?=$(MINICHLINK)/minichlink -w $< $(WRITE_SECTION) -b
+
+.PHONY : $(GENERATED_LD_FILE)
 $(GENERATED_LD_FILE) :
 	$(PREFIX)-gcc -E -P -x c -DTARGET_MCU=$(TARGET_MCU) -DMCU_PACKAGE=$(MCU_PACKAGE) -DTARGET_MCU_LD=$(TARGET_MCU_LD) $(CH32V003FUN)/ch32v003fun.ld > $(GENERATED_LD_FILE)
 
 $(TARGET).elf : $(FILES_TO_COMPILE) $(LINKER_SCRIPT) $(EXTRA_ELF_DEPENDENCIES)
 	$(PREFIX)-gcc -o $@ $(FILES_TO_COMPILE) $(CFLAGS) $(LDFLAGS)
+
+# Rule for independently building ch32v003fun.o indirectly, instead of recompiling it from source every time.
+# Not used in the default 003fun toolchain, but used in more sophisticated toolchains.
+ch32v003fun.o : $(SYSTEM_C)
+	$(PREFIX)-gcc -c -o $@ $(SYSTEM_C) $(CFLAGS)
+
+cv_flash : $(TARGET).bin
+	make -C $(MINICHLINK) all
+	$(FLASH_COMMAND)
+
+cv_clean :
+	rm -rf $(TARGET).elf $(TARGET).bin $(TARGET).hex $(TARGET).lst $(TARGET).map $(TARGET).hex $(GENERATED_LD_FILE) || true
 
 build : $(TARGET).bin

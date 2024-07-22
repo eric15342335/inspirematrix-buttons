@@ -20,11 +20,8 @@ void WS2812BSimpleSend(GPIO_TypeDef *port, int pin, uint8_t *data, int len_in_by
         printf("%d|", y - 1);
         for (uint8_t x = horizontalButtons; x > 0; x--) {
             uint8_t led = (y - 1) * horizontalButtons + (x - 1);
-            if (led < len_in_bytes && (data[led] & 0x07)) {
-                printf("\e[48;2;%d;%d;%dm\u2588\x1b[0m", (data[led] & 0xE0) >> 5, (data[led] & 0x1C) >> 2, (data[led] & 0x03));
-            } else {
-                printf(" ");
-            }
+            printf("\e[38;2;%d;%d;%dm\u2588\x1b[0m", data[led * 3], data[led * 3 + 1], data[led * 3 + 2]);
+            //printf("r:%d g:%d b:%d ", data[led * 3], data[led * 3 + 1], data[led * 3 + 2]);
         }
         printf("|");
         if (y == verticalButtons / 2 + 2) {

@@ -145,7 +145,7 @@ CFLAGS+= \
 	$(CFLAGS_ARCH) -static-libgcc \
 	-I$(CH32V003FUN) \
 	-nostdlib \
-	-I. -I../common -Wall $(EXTRA_CFLAGS) \
+	-I. -I../datas -Wall $(EXTRA_CFLAGS) \
 	-Wshadow -Wswitch -Wfloat-equal
 
 LDFLAGS+=-T $(LINKER_SCRIPT) -Wl,--gc-sections

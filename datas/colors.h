@@ -15,7 +15,7 @@ typedef struct color_256 {
 color_t led_array[NUM_LEDS] = {0};
 
 /// @brief Array of colors for the LED strip, for sending to the LED strip
-static const color_t colors[] = {
+const color_t colors[] = {
     // Red (8 shades)
     {255, 0, 0}, {223, 0, 0}, {191, 0, 0}, {159, 0, 0}, {127, 0, 0}, {95, 0, 0},
     {63, 0, 0}, {31, 0, 0},
@@ -49,4 +49,4 @@ static const color_t colors[] = {
     {63, 31, 0}, {31, 15, 0}};
 
 /// @brief Number of colors in the color array
-static const uint16_t num_colors = sizeof(colors) / sizeof(colors[0]);
+const uint16_t num_colors = sizeof(colors) / sizeof(colors[0]);

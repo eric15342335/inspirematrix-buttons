@@ -3,8 +3,8 @@
 #include "ch32v003fun.h"
 #include "ws2812b_simple.h"
 #include <stdio.h>
+#include "colors.h"
 
-#define NUM_LEDS 64
 #define PAD_NONE 1
 #define PAD_UP 199
 #define PAD_DOWN 362
@@ -13,14 +13,6 @@
 #define ACT_RELEASED // random values
 #define ACT_PRESSED 0
 #define DEVIATION 20
-
-typedef struct color_256 {
-    uint8_t r;
-    uint8_t g;
-    uint8_t b;
-} color_t;
-
-color_t led_array[NUM_LEDS] = {0};
 
 void set_color(uint8_t led, color_t color) {
     led_array[led].r = color.r;
@@ -31,6 +23,7 @@ void set_color(uint8_t led, color_t color) {
 color_t onColor = {5, 5, 5};
 color_t offColor = {0, 0, 0};
 color_t pointerColor = {0, 0, 5};
+
 void clear(void) {
     for (int i = 0; i < NUM_LEDS; i++) {
         set_color(i, offColor);
@@ -45,18 +38,6 @@ void fill(color_t color) {
 
 void send(void) {
     WS2812BSimpleSend(GPIOC, 2, (uint8_t *)led_array, NUM_LEDS * 3);
-}
-
-void adc_cal(void) {
-    // Reset calibration
-    ADC1->CTLR2 |= ADC_RSTCAL;
-    while (ADC1->CTLR2 & ADC_RSTCAL)
-        ;
-
-    // Calibrate
-    ADC1->CTLR2 |= ADC_CAL;
-    while (ADC1->CTLR2 & ADC_CAL)
-        ;
 }
 
 // initialize adc for polling
@@ -175,6 +156,6 @@ int main(void) {
             set_color(i, toggle[i] ? onColor : offColor);
         set_color(currentposition, pointerColor);
         send();
-        Delay_Ms(21);
+        //Delay_Ms(21);
     }
 }

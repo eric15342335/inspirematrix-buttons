@@ -1,7 +1,22 @@
+#pragma once
 #include <stdio.h>
 #include <stdlib.h>
 #include "colors.h"
 #include "buttons.h"
+
+#define GPIOC                                   ((GPIO_TypeDef *)0)
+#define GPIOD                                   ((GPIO_TypeDef *)0)
+#define __IO volatile
+typedef struct
+{
+	__IO uint32_t CFGLR;
+	__IO uint32_t CFGHR;
+	__IO uint32_t INDR;
+	__IO uint32_t OUTDR;
+	__IO uint32_t BSHR;
+	__IO uint32_t BCR;
+	__IO uint32_t LCKR;
+} GPIO_TypeDef;
 
 #ifdef _WIN32
 #define NOMINMAX 1          // Prevent Windows.h from defining min and max macros
@@ -38,4 +53,14 @@ uint16_t ADC_read(void) {
     scanf("%hhd", &button);
     printf("\n");
     return buttons[button];
+}
+
+int8_t matrix_pressed(void) {
+    uint16_t adc_value = ADC_read();
+    for (uint8_t i = 0; i < 64; i++) {
+        if (buttons[i] == adc_value) {
+            return i;
+        }
+    }
+    return -1;
 }

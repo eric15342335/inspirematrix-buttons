@@ -24,10 +24,6 @@ void nextBackgroundColor(void) {
     }
 }
 
-void send(void) {
-    Delay_Us(1);
-    WS2812BSimpleSend(GPIOC, 2, (uint8_t *)led_array, NUM_LEDS * 3);
-}
 
 uint8_t toggle[NUM_LEDS] = {0};
 
@@ -35,11 +31,11 @@ int main(void) {
     SystemInit();
     ADC_init();
     clear();
-    send();
+    WS2812BSimpleSend(GPIOC, 2, (uint8_t *)led_array, NUM_LEDS * 3);
     toggle[7] = 1;
     fill_color(colors[foregroundColorIndex]);
     Delay_Ms(1);
-    send();
+    WS2812BSimpleSend(GPIOC, 2, (uint8_t *)led_array, NUM_LEDS * 3);
     while (1) {
         int8_t button = matrix_pressed();
         if (button == 7) {
@@ -58,6 +54,6 @@ int main(void) {
             set_color(i,
                 toggle[i] ? colors[foregroundColorIndex] : colors[backgroundColorIndex]);
         }
-        send();
+        WS2812BSimpleSend(GPIOC, 2, (uint8_t *)led_array, NUM_LEDS * 3);
     }
 }

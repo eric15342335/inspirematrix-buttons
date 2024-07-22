@@ -10,10 +10,6 @@ color_t onColor = {5, 5, 5};
 color_t offColor = {0, 0, 0};
 color_t pointerColor = {0, 0, 5};
 
-void send(void) {
-    WS2812BSimpleSend(GPIOC, 2, (uint8_t *)led_array, NUM_LEDS * 3);
-}
-
 int currentposition = 0;
 uint8_t toggle[NUM_LEDS] = {0};
 

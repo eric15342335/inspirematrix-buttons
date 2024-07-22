@@ -44,7 +44,7 @@ static inline bool is_key_pressed(char capitalkey) {
 #include "system_mac.h"
 #include <unistd.h>
 
-#define SystemInit() //do nothing
+#define SystemInit() pthread_init()
 #define DLY_ms(milliseconds) usleep(milliseconds * 1000)
 
 #define JOY_act_pressed() is_key_pressed(F_Key)

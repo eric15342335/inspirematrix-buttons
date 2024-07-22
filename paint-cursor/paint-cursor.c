@@ -6,7 +6,7 @@
 
 color_t onColor = {100, 255, 100};
 color_t offColor = {0, 0, 0};
-color_t pointerColor = {0, 0, 255};
+color_t pointerColor = {100, 100, 255};
 
 int currentposition = 0;
 uint8_t toggle[NUM_LEDS] = {0};
@@ -36,8 +36,9 @@ int main(void) {
             currentposition = (NUM_LEDS + currentposition - 1) % NUM_LEDS;
         }
         int8_t button = matrix_pressed();
-        if (matrix_pressed() != -1) {
+        if (button != -1) {
             printf("Button: %d\n", button);
+            Delay_Ms(100);
             toggle[button] = !toggle[button];
         }
         else if (JOY_pad_released()) {

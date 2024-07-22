@@ -75,16 +75,14 @@ static inline uint8_t JOY_right_pressed(void) {
 }
 
 int8_t matrix_pressed(void) {
-    uint16_t adc;
-    while (1) {
-        uint16_t adc2;
-        adc = ADC_read();
-        Delay_Us(1);
-        adc2 = ADC_read();
-        if (adc == adc2)
-            break;
+    int adc;
+    // average samples
+    for (int8_t sample = 0; sample < 16; sample++) {
+        adc += ADC_read();
     }
-    Delay_Ms(10);
+    adc /= 16;
+    adc += 6;
+    printf("ADC: %d\n", adc);
     int8_t no_button_pressed = -1;
     for (int8_t i = 0; i < 64; i++) {
         int deviation = abs(adc - buttons[i]);

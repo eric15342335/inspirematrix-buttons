@@ -35,7 +35,12 @@ int main(void) {
         if (JOY_right_pressed()) {
             currentposition = (NUM_LEDS + currentposition - 1) % NUM_LEDS;
         }
-        if (JOY_pad_released()) {
+        int8_t button = matrix_pressed();
+        if (matrix_pressed() != -1) {
+            printf("Button: %d\n", button);
+            toggle[button] = !toggle[button];
+        }
+        else if (JOY_pad_released()) {
             continue;
         }
         if (act_pressed)
@@ -44,6 +49,6 @@ int main(void) {
             set_color(i, toggle[i] ? onColor : offColor);
         set_color(currentposition, pointerColor);
         WS2812BSimpleSend(GPIOC, 2, (uint8_t *)led_array, NUM_LEDS * 3);
-        Delay_Ms(100);
+        Delay_Ms(200);
     }
 }

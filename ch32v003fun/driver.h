@@ -73,7 +73,7 @@ static inline uint8_t JOY_right_pressed(void) {
          | ((val > JOY_NE - JOY_DEV) && (val < JOY_NE + JOY_DEV))
          | ((val > JOY_SE - JOY_DEV) && (val < JOY_SE + JOY_DEV)) );
 }
-#include <stdio.h>
+
 int8_t matrix_pressed(void) {
     uint16_t adc;
     while (1) {

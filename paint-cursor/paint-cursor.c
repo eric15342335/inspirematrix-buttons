@@ -3,8 +3,10 @@
 #include "ch32v003fun.h"
 #include "ws2812b_simple.h"
 #include <stdio.h>
+#include "buttons.h"
 #include "colors.h"
 
+#define NUM_LEDS 64
 #define PAD_NONE 1
 #define PAD_UP 199
 #define PAD_DOWN 362
@@ -131,9 +133,10 @@ int main(void) {
         clear();
         printf("ADC reading: %d; ", adc_get_pad());
         printf("ACT pressed?: %ld\r\n", gpio_act_pressed());
-        printf("PAD which?: %d\r\n", adc_get_pad_button());
+        int pad = adc_get_pad_button();
+        printf("PAD which?: %d\r\n", pad);
         // move current position
-        switch (adc_get_pad_button()) {
+        switch (pad) {
             case up:
                 currentposition = (NUM_LEDS + currentposition + 8) % NUM_LEDS;
                 break;
@@ -149,6 +152,7 @@ int main(void) {
             default:
                 break;
         }
+        printf("Current position: %d\r\n", currentposition);
         // toggle current position
         if (gpio_act_pressed())
             toggle[currentposition] = !toggle[currentposition];
@@ -156,6 +160,6 @@ int main(void) {
             set_color(i, toggle[i] ? onColor : offColor);
         set_color(currentposition, pointerColor);
         send();
-        //Delay_Ms(21);
+        Delay_Ms(21);
     }
 }

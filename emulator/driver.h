@@ -20,8 +20,6 @@ void SystemInit(void) {
 }
 #define Delay_Ms(milliseconds) Sleep(milliseconds)
 #define Delay_Us(microseconds) Sleep((microseconds) / 1000)
-#define JOY_init() SystemInit()
-#define DLY_ms(milliseconds) Sleep(milliseconds)
 
 static inline bool is_key_pressed(char capitalkey) {
     SHORT result =
@@ -71,7 +69,6 @@ uint16_t ADC_read(void) {
 #include <unistd.h>
 
 #define SystemInit() pthread_init()
-#define DLY_ms(milliseconds) usleep(milliseconds * 1000)
 #define Delay_Ms(milliseconds) usleep((milliseconds) * 1000)
 #define Delay_Us(microseconds) usleep(microseconds)
 #define JOY_act_pressed() is_key_pressed(P_Key)

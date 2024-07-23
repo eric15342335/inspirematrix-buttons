@@ -176,7 +176,7 @@ void play(){
         uint8_t randpos = JOY_random() % 9;
         if (gameboard[randpos] == ' '){
             gameboard[randpos] = 'O';
-            DLY_ms(300);
+            Delay_Ms(300);
             break;
         }
     }
@@ -193,13 +193,13 @@ int main(void) {
         fillallcirclecross();
         WS2812BSimpleSend(GPIOC, 2, (uint8_t *)led_array, NUM_LEDS * 3);
         winner = checkwinside();
-        DLY_ms(200);
+        Delay_Ms(200);
         if (winner != 0) break;
         play();
         fillallcirclecross();
         WS2812BSimpleSend(GPIOC, 2, (uint8_t *)led_array, NUM_LEDS * 3);
         winner = checkwinside();
-        DLY_ms(200);
+        Delay_Ms(200);
         if (winner != 0) break;
     }
 }

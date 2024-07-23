@@ -95,6 +95,7 @@ void selectposition(){
     const int8_t * loopptr;
     int8_t position = -1;
     while (1){
+    while (1){
         position = matrix_pressed();
         seed++;
         if (position != -1){
@@ -168,6 +169,7 @@ void selectposition(){
             gameboard[8] = 'X';
             return;
         }
+    }
     }
 }
 

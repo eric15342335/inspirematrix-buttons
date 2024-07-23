@@ -74,17 +74,30 @@ static inline uint8_t JOY_right_pressed(void) {
          | ((val > JOY_SE - JOY_DEV) && (val < JOY_SE + JOY_DEV)) );
 }
 
-#include <stdio.h>
 int8_t matrix_pressed(void) {
-    int32_t adc = 0; // sum of adc readings, initialize to zero!
-    // average samples
-    const int8_t samples = 6;
-    for (int8_t _ = 0; _ < samples; _++) {
-        adc += ADC_read();
+    int64_t adc = 0;
+    const int8_t samples = 5;
+    int16_t readings[samples];
+    int8_t valid_samples = 1;
+    int16_t deviation_threshold = BUTTON_DEVIATION;
+    for (int8_t i = 0; i < samples; i++) {
+        readings[i] = ADC_read();
+        Delay_Ms(1);
     }
-    adc /= samples;
-    adc += 6; // weird offset that applies to all buttons
-    printf("ADC: %d\n", adc);
+    for (int8_t i = 1; i < samples; i++) {
+        int16_t deviation = abs(readings[i] - readings[i-1]);
+        if (deviation > deviation_threshold) {
+            valid_samples = 0;
+            break;
+        }
+    }
+    if (valid_samples) {
+        for (int8_t i = 0; i < samples; i++) {
+            adc += readings[i];
+        }
+        adc /= samples;
+        adc += 10;
+    }
     int8_t no_button_pressed = -1;
     for (int8_t i = 0; i < 64; i++) {
         int deviation = abs(adc - buttons[i]);

@@ -76,13 +76,14 @@ static inline uint8_t JOY_right_pressed(void) {
 
 #include <stdio.h>
 int8_t matrix_pressed(void) {
-    int adc;
+    int32_t adc = 0; // sum of adc readings, initialize to zero!
     // average samples
-    for (int8_t sample = 0; sample < 16; sample++) {
+    const int8_t samples = 6;
+    for (int8_t _ = 0; _ < samples; _++) {
         adc += ADC_read();
     }
-    adc /= 16;
-    adc += 6;
+    adc /= samples;
+    adc += 6; // weird offset that applies to all buttons
     printf("ADC: %d\n", adc);
     int8_t no_button_pressed = -1;
     for (int8_t i = 0; i < 64; i++) {

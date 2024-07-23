@@ -13,6 +13,7 @@
         "stdint.h": "c",
         "unistd.h": "c",
         "compare": "c",
-        "colors.h": "c"
+        "colors.h": "c",
+        "string.h": "c"
     },
 }

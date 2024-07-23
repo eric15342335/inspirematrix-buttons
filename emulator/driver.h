@@ -22,7 +22,6 @@ void SystemInit(void) {
 #define Delay_Us(microseconds) Sleep((microseconds) / 1000)
 #define JOY_init() SystemInit()
 #define DLY_ms(milliseconds) Sleep(milliseconds)
-#define JOY_sound(freq, dur) Beep(freq, dur)
 
 static inline bool is_key_pressed(char capitalkey) {
     SHORT result =
@@ -75,19 +74,35 @@ uint16_t ADC_read(void) {
 #define DLY_ms(milliseconds) usleep(milliseconds * 1000)
 #define Delay_Ms(milliseconds) usleep((milliseconds) * 1000)
 #define Delay_Us(microseconds) usleep(microseconds)
-#define JOY_act_pressed() is_key_pressed(F_Key)
-#define JOY_act_released() !is_key_pressed(F_Key)
-#define JOY_up_pressed() is_key_pressed(W_Key)
-#define JOY_down_pressed() is_key_pressed(S_Key)
-#define JOY_left_pressed() is_key_pressed(A_Key)
-#define JOY_right_pressed() is_key_pressed(D_Key)
+#define JOY_act_pressed() is_key_pressed(P_Key)
+#define JOY_act_released() !is_key_pressed(P_Key)
+#define JOY_up_pressed() is_key_pressed(I_Key)
+#define JOY_down_pressed() is_key_pressed(K_Key)
+#define JOY_left_pressed() is_key_pressed(J_Key)
+#define JOY_right_pressed() is_key_pressed(L_Key)
+#define JOY_X_pressed() is_key_pressed(U_Key)
+#define JOY_Y_pressed() is_key_pressed(O_Key)
+
 uint16_t ADC_read(void) {
-    // Get user input of button number (0-63)
-    // and return its ADC reading value
-    uint8_t button;
-    scanf("%hhd", &button);
-    printf("\n");
-    return buttons[button];
+    // If pressed A, B, C, D, wait for second input 0-9 and A-F
+    // return the value of the button
+    // e.g. AF indicates A=0 + F=15 = 15
+    // Use non blocking is_key_pressed
+    for (int i = 0; i < 4; i++) {
+        if (is_key_pressed(ABCD[i])) {
+            while (is_key_pressed(ABCD[i]));
+            printf("Pressed %c, Press 0-9 or A-F\n", ABCD[i]);
+            while (true) {
+                for (int j = 0; j < 16; j++) {
+                    if (is_key_pressed(_0123456789ABCDEF[j])) {
+                        printf("Pressed %d\n", j);
+                        return buttons[i * 16 + j];
+                    }
+                }
+            }
+        }
+    }
+    return 0;
 }
 
 #endif

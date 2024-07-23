@@ -4,9 +4,9 @@
 #include "colors.h"
 #include "ws2812b_simple.h"
 
-color_t onColor = {100, 255, 100};
-color_t offColor = {0, 0, 0};
-color_t pointerColor = {100, 100, 255};
+color_t onColor = {100, 255, 100}; // Green
+color_t offColor = {0, 0, 0}; // Black
+color_t pointerColor = {100, 100, 255}; // Blue
 
 int currentposition = 0;
 uint8_t toggle[NUM_LEDS] = {0};

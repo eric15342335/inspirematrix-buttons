@@ -130,3 +130,17 @@ int8_t matrix_pressed(void) {
 uint8_t adc_get_pad(void) {
     return 0;
 }
+
+uint16_t rnval;
+uint16_t JOY_random(void) {
+  rnval = (rnval >> 0x01) ^ (-(rnval & 0x01) & 0xB400);
+  return rnval;
+}
+
+void JOY_setseed_default(void){
+  rnval = 0x1234;
+}
+
+void JOY_setseed(uint16_t seed){
+  rnval = seed;
+}

@@ -97,7 +97,7 @@ const uint8_t * font_list[] = {
     font_9, font_0, font_X, font_D};
 
 static inline void font_draw(const uint8_t font[], color_t color, int startpos) {
-    // insert the 3*5 font to the led_array
+    // insert the font_width*font_height font to the led_array
     // which has horizontalButtons*verticalButtons leds
     if (startpos < 0 || startpos >= NUM_LEDS ||
         startpos % horizontalButtons + font_width > horizontalButtons ||
@@ -107,8 +107,8 @@ static inline void font_draw(const uint8_t font[], color_t color, int startpos) 
     }
     for (int i = 0; i < font_size; i++) {
         if (font[i]) {
-            int x = (font_size - i - 1) % 3;
-            int y = (font_size - i - 1) / 3;
+            int x = (font_size - i - 1) % font_width;
+            int y = (font_size - i - 1) / font_width;
             int pos = startpos + x + y * horizontalButtons;
             set_color(pos, color);
         }

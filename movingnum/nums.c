@@ -10,9 +10,11 @@ int main(void) {
     while (1) {
         for (int i = 0; i < NUM_LEDS; i++) {
             clear();
-            for (int index = 0; index < 12; index++) {
-                if (i > -1+4*index && i < 6+4*index) {
-                    font_draw(font_list[index], colors[8*index%num_colors], (i-4*index) % 6 + 8);
+#define separation 1
+#define space_occupied (font_width+separation)
+            for (int index = 0; index < sizeof(font_list) / sizeof(font_list[0]); index++) {
+                if (i > -1+space_occupied*index && i < 6+space_occupied*index) {
+                    font_draw(font_list[index], colors[8*index%num_colors], (i-(space_occupied*index) % 6 + horizontalButtons);
                 }
             }
             WS2812BSimpleSend(GPIOC, 1, (uint8_t *)led_array, NUM_LEDS * 3);

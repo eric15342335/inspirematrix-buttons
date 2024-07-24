@@ -1,0 +1,35 @@
+CC=gcc
+INCLUDES=-I../emulator -I../data -I.
+CFLAGS=-g -Wall -Wextra -Wshadow -Wswitch -Wfloat-equal $(INCLUDES)
+LDFLAGS=$(CFLAGS)
+
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S), Darwin)
+    LDFLAGS += -framework CoreFoundation -framework ApplicationServices -pthread
+endif
+
+SRCS=nums.c
+TARGET=nums
+
+SRCS += $(wildcard ../emulator/*.c)
+ifneq ($(UNAME_S), Darwin)
+SRCS := $(filter-out ../emulator/system_mac.c,$(SRCS))
+endif
+OBJS = $(SRCS:.c=.o)
+# Default target
+all: $(TARGET)
+
+# Linking
+$(TARGET): $(OBJS)
+	$(CC) $(OBJS) $(LDFLAGS) -o $(TARGET)
+
+# Compiling
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Clean up
+clean:
+	rm -f $(OBJS) $(TARGET)
+
+# Phony targets
+.PHONY: all clean

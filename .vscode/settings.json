@@ -16,6 +16,7 @@
         "colors.h": "c",
         "string.h": "c",
         "stdio.h": "c",
-        "ch32v003_gpio_branchless.h": "c"
+        "ch32v003_gpio_branchless.h": "c",
+        "music.h": "c"
     },
 }

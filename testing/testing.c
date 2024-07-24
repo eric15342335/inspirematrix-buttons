@@ -8,7 +8,7 @@
 
 int main(void) {
     SystemInit();
-    GPIO_ADCinit();
+    //GPIO_ADCinit();
     while(1) {
         for (int i = 0; i < NUM_LEDS; i++) {
             clear();
@@ -25,7 +25,6 @@ int main(void) {
             /*
             act: pa2, gpio possible
             */
-            set_color(i, colors[0]);
             WS2812BSimpleSend(GPIOC, 1, (uint8_t *)led_array, NUM_LEDS * 3);
             Delay_Ms(10);
         }

@@ -66,25 +66,20 @@ int main(void) {
         rv_u32 trap = rv_step(&cpu);
         clear();
         uint8_t next_pos = (cpu.pc - RAM_BASE) / sizeof(program[0]);
-        // display a progress bar at led 48-63
-        for (int i = 63; i > 63 - next_pos; i--) {
-            set_color(i, (color_t){255, 0, 0});
-        }
         for (int bit = 15; bit >= 0; bit--) {
+            // display 16bit instruction at PC in led 0-15
             if (program[next_pos] & (1 << bit)) {
                 set_color(bit, (color_t){255, 255, 255});
             }
-        }
-        // display register r10, r11, r12 value at led 64-95, 96-127, 128-159
-        for (int bit = 31; bit >= 0; bit--) {
+            // display register r10, r11, r12 value at led 16-31, 32-47, 48-63
             if (cpu.r[10] & (1 << bit)) {
-                set_color(bit + 64, (color_t){255, 0, 0});
+                set_color(bit + 16, (color_t){255, 0, 0});
             }
             if (cpu.r[11] & (1 << bit)) {
-                set_color(bit + 96, (color_t){0, 255, 0});
+                set_color(bit + 32, (color_t){0, 255, 0});
             }
             if (cpu.r[12] & (1 << bit)) {
-                set_color(bit + 128, (color_t){0, 0, 255});
+                set_color(bit + 48, (color_t){0, 0, 255});
             }
         }
         WS2812BSimpleSend(GPIOC, 1, (uint8_t *)led_array, NUM_LEDS * 3);

@@ -1,6 +1,8 @@
 /// @brief Button calibration values
 #pragma once
 
+#include "funconfig.h"
+
 #define BUTTON_NONE 10
 #define BUTTON_DEVIATION 5
 #define BUTTON_0 1019
@@ -78,10 +80,6 @@
 #define JOY_W       511   // joypad LEFT
 #define JOY_NW      567   // JOYPAD UP + LEFT
 #define JOY_DEV     20    // deviation
-
-#define horizontalButtons 8
-#define verticalButtons 8
-#define NUM_LEDS (horizontalButtons * verticalButtons)
 
 /// @brief Array of buttons corresponding to the ADC values, for linear searching
 static const int buttons[NUM_LEDS] = {BUTTON_0, BUTTON_1, BUTTON_2, BUTTON_3, BUTTON_4, BUTTON_5,

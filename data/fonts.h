@@ -96,6 +96,8 @@ const uint8_t * font_list[] = {
     font_5, font_6, font_7, font_8,
     font_9, font_0, font_X, font_D};
 
+const int num_fonts = sizeof(font_list) / sizeof(font_list[0]);
+
 static inline void font_draw(const uint8_t font[], color_t color, int startpos) {
     // insert the font_width*font_height font to the led_array
     // which has horizontalButtons*verticalButtons leds

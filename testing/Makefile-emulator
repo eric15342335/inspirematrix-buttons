@@ -1,5 +1,5 @@
 CC=gcc
-INCLUDES=-I../emulator -I../data
+INCLUDES=-I../emulator -I../data -I.
 CFLAGS=-g -Wall -Wextra -Wshadow -Wswitch -Wfloat-equal $(INCLUDES)
 LDFLAGS=$(CFLAGS)
 

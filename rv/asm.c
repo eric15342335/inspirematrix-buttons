@@ -59,6 +59,9 @@ int main(void) {
     rv cpu;
     rv_init(&cpu, (void *)mem, &bus_cb);
     memcpy((void *)mem, (void *)program, sizeof(program));
+    clear();
+    WS2812BSimpleSend(GPIOC, 1, (uint8_t *)led_array, NUM_LEDS * 3);
+    Delay_Ms(3000);
     while (1) {
         rv_u32 trap = rv_step(&cpu);
         clear();
@@ -72,7 +75,19 @@ int main(void) {
                 set_color(bit, (color_t){255, 255, 255});
             }
         }
-        WS2812BSimpleSend(GPIOC, 2, (uint8_t *)led_array, NUM_LEDS * 3);
+        // display register r10, r11, r12 value at led 64-95, 96-127, 128-159
+        for (int bit = 31; bit >= 0; bit--) {
+            if (cpu.r[10] & (1 << bit)) {
+                set_color(bit + 64, (color_t){255, 0, 0});
+            }
+            if (cpu.r[11] & (1 << bit)) {
+                set_color(bit + 96, (color_t){0, 255, 0});
+            }
+            if (cpu.r[12] & (1 << bit)) {
+                set_color(bit + 128, (color_t){0, 0, 255});
+            }
+        }
+        WS2812BSimpleSend(GPIOC, 1, (uint8_t *)led_array, NUM_LEDS * 3);
         printf("PC: %X, ", cpu.pc);
         printf("Trap: %X\n", trap);
         printf("Opcode: %X, ", program[next_pos]);
@@ -83,5 +98,6 @@ int main(void) {
     }
     printf("Environment call @ %X\n", cpu.csr.mepc);
     display_all_registers(&cpu);
+    NVIC_SystemReset();
 }
 

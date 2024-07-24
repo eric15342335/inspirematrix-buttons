@@ -14,3 +14,5 @@ typedef struct
 	__IO uint32_t BCR;
 	__IO uint32_t LCKR;
 } GPIO_TypeDef;
+
+#define NVIC_SystemReset() // suppose to restart the program, unimplemented

@@ -15,7 +15,7 @@ void WS2812BSimpleSend(GPIO_TypeDef *port, int pin, uint8_t *data, int len_in_by
     #define BORDER_X 2
     printf("\\x");
     for (uint8_t i = horizontalButtons; i > 0; i--) {
-        printf("%d", i - 1);
+        printf("%d", (i - 1) % 10);
     }
     printf(" \ny");
     for (uint8_t i = 0; i < horizontalButtons + BORDER_X; i++) {
@@ -23,7 +23,7 @@ void WS2812BSimpleSend(GPIO_TypeDef *port, int pin, uint8_t *data, int len_in_by
     }
     printf("\n");
     for (uint8_t y = verticalButtons; y > 0; y--) {
-        printf("%d|", y - 1);
+        printf("%d|", (y - 1) % 10);
         for (uint8_t x = horizontalButtons; x > 0; x--) {
             uint8_t led = (y - 1) * horizontalButtons + (x - 1);
             printf("\e[38;2;%d;%d;%dm\u2588\x1b[0m", data[led * 3], data[led * 3 + 1], data[led * 3 + 2]);

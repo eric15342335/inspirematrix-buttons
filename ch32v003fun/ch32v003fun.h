@@ -12994,7 +12994,3 @@ Examples:
 #ifdef __cplusplus
 };
 #endif
-
-
-// @todo make this clear/configurable
-#include "driver.h"

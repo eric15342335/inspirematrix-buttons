@@ -18,6 +18,7 @@ int main(void) {
                     font_draw(font_list[index], colors[8*index%num_colors], (i-(space_occupied*index)) % 6 + horizontalButtons);
                 }
             }
+            printf("%d\n", i);
             WS2812BSimpleSend(GPIOC, 1, (uint8_t *)led_array, NUM_LEDS * 3);
             Delay_Ms(400);
             if (i > 49) break;

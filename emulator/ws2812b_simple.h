@@ -4,6 +4,8 @@
 #include "buttons.h"
 #include "ch32v003fun.h"
 
+#define BORDER_X 2
+
 void WS2812BSimpleSend(GPIO_TypeDef *port, int pin, uint8_t *data, int len_in_bytes) {
     (void) port;
     (void) pin;
@@ -12,7 +14,6 @@ void WS2812BSimpleSend(GPIO_TypeDef *port, int pin, uint8_t *data, int len_in_by
         exit(1);
     }
     printf("\033[2J\033[H");
-    #define BORDER_X 2
     printf("\\x");
     for (uint8_t i = horizontalButtons; i > 0; i--) {
         printf("%d", (i - 1) % 10);

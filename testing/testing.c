@@ -8,12 +8,12 @@
 
 int main(void) {
     SystemInit();
-    //GPIO_ADCinit();
+    GPIO_ADCinit();
     while(1) {
+        clear();
         for (int i = 0; i < NUM_LEDS; i++) {
-            clear();
             WS2812BSimpleSend(GPIOC, 1, (uint8_t *)led_array, NUM_LEDS * 3);
-            Delay_Ms(10);
+            Delay_Ms(100);
             printf("Hello, World! %d\n", i);
             printf("PC4: %d\n", GPIO_analogRead(GPIO_Ain2_C4));
             printf("PD4: %d\n", GPIO_analogRead(GPIO_Ain7_D4));
@@ -24,9 +24,10 @@ int main(void) {
             //playMusic((noterange_t){i % 13, i % 13 + 1});
             /*
             act: pa2, gpio possible
-            */
+             */
+            set_color(i, colors[i]);
             WS2812BSimpleSend(GPIOC, 1, (uint8_t *)led_array, NUM_LEDS * 3);
-            Delay_Ms(10);
+            Delay_Ms(100);
         }
     }
 }

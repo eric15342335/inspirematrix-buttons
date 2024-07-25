@@ -7,4 +7,3 @@ usbipd list
 usbipd attach --wsl --busid 1-4
 usbipd detach --busid 1-4
 ```
-

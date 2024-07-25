@@ -51,7 +51,7 @@ void init_timer() {
 
 //-----------------------------------------------------------------------------------
 void init_adc() {
-    printf("Initializing ADC... (on pin PD6...)\r\n");
+    printf("Initializing ADC... (on pin PD4...)\r\n");
     
     // ADCCLK = 24 MHz => RCC_ADCPRE divide by 2
     RCC->CFGR0 &= ~(0x1F<<11);
@@ -59,8 +59,8 @@ void init_adc() {
     // Enable GPIOD and ADC
     RCC->APB2PCENR |= RCC_APB2Periph_GPIOD | RCC_APB2Periph_ADC1;
     
-    // PD6 is analog input chl 7
-    GPIOD->CFGLR &= ~(0xf<<(4*6));    // pin D4 analog-in  now
+    // PD4 is analog input chl 7
+    GPIOD->CFGLR &= ~(0xf<<(4*4));    // pin D4 analog-in  now
    
     // Reset the ADC to init all regs
     RCC->APB2PRSTR |= RCC_APB2Periph_ADC1;
@@ -69,11 +69,11 @@ void init_adc() {
   // Set sequencer to channel 7 only
     ADC1->RSQR1 = 0;
     ADC1->RSQR2 = 0;
-    ADC1->RSQR3 = 6;
+    ADC1->RSQR3 = 7;
     
      // set sampling time for chl 7
-     ADC1->SAMPTR2 &= ~(ADC_SMP0<<(3*6));
-     ADC1->SAMPTR2 |= 7<<(3*6);	// 0:7 => 3/9/15/30/43/57/73/241 cycles
+     ADC1->SAMPTR2 &= ~(ADC_SMP0<<(3*7));
+     ADC1->SAMPTR2 |= 7<<(3*7);	// 0:7 => 3/9/15/30/43/57/73/241 cycles
 		 
     
     // Keep CALVOL register with initial value

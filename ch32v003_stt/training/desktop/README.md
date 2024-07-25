@@ -16,6 +16,7 @@ stty -F /dev/ttyACM0 230400
 
 Note that once the serial port is put into RAW mode,
 audio can be tested/listened back to with something like:
+
 ```bash
 cat /dev/ttyACM0 > /tmp/audio.raw
 (press CTRL-C once finished)

@@ -17,14 +17,7 @@ else
 endif
 
 
-TARGET_MCU?=CH32V003
-TARGET_EXT?=c
-
-CH32V003FUN?=../../ch32v003fun
 MINICHLINK?=$(CH32V003FUN)/../minichlink
-
-WRITE_SECTION?=flash
-SYSTEM_C?=$(CH32V003FUN)/ch32v003fun.c
 
 CFLAGS?=-g -Os -flto -ffunction-sections -fdata-sections -fmessage-length=0 -msmall-data-limit=8
 LDFLAGS+=-Wl,--print-memory-usage

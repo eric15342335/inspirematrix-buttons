@@ -1,3 +1,4 @@
+# cl -MD -GL -D_HAS_EXCEPTIONS=0 -GR- -O1 -Oy- -W4 -sdl -I../emulator/ -I../data nums.c user32.lib
 CC=gcc
 INCLUDES=-I../emulator -I../data -I.
 CFLAGS=-g -Wall -Wextra -Wshadow -Wswitch -Wfloat-equal $(INCLUDES)

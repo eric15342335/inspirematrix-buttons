@@ -1,4 +1,4 @@
-/// @brief Button calibration values
+/// @brief Button calibration values from ADC_read()
 #pragma once
 
 #include "funconfig.h"

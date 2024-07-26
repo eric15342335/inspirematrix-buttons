@@ -1,3 +1,4 @@
+/// @brief This file contains the definition of color_256 struct and some preset color values
 #pragma once
 #include "buttons.h"
 #include <stdint.h>

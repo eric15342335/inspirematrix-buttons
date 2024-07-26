@@ -38,13 +38,13 @@ void init_adc() {
     RCC->APB2PCENR |= RCC_APB2Periph_GPIOD | RCC_APB2Periph_ADC1;
     
     // PD4 is analog input chl 7
-    GPIOD->CFGLR &= ~(0xf<<(4*6));    // pin D6 analog-in  now
+    GPIOD->CFGLR &= ~(0xf<<(4*4));    // pin D4 analog-in  now
    
     // Reset the ADC to init all regs
     RCC->APB2PRSTR |= RCC_APB2Periph_ADC1;
     RCC->APB2PRSTR &= ~RCC_APB2Periph_ADC1;
 
-  // Set sequencer to channel 6 only
+  // Set sequencer to channel 7 only
     ADC1->RSQR1 = 0;
     ADC1->RSQR2 = 0;
     ADC1->RSQR3 = 7;

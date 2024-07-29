@@ -16,7 +16,6 @@ rv_res bus_cb(
     memcpy(is_store ? mem : data, is_store ? data : mem, width);
     return RV_OK;
 }
-
 rv_u16 program[4] = {
     // c.li x10, -11
     0x5555,
@@ -48,6 +47,27 @@ void instructionDisplay(void) {
     }
 }
 
+void inputProgram(void) {
+    // input 2 16bit instructions in led 0-15, 16-31
+    while (1) {
+        int8_t input = matrix_pressed(ADC_read_smallboard);
+        Delay_Ms(100);
+        if (input == no_buttons_pressed) {
+            continue;
+        }
+        if (input == 32) {
+            break;
+        }
+        printf("program: %lX\n", program[input / 16]);
+        printf("bit: %d\n", input % 16);
+        program[input / 16] ^= (1 << (input % 16));
+        printf("program: %lX\n", program[input / 16]);
+        clear();
+        instructionDisplay();
+        WS2812BSimpleSend(GPIOC, 1, (uint8_t *)led_array, NUM_LEDS * 3);
+    }
+}
+
 int main(void) {
     SystemInit();
     ADC_init();
@@ -61,8 +81,9 @@ int main(void) {
     set_color(32, (color_t){255, 255, 255});
     instructionDisplay();
     WS2812BSimpleSend(GPIOC, 1, (uint8_t *)led_array, NUM_LEDS * 3);
-    while (matrix_pressed(ADC_read_smallboard) != 32)
-        ;
+    
+    inputProgram();
+
     printf("Matrix Pressed\n");
 
     while (1) {

@@ -14,6 +14,10 @@
 #define JOY_NW      567   // JOYPAD UP + LEFT
 #define JOY_DEV     20    // deviation
 
+#ifndef NUM_BUTTONS
+#define NUM_BUTTONS NUM_LEDS
+#endif
+
 #ifdef INTERNAL_INSPIRE_MATRIX
 
 #define BUTTON_DEVIATION 10
@@ -52,7 +56,7 @@
 #define BUTTON_32 33
 
 /// @brief Array of buttons corresponding to the ADC values, for linear searching
-static const int buttons[NUM_LEDS] = {BUTTON_0, BUTTON_1, BUTTON_2, BUTTON_3, BUTTON_4, BUTTON_5,
+static const int buttons[NUM_BUTTONS] = {BUTTON_0, BUTTON_1, BUTTON_2, BUTTON_3, BUTTON_4, BUTTON_5,
     BUTTON_6, BUTTON_7, BUTTON_8, BUTTON_9, BUTTON_10, BUTTON_11, BUTTON_12, BUTTON_13,
     BUTTON_14, BUTTON_15, BUTTON_16, BUTTON_17, BUTTON_18, BUTTON_19, BUTTON_20,
     BUTTON_21, BUTTON_22, BUTTON_23, BUTTON_24, BUTTON_25, BUTTON_26, BUTTON_27,
@@ -128,7 +132,7 @@ static const int buttons[NUM_LEDS] = {BUTTON_0, BUTTON_1, BUTTON_2, BUTTON_3, BU
 #define BUTTON_63 20
 
 /// @brief Array of buttons corresponding to the ADC values, for linear searching
-static const int buttons[NUM_LEDS] = {BUTTON_0, BUTTON_1, BUTTON_2, BUTTON_3, BUTTON_4, BUTTON_5,
+static const int buttons[NUM_BUTTONS] = {BUTTON_0, BUTTON_1, BUTTON_2, BUTTON_3, BUTTON_4, BUTTON_5,
     BUTTON_6, BUTTON_7, BUTTON_8, BUTTON_9, BUTTON_10, BUTTON_11, BUTTON_12, BUTTON_13,
     BUTTON_14, BUTTON_15, BUTTON_16, BUTTON_17, BUTTON_18, BUTTON_19, BUTTON_20,
     BUTTON_21, BUTTON_22, BUTTON_23, BUTTON_24, BUTTON_25, BUTTON_26, BUTTON_27,

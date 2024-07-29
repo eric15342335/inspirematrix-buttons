@@ -48,13 +48,21 @@ uint16_t ADC_read(void) {
                 for (char j = '0'; j <= '9'; j++) {
                     if (is_key_pressed(j)) {
                         printf("Pressed %c\n", j);
-                        return buttons[(i - 'A') * 16 + (j - '0')];
+                        const int BUTTON_INDEX = (i - 'A') * 16 + (j - '0');
+                        if (BUTTON_INDEX > NUM_BUTTONS - 1) {
+                            return 0;
+                        }
+                        return buttons[BUTTON_INDEX];
                     }
                 }
                 for (char j = 'A'; j <= 'F'; j++) {
                     if (is_key_pressed(j)) {
                         printf("Pressed %c\n", j);
-                        return buttons[(i - 'A') * 16 + (j - 'A' + 10)];
+                        const int BUTTON_INDEX = (i - 'A') * 16 + (j - 'A' + 10);
+                        if (BUTTON_INDEX > NUM_BUTTONS - 1) {
+                            return 0;
+                        }
+                        return buttons[BUTTON_INDEX];
                     }
                 }
             }
@@ -93,7 +101,11 @@ uint16_t ADC_read(void) {
                 for (int j = 0; j < 16; j++) {
                     if (is_key_pressed(_0123456789ABCDEF[j])) {
                         printf("Pressed %d\n", j);
-                        return buttons[i * 16 + j];
+                        const int BUTTON_INDEX = i * 16 + j;
+                        if (BUTTON_INDEX > NUM_BUTTONS - 1) {
+                            return 0;
+                        }
+                        return buttons[BUTTON_INDEX];
                     }
                 }
             }
@@ -114,14 +126,15 @@ void ADC_init(void) {
     // Do nothing
 }
 
+#define no_buttons_pressed -1
 int8_t matrix_pressed(uint16_t (*matrix)(void)) {
     uint16_t adc_value = matrix();
-    for (uint8_t i = 0; i < NUM_LEDS; i++) {
+    for (uint8_t i = 0; i < NUM_BUTTONS; i++) {
         if (buttons[i] == adc_value) {
             return i;
         }
     }
-    return -1;
+    return no_buttons_pressed;
 }
 
 uint16_t ADC_read_pad(void) {

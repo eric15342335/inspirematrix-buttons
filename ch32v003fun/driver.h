@@ -78,6 +78,7 @@ static inline uint8_t JOY_right_pressed(void) {
          | ((val > JOY_SE - JOY_DEV) && (val < JOY_SE + JOY_DEV)) );
 }
 
+#define no_buttons_pressed -1
 int8_t matrix_pressed(uint16_t (*matrix)(void)) {
     int64_t adc = 0;
     const int8_t samples = 5;
@@ -101,8 +102,7 @@ int8_t matrix_pressed(uint16_t (*matrix)(void)) {
         adc /= samples;
         adc += 10;
     }
-    int8_t no_button_pressed = -1;
-    for (int8_t i = 0; i < NUM_LEDS; i++) {
+    for (int8_t i = 0; i < NUM_BUTTONS; i++) {
         int deviation = abs(adc - buttons[i]);
         if (deviation <= BUTTON_DEVIATION) {
             return i;

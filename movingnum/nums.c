@@ -7,21 +7,47 @@
 
 #define separation 1
 #define space_occupied (font_width+separation)
-
+#define last_appear_x (horizontalButtons - space_occupied + 2)
+#define INSPIRE_MATRIX_HEIGHT 8
 int main(void) {
     SystemInit();
-    while (1) {
-        for (int i = 0; i < NUM_LEDS; i++) {
+    // Test for each LEDs
+    while (0) {
+        for (int ledIndex = 0; ledIndex < NUM_LEDS; ledIndex++) {
             clear();
-            for (int index = 0; index < num_fonts; index++) {
-                if (i > -1+space_occupied*index && i < 6+space_occupied*index) {
-                    font_draw(font_list[index], colors[8*index%num_colors], (i-(space_occupied*index)) % 6 + horizontalButtons);
+            Delay_Us(1);
+            WS2812BSimpleSend(GPIOC, 1, (uint8_t *)led_array, NUM_LEDS * 3);
+            Delay_Us(1);
+            set_color(ledIndex, colors[ledIndex % num_colors]);
+            Delay_Ms(100);
+            WS2812BSimpleSend(GPIOC, 1, (uint8_t *)led_array, NUM_LEDS * 3);
+            Delay_Ms(100);
+        }
+    }
+    while (1) {
+        for (int ledIndex = 0; ledIndex < NUM_LEDS; ledIndex++) {
+            clear();
+            for (int fontIndex = 0; fontIndex < num_fonts; fontIndex++) {
+                int verticalOffset = 0;
+                const int fontStartPosition = space_occupied * fontIndex;
+                int adjustedLedIndex = ledIndex - fontStartPosition;
+                while (adjustedLedIndex >= 0) {
+                    if (adjustedLedIndex < last_appear_x) {
+                        font_draw(font_list[fontIndex], colors[8*fontIndex%num_colors],
+                        adjustedLedIndex % last_appear_x + horizontalButtons * verticalOffset);
+                        break;
+                    }
+                    // verticalOffset += font_height + separation;
+                    verticalOffset += INSPIRE_MATRIX_HEIGHT;
+                    adjustedLedIndex -= horizontalButtons;
                 }
             }
-            printf("%d\n", i);
+            printf("%d\n", ledIndex);
             WS2812BSimpleSend(GPIOC, 1, (uint8_t *)led_array, NUM_LEDS * 3);
-            Delay_Ms(400);
-            if (i > 49) break;
+            Delay_Ms(100);
+            if (ledIndex > 76) {
+                break;
+            }
         }
     }
 }

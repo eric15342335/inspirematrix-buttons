@@ -8,6 +8,8 @@
 #include <stdlib.h>
 
 int result,total=0,count=0,b=0;
+// value should be one of 1,2,4,8
+#define average_multiplier 1
 
 //-----------------------------------------------------------------------------------
 void init_timer() {
@@ -16,7 +18,7 @@ void init_timer() {
     RCC->APB2PCENR |= RCC_APB2Periph_TIM1;
     TIM1->CTLR1 |= TIM_CounterMode_Up | TIM_CKD_DIV1;
     TIM1->CTLR2 = TIM_MMS_1;
-    TIM1->ATRLR = 80;   // lower = higher sample rate. 800 for 6400sam/sec
+    TIM1->ATRLR = 80/average_multiplier;   // lower = higher sample rate. 800 for 6400sam/sec
     TIM1->PSC = 10-1;
     TIM1->RPTCR = 0;
     TIM1->SWEVGR = TIM_PSCReloadMode_Immediate;
@@ -77,10 +79,9 @@ void TIM1_UP_IRQHandler() {
     if(TIM1->INTFR & TIM_FLAG_Update) {
         TIM1->INTFR = ~TIM_FLAG_Update;
 	result= ADC1->RDATAR; result-=512;
-	
 	total+=result; count++;
-	if (count==8) {
-	  total>>=3; 	
+	if (count==8*average_multiplier) {
+	  total>>=3+(average_multiplier>>1);
 	  total+=127;
 	  printf("%c",total);   // averaged
 	  total=0; count=0;

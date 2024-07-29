@@ -126,7 +126,7 @@ void ADC_init(void) {
     // Do nothing
 }
 
-#define no_buttons_pressed -1
+#define no_button_pressed -1
 int8_t matrix_pressed(uint16_t (*matrix)(void)) {
     uint16_t adc_value = matrix();
     for (uint8_t i = 0; i < NUM_BUTTONS; i++) {
@@ -134,7 +134,7 @@ int8_t matrix_pressed(uint16_t (*matrix)(void)) {
             return i;
         }
     }
-    return no_buttons_pressed;
+    return no_button_pressed;
 }
 
 uint16_t ADC_read_pad(void) {

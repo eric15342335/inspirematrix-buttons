@@ -78,7 +78,7 @@ static inline uint8_t JOY_right_pressed(void) {
          | ((val > JOY_SE - JOY_DEV) && (val < JOY_SE + JOY_DEV)) );
 }
 
-#define no_buttons_pressed -1
+#define no_button_pressed -1
 int8_t matrix_pressed(uint16_t (*matrix)(void)) {
     int64_t adc = 0;
     const int8_t samples = 5;

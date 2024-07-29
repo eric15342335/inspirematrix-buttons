@@ -52,7 +52,7 @@ void inputProgram(void) {
     while (1) {
         int8_t input = matrix_pressed(ADC_read_smallboard);
         Delay_Ms(100);
-        if (input == no_buttons_pressed) {
+        if (input == no_button_pressed) {
             continue;
         }
         if (input == 32) {

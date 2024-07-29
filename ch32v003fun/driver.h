@@ -1,4 +1,5 @@
 #pragma once
+#include "funconfig.h"
 #include "ch32v003fun.h"
 #include "buttons.h"
 #include "ch32v003_GPIO_branchless.h"
@@ -6,7 +7,6 @@
 #define abs(x) ((x) < 0 ? -(x) : (x))
 
 #ifdef WS2812BSIMPLE_IMPLEMENTATION
-#include "funconfig.h"
 #if FUNCONF_SYSTICK_USE_HCLK != 1
 #error WS2812B Driver Requires FUNCONF_SYSTICK_USE_HCLK
 #endif
@@ -35,58 +35,61 @@ uint16_t ADC_read(void) {
     return GPIO_analogRead(GPIO_Ain7_D4);
 }
 
-uint16_t adc_get_pad(void) {
+uint16_t ADC_read_pad(void) {
+    return GPIO_analogRead(GPIO_Ain2_C4);
+}
+
+uint16_t ADC_read_smallboard(void) {
     return GPIO_analogRead(GPIO_Ain2_C4);
 }
 
 // Buttons
 #define JOY_act_pressed()         (gpio_act_pressed())
 #define JOY_act_released()        (!gpio_act_pressed())
-#define JOY_pad_pressed()         (adc_get_pad() > 10)
-#define JOY_pad_released()        (adc_get_pad() <= 10)
+#define JOY_pad_pressed()         (ADC_read_pad() > 10)
+#define JOY_pad_released()        (ADC_read_pad() <= 10)
 #define JOY_all_released()        (JOY_act_released() && JOY_pad_released())
 
 static inline uint8_t JOY_up_pressed(void) {
- uint16_t val = adc_get_pad();
+ uint16_t val = ADC_read_pad();
  return(   ((val > JOY_N  - JOY_DEV) && (val < JOY_N  + JOY_DEV))
          | ((val > JOY_NE - JOY_DEV) && (val < JOY_NE + JOY_DEV))
          | ((val > JOY_NW - JOY_DEV) && (val < JOY_NW + JOY_DEV)) );
 }
 
 static inline uint8_t JOY_down_pressed(void) {
- uint16_t val = adc_get_pad();
+ uint16_t val = ADC_read_pad();
  return(   ((val > JOY_S  - JOY_DEV) && (val < JOY_S  + JOY_DEV))
          | ((val > JOY_SE - JOY_DEV) && (val < JOY_SE + JOY_DEV))
          | ((val > JOY_SW - JOY_DEV) && (val < JOY_SW + JOY_DEV)) );
 }
 
 static inline uint8_t JOY_left_pressed(void) {
- uint16_t val = adc_get_pad();
+ uint16_t val = ADC_read_pad();
  return(   ((val > JOY_W  - JOY_DEV) && (val < JOY_W  + JOY_DEV))
          | ((val > JOY_NW - JOY_DEV) && (val < JOY_NW + JOY_DEV))
          | ((val > JOY_SW - JOY_DEV) && (val < JOY_SW + JOY_DEV)) );
 }
 
 static inline uint8_t JOY_right_pressed(void) {
- uint16_t val = adc_get_pad();
+ uint16_t val = ADC_read_pad();
  return(   ((val > JOY_E  - JOY_DEV) && (val < JOY_E  + JOY_DEV))
          | ((val > JOY_NE - JOY_DEV) && (val < JOY_NE + JOY_DEV))
          | ((val > JOY_SE - JOY_DEV) && (val < JOY_SE + JOY_DEV)) );
 }
 
-int8_t matrix_pressed(void) {
+int8_t matrix_pressed(uint16_t (*matrix)(void)) {
     int64_t adc = 0;
     const int8_t samples = 5;
     int16_t readings[samples];
     int8_t valid_samples = 1;
-    int16_t deviation_threshold = BUTTON_DEVIATION;
     for (int8_t i = 0; i < samples; i++) {
-        readings[i] = ADC_read();
+        readings[i] = matrix();
         Delay_Ms(1);
     }
     for (int8_t i = 1; i < samples; i++) {
         int16_t deviation = abs(readings[i] - readings[i-1]);
-        if (deviation > deviation_threshold) {
+        if (deviation > BUTTON_DEVIATION) {
             valid_samples = 0;
             break;
         }
@@ -99,7 +102,7 @@ int8_t matrix_pressed(void) {
         adc += 10;
     }
     int8_t no_button_pressed = -1;
-    for (int8_t i = 0; i < 64; i++) {
+    for (int8_t i = 0; i < NUM_LEDS; i++) {
         int deviation = abs(adc - buttons[i]);
         if (deviation <= BUTTON_DEVIATION) {
             return i;

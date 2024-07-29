@@ -40,11 +40,11 @@ int main(void) {
                 toggle[button_index] =!toggle[button_index];
                 set_color(button_index, toggle[button_index]? colors[0] : (color_t){0,0,0});
             }
-            /*printf("PD4: %d\n", GPIO_analogRead(GPIO_Ain7_D4));
+            printf("PD4: %d\n", GPIO_analogRead(GPIO_Ain7_D4));
             printf("PD5: %d\n", GPIO_analogRead(GPIO_Ain5_D5));
             printf("PD6: %d\n", GPIO_analogRead(GPIO_Ain6_D6));
             printf("PA1: %d\n", GPIO_analogRead(GPIO_Ain1_A1));
-            printf("PA2: %d\n", GPIO_analogRead(GPIO_Ain0_A2));*/
+            printf("PA2: %d\n", GPIO_analogRead(GPIO_Ain0_A2));
             //playMusic((noterange_t){i % 13, i % 13 + 1});
             /*
             act: pa2, gpio possible

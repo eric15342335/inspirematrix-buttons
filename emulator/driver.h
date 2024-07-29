@@ -114,9 +114,9 @@ void ADC_init(void) {
     // Do nothing
 }
 
-int8_t matrix_pressed(void) {
-    uint16_t adc_value = ADC_read();
-    for (uint8_t i = 0; i < 64; i++) {
+int8_t matrix_pressed(uint16_t (*matrix)(void)) {
+    uint16_t adc_value = matrix();
+    for (uint8_t i = 0; i < NUM_LEDS; i++) {
         if (buttons[i] == adc_value) {
             return i;
         }
@@ -124,8 +124,12 @@ int8_t matrix_pressed(void) {
     return -1;
 }
 
-uint8_t adc_get_pad(void) {
-    return 0;
+uint16_t ADC_read_pad(void) {
+    return ADC_read();
+}
+
+uint16_t ADC_read_smallboard(void) {
+    return ADC_read();
 }
 
 uint16_t rnval;

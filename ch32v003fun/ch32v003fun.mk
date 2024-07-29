@@ -171,6 +171,7 @@ $(TARGET).bin : $(TARGET).elf
 	$(PREFIX)-objdump -t $^ > $(TARGET).map
 	$(PREFIX)-objcopy -O binary $< $(TARGET).bin
 	$(PREFIX)-objcopy -O ihex $< $(TARGET).hex
+	$(MAKE) elf-size
 
 ifeq ($(OS),Windows_NT)
 closechlink :
@@ -223,3 +224,10 @@ cv_clean :
 	rm -rf $(TARGET).elf $(TARGET).bin $(TARGET).hex $(TARGET).lst $(TARGET).map $(TARGET).hex $(GENERATED_LD_FILE) || true
 
 build : $(TARGET).bin
+
+OBJSIZE?= $(PREFIX)-size
+elf-size:
+	@echo "------------------"
+	@echo "FLASH: $(shell $(OBJSIZE) -d $(TARGET).elf | awk '/[0-9]/ {print $$1 + $$2}') bytes"
+	@echo "SRAM:  $(shell $(OBJSIZE) -d $(TARGET).elf | awk '/[0-9]/ {print $$2 + $$3}') bytes"
+	@echo "------------------"

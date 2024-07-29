@@ -17,6 +17,7 @@
         "string.h": "c",
         "stdio.h": "c",
         "ch32v003_gpio_branchless.h": "c",
-        "music.h": "c"
+        "music.h": "c",
+        "rv.h": "c"
     },
 }

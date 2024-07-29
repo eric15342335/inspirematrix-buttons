@@ -35,7 +35,7 @@ int main(void) {
         if (JOY_right_pressed()) {
             currentposition = (NUM_LEDS + currentposition - 1) % NUM_LEDS;
         }
-        int8_t button = matrix_pressed();
+        int8_t button = matrix_pressed(ADC_read);
         if (button != -1) {
             printf("Button: %d\n", button);
             Delay_Ms(100);

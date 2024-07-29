@@ -96,7 +96,7 @@ void selectposition(){
     int8_t position = -1;
     while (1){
     while (1){
-        position = matrix_pressed();
+        position = matrix_pressed(ADC_read);
         seed++;
         if (position != -1){
             break;

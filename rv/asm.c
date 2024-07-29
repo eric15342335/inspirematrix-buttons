@@ -63,6 +63,7 @@ void inputProgram(void) {
         program[input / 16] ^= (1 << (input % 16));
         printf("program: %lX\n", program[input / 16]);
         clear();
+        set_color(32, (color_t){255, 255, 255});
         instructionDisplay();
         WS2812BSimpleSend(GPIOC, 1, (uint8_t *)led_array, NUM_LEDS * 3);
     }
@@ -72,10 +73,6 @@ int main(void) {
     SystemInit();
     ADC_init();
     printf("Hello, World!\n");
-    rv_u8 mem[RAM_SIZE];
-    rv cpu;
-    rv_init(&cpu, (void *)mem, &bus_cb);
-    memcpy((void *)mem, (void *)program, sizeof(program));
 
     clear();
     set_color(32, (color_t){255, 255, 255});
@@ -85,6 +82,11 @@ int main(void) {
     inputProgram();
 
     printf("Matrix Pressed\n");
+
+    rv_u8 mem[RAM_SIZE];
+    rv cpu;
+    rv_init(&cpu, (void *)mem, &bus_cb);
+    memcpy((void *)mem, (void *)program, sizeof(program));
 
     while (1) {
         rv_u32 trap = rv_step(&cpu);

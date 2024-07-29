@@ -1,4 +1,4 @@
-## Share WCH-LinkE serial port to `wsl2`
+# Share WCH-LinkE serial port to `wsl2`
 
 <https://learn.microsoft.com/en-us/windows/wsl/connect-usb>
 

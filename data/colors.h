@@ -41,7 +41,7 @@ const color_t colors[] = {
 const uint16_t num_colors = sizeof(colors) / sizeof(colors[0]);
 
 static inline void set_color(uint8_t led, color_t color) {
-    uint8_t divider = 1;
+    uint8_t divider = 10;
     led_array[led].r = color.r / divider;
     led_array[led].g = color.g / divider;
     led_array[led].b = color.b / divider;

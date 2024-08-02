@@ -78,6 +78,15 @@ static inline uint8_t JOY_right_pressed(void) {
          | ((val > JOY_SE - JOY_DEV) && (val < JOY_SE + JOY_DEV)) );
 }
 
+uint16_t multiple_ADC_reads(uint16_t (*matrix)(void), uint8_t samples) {
+    uint64_t adc = 0;
+    for (int8_t i = 0; i < samples; i++) {
+        adc += matrix();
+    }
+    adc /= samples;
+    return adc;
+}
+
 #define no_button_pressed -1
 int8_t matrix_pressed(uint16_t (*matrix)(void)) {
     int64_t adc = 0;
@@ -100,7 +109,7 @@ int8_t matrix_pressed(uint16_t (*matrix)(void)) {
             adc += readings[i];
         }
         adc /= samples;
-        adc += 10;
+        adc += 10; // offset?
     }
     for (int8_t i = 0; i < NUM_BUTTONS; i++) {
         int deviation = abs(adc - buttons[i]);

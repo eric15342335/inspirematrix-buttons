@@ -43,6 +43,69 @@ uint16_t ADC_read_smallboard(void) {
     return GPIO_analogRead(GPIO_Ain2_C4);
 }
 
+uint16_t multiple_ADC_reads(uint16_t (*matrix)(void), uint8_t samples) {
+    uint64_t adc = 0;
+    for (int8_t i = 0; i < samples; i++) {
+        adc += matrix();
+        printf("%d, ", adc);
+    }
+    adc /= samples;
+    printf("%d\n", adc);
+    return adc;
+}
+
+#define no_button_pressed -1
+int8_t matrix_pressed(uint16_t (*matrix)(void)) {
+    const int8_t samples = 5;
+    uint16_t adc = multiple_ADC_reads(matrix, samples);
+    for (int8_t i = 0; i < NUM_BUTTONS; i++) {
+        int deviation = abs(adc - buttons[i]);
+        if (deviation <= BUTTON_DEVIATION) {
+            return i;
+        }
+    }
+    return no_button_pressed;
+}
+
+#ifdef INTERNAL_INSPIRE_MATRIX
+typedef enum {
+    JOY_UP = -2,
+    JOY_DOWN = -3,
+    JOY_LEFT = -4,
+    JOY_RIGHT = -5,
+    JOY_X = -6,
+    JOY_Y = -7,
+    JOY_ACT = -8,
+} JOY_Button;
+
+JOY_Button JOY_check_button(uint16_t adc_value) {
+    if (abs(adc_value - BUTTON_UP) <= SPECIAL_BUTTON_DEVIATION)
+        return JOY_UP;
+    else if (abs(adc_value - BUTTON_DOWN) <= SPECIAL_BUTTON_DEVIATION)
+        return JOY_DOWN;
+    else if (abs(adc_value - BUTTON_LEFT) <= SPECIAL_BUTTON_DEVIATION)
+        return JOY_LEFT;
+    else if (abs(adc_value - BUTTON_RIGHT) <= SPECIAL_BUTTON_DEVIATION)
+        return JOY_RIGHT;
+    else if (abs(adc_value - BUTTON_X) <= SPECIAL_BUTTON_DEVIATION)
+        return JOY_X;
+    else if (abs(adc_value - BUTTON_Y) <= SPECIAL_BUTTON_DEVIATION)
+        return JOY_Y;
+    else
+        return no_button_pressed;
+}
+
+#define JOY_act_pressed()        (JOY_check_button(multiple_ADC_reads(ADC_read_smallboard, 5)) == JOY_ACT)
+#define JOY_act_released()      (JOY_check_button(multiple_ADC_reads(ADC_read_smallboard, 5)) != JOY_ACT)
+#define JOY_up_pressed()    (JOY_check_button(multiple_ADC_reads(ADC_read_smallboard, 5)) == JOY_UP)
+#define JOY_down_pressed()  (JOY_check_button(multiple_ADC_reads(ADC_read_smallboard, 5)) == JOY_DOWN)
+#define JOY_left_pressed() (JOY_check_button(multiple_ADC_reads(ADC_read_smallboard, 5)) == JOY_LEFT)
+#define JOY_right_pressed() (JOY_check_button(multiple_ADC_reads(ADC_read_smallboard, 5)) == JOY_RIGHT)
+#define JOY_X_pressed() (JOY_check_button(multiple_ADC_reads(ADC_read_smallboard, 5)) == JOY_X)
+#define JOY_Y_pressed() (JOY_check_button(multiple_ADC_reads(ADC_read_smallboard, 5)) == JOY_Y)
+
+#else
+
 // Buttons
 #define JOY_act_pressed()         (gpio_act_pressed())
 #define JOY_act_released()        (!gpio_act_pressed())
@@ -78,47 +141,7 @@ static inline uint8_t JOY_right_pressed(void) {
          | ((val > JOY_SE - JOY_DEV) && (val < JOY_SE + JOY_DEV)) );
 }
 
-uint16_t multiple_ADC_reads(uint16_t (*matrix)(void), uint8_t samples) {
-    uint64_t adc = 0;
-    for (int8_t i = 0; i < samples; i++) {
-        adc += matrix();
-    }
-    adc /= samples;
-    return adc;
-}
-
-#define no_button_pressed -1
-int8_t matrix_pressed(uint16_t (*matrix)(void)) {
-    int64_t adc = 0;
-    const int8_t samples = 5;
-    int16_t readings[samples];
-    int8_t valid_samples = 1;
-    for (int8_t i = 0; i < samples; i++) {
-        readings[i] = matrix();
-        Delay_Ms(1);
-    }
-    for (int8_t i = 1; i < samples; i++) {
-        int16_t deviation = abs(readings[i] - readings[i-1]);
-        if (deviation > BUTTON_DEVIATION) {
-            valid_samples = 0;
-            break;
-        }
-    }
-    if (valid_samples) {
-        for (int8_t i = 0; i < samples; i++) {
-            adc += readings[i];
-        }
-        adc /= samples;
-        adc += 10; // offset?
-    }
-    for (int8_t i = 0; i < NUM_BUTTONS; i++) {
-        int deviation = abs(adc - buttons[i]);
-        if (deviation <= BUTTON_DEVIATION) {
-            return i;
-        }
-    }
-    return no_button_pressed;
-}
+#endif
 
 uint16_t rnval;
 uint16_t JOY_random(void) {

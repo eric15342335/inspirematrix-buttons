@@ -18,6 +18,7 @@
         "stdio.h": "c",
         "ch32v003_gpio_branchless.h": "c",
         "music.h": "c",
-        "rv.h": "c"
+        "rv.h": "c",
+        "complex": "c"
     },
 }

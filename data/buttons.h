@@ -21,7 +21,7 @@
 #ifdef INTERNAL_INSPIRE_MATRIX
 
 #define BUTTON_NONE 3
-#define BUTTON_DEVIATION 5
+#define BUTTON_DEVIATION 7
 #define BUTTON_0 1023
 #define BUTTON_1 1004
 #define BUTTON_2 986
@@ -86,12 +86,13 @@
 #define BUTTON_61 130
 #define BUTTON_62 114
 #define BUTTON_63 98
-#define BUTTON_X 30
-#define BUTTON_Y 15
+#define BUTTON_X 32
+#define BUTTON_Y 18
 #define BUTTON_UP 72
-#define BUTTON_DOWN 46
+#define BUTTON_DOWN 44
 #define BUTTON_LEFT 88
 #define BUTTON_RIGHT 57
+#define SPECIAL_BUTTON_DEVIATION 5
 
 /// @brief Array of buttons corresponding to the ADC values, for linear searching
 static const int buttons[NUM_BUTTONS] = {BUTTON_0, BUTTON_1, BUTTON_2, BUTTON_3, BUTTON_4, BUTTON_5,

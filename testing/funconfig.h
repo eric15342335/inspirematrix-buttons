@@ -10,5 +10,6 @@
 #define horizontalButtons 8
 #define verticalButtons 8
 #define NUM_LEDS (horizontalButtons * verticalButtons)
+#define INTERNAL_INSPIRE_MATRIX
 
 #endif

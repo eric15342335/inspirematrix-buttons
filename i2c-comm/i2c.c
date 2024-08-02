@@ -23,8 +23,8 @@
 #define SLAVE_MODE 1
 
 /* I2C Communication Mode Selection */
-#define I2C_MODE   HOST_MODE
-//#define I2C_MODE SLAVE_MODE
+//#define I2C_MODE   HOST_MODE
+#define I2C_MODE SLAVE_MODE
 
 /* Global define */
 #define Size 6
@@ -56,7 +56,7 @@ void IIC_Init(uint32_t bound, uint16_t address) {
     // Configure I2C1
     I2C1->CTLR2 = (FUNCONF_SYSTEM_CORE_CLOCK / 1000000); // PCLK1 frequency in MHz
     I2C1->CKCFGR = (bound / (2 * FUNCONF_SYSTEM_CORE_CLOCK)) & 0xFFF; // Set clock speed
-    I2C1->OADDR1 = address & 0x7F; // Set own address
+    I2C1->OADDR1 = address << 1; // Set own address
     I2C1->CTLR1 = I2C_CTLR1_ACK; // Enable ACK
     I2C1->CTLR1 |= I2C_CTLR1_PE; // Enable I2C
 }
@@ -92,7 +92,7 @@ int main(void) {
         // the 8th-bit indicates direction of the transfer
         // 0: Master sends data to Slave
         // 1: Master receives data from Slave
-        I2C1->DATAR = (RXAdderss & OADDR1_ADD0_Reset);
+        I2C1->DATAR = RXAdderss;
         printf("I2C Write 7-bit Address\n");
         while (!(I2C1->STAR1 & I2C_STAR1_ADDR));
         printf("I2C Sent 7-bit Address\n");
@@ -122,7 +122,19 @@ int main(void) {
     for (uint8_t p = 0; p < 5; p++) {
         uint8_t i = 0;
         printf("Waiting for receiver address match!\n");
-        while (!(I2C1->STAR1 & I2C_STAR1_ADDR));
+        while () {
+            uint16_t flag1 = I2C1->STAR1;
+            uint16_t flag2 = I2C1->STAR2;
+            flag2 = flag2 << 16;
+
+            uint16_t lastevent = (flag1 | flag2) & 0x00FFFFFF;
+            printf("last=%d\n", flag1);
+            printf("match=%d\n", I2C_STAR1_ADDR & lastevent);
+            if (!(flag1 & I2C_STAR1_ADDR)) {
+                break;
+            }
+            Delay_Ms(100);
+        }
         printf("I2C Event slave receiver address matched!\n");
 
         (void)I2C1->STAR2; // Clear ADDR flag

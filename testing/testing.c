@@ -40,7 +40,8 @@ int main(void) {
             printf("PD6: %d\n", GPIO_analogRead(GPIO_Ain6_D6));
             printf("PA1: %d\n", GPIO_analogRead(GPIO_Ain1_A1));
             printf("PA2: %d\n", multiple_ADC_reads(act_func, 5));
-            // playMusic((noterange_t){i % 13, i % 13 + 1});
+            // playMusic((noterange_t){i % notes, i % notes + 1});
+            playAllMusic();
             /*
             act: pa2, gpio possible
              */

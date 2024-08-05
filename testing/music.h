@@ -8,7 +8,7 @@
 #include "ch32v003fun.h"
 
 void JOY_sound(uint16_t freq, uint16_t dur) {
-    funPinMode( PD6, GPIO_Speed_10MHz | GPIO_CNF_OUT_PP );
+    funPinMode( PD6, GPIO_Speed_50MHz | GPIO_CNF_OUT_PP );
     const int sysclk = 1000000;
     if (sysclk < freq) return;
     uint32_t delay_us = sysclk / 2 / freq;
@@ -153,10 +153,30 @@ void playAllMusic(void);
  * For example, `NOTE_E5, 8` represents an eighth note of E5.
  *
  */
-const int melody[] = {NOTE_E5, 8, NOTE_D5, 8, NOTE_FS4, 4, NOTE_GS4, 4, NOTE_CS5, 8,
-    NOTE_B4, 8, NOTE_D4, 4, NOTE_E4, 4, NOTE_B4, 8, NOTE_A4, 8, NOTE_CS4, 4, NOTE_E4, 4,
-    NOTE_A4, 2};
+const int melody[] = {
 
+  
+  NOTE_E4,4,  NOTE_E4,4,  NOTE_F4,4,  NOTE_G4,4,//1
+  NOTE_G4,4,  NOTE_F4,4,  NOTE_E4,4,  NOTE_D4,4,
+  NOTE_C4,4,  NOTE_C4,4,  NOTE_D4,4,  NOTE_E4,4,
+  NOTE_E4,-4, NOTE_D4,8,  NOTE_D4,2,
+
+  NOTE_E4,4,  NOTE_E4,4,  NOTE_F4,4,  NOTE_G4,4,//4
+  NOTE_G4,4,  NOTE_F4,4,  NOTE_E4,4,  NOTE_D4,4,
+  NOTE_C4,4,  NOTE_C4,4,  NOTE_D4,4,  NOTE_E4,4,
+  NOTE_D4,-4,  NOTE_C4,8,  NOTE_C4,2,
+
+  NOTE_D4,4,  NOTE_D4,4,  NOTE_E4,4,  NOTE_C4,4,//8
+  NOTE_D4,4,  NOTE_E4,8,  NOTE_F4,8,  NOTE_E4,4, NOTE_C4,4,
+  NOTE_D4,4,  NOTE_E4,8,  NOTE_F4,8,  NOTE_E4,4, NOTE_D4,4,
+  NOTE_C4,4,  NOTE_D4,4,  NOTE_G3,2,
+
+  NOTE_E4,4,  NOTE_E4,4,  NOTE_F4,4,  NOTE_G4,4,//12
+  NOTE_G4,4,  NOTE_F4,4,  NOTE_E4,4,  NOTE_D4,4,
+  NOTE_C4,4,  NOTE_C4,4,  NOTE_D4,4,  NOTE_E4,4,
+  NOTE_D4,-4,  NOTE_C4,8,  NOTE_C4,2
+  };
+const int notes = sizeof(melody) / sizeof(melody[0]) / 2;
 /**
  * Plays a melody based on the given note range.
  *
@@ -194,6 +214,7 @@ void playMusic(noterange_t range) {
         OLED_println("");
 #endif
         JOY_sound(melody[thisNote], noteDuration);
+        Delay_Ms(10);
     }
 }
 
@@ -208,6 +229,5 @@ void playAllMusic(void) {
     // composed of two bytes (16 bits)
     // there are two values per note (pitch and duration), so for each note
     // there are four bytes
-    const int notes = sizeof(melody) / sizeof(melody[0]) / 2;
     playMusic((noterange_t){0, notes});
 }

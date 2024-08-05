@@ -4,26 +4,28 @@
 #include "colors.h"
 #include "ws2812b_simple.h"
 
-color_t foreground = {10,0,0};
-color_t background = {0,0,10};
+color_t foreground = {100,0,0};
+color_t background = {0,0,100};
 typedef struct {
     enum {FOREGROUND_LAYER, BACKGROUND_LAYER} layer;
     color_t color;
 } canvas_t;
-canvas_t canvas[NUM_LEDS];
+canvas_t canvas[NUM_LEDS] = {0};
 void flushCanvas(void) {
-    for (int i = 0; i < NUM_LEDS; i++) {
-        set_color(i, canvas[i].color);
+    for (int i = 1; i < NUM_LEDS; i++) {
+        set_color(i-1, canvas[i].color);
     }
     WS2812BSimpleSend(GPIOC, 1, (uint8_t *)led_array, NUM_LEDS * 3);
 }
+
 void displayColorPalette(void) {
-    for (int i = 0; i < num_colors; i++) {
-        set_color(i, colors[i]);
+    for (int i = 1; i < NUM_LEDS; i++) {
+        set_color(i-1, colors[i]);
     }
     WS2812BSimpleSend(GPIOC, 1, (uint8_t *)led_array, NUM_LEDS * 3);
     printf("Color palette displayed\n");
 }
+
 void colorPaletteSelection(color_t * selectedColor) {
     displayColorPalette();
     while(1) {
@@ -37,15 +39,23 @@ void colorPaletteSelection(color_t * selectedColor) {
     printf("Selected color: R:%d G:%d B:%d\n", selectedColor->r, selectedColor->g, selectedColor->b);
     flushCanvas();
 }
+
 int main(void) {
     SystemInit();
     ADC_init();
-    flushCanvas();
+    clear();
+    WS2812BSimpleSend(GPIOC, 1, (uint8_t *)led_array, NUM_LEDS * 3);
+    Delay_Ms(500);
     printf("\nBackground Initialized\n");
+    for (int i = 1; i < NUM_LEDS; i++) {
+        canvas[i].layer = BACKGROUND_LAYER;
+        canvas[i].color = (color_t){0,0,0};
+    }
+    flushCanvas();
     while (1) {
         Delay_Ms(200);
-        printf("Foreground color: R:%d G:%d B:%d\n", foreground.r, foreground.g, foreground.b);
-        printf("Background color: R:%d G:%d B:%d\n", background.r, background.g, background.b);
+        // printf("Foreground color: R:%d G:%d B:%d\n", foreground.r, foreground.g, foreground.b);
+        // printf("Background color: R:%d G:%d B:%d\n", background.r, background.g, background.b);
         int8_t user_input = matrix_pressed(ADC_read_smallboard);
         if (user_input == no_button_pressed) {
             if (JOY_Y_pressed()) {

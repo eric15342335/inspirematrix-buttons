@@ -20,8 +20,8 @@
 
 #ifdef INTERNAL_INSPIRE_MATRIX
 
-#define BUTTON_NONE 3
-#define BUTTON_DEVIATION 7
+#define BUTTON_NONE 0
+#define BUTTON_DEVIATION 6
 #define BUTTON_0 1023
 #define BUTTON_1 1004
 #define BUTTON_2 986
@@ -86,9 +86,9 @@
 #define BUTTON_61 130
 #define BUTTON_62 114
 #define BUTTON_63 98
-#define BUTTON_X 32
+#define BUTTON_X 34
 #define BUTTON_Y 18
-#define BUTTON_UP 72
+#define BUTTON_UP 70
 #define BUTTON_DOWN 44
 #define BUTTON_LEFT 88
 #define BUTTON_RIGHT 57

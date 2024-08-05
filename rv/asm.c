@@ -6,7 +6,7 @@
 #include "rv.h"
 #include <string.h>
 #define RAM_BASE 0x80000000
-#define RAM_SIZE 0x100
+#define RAM_SIZE 0x400
 
 rv_res bus_cb(
     void * user, rv_u32 addr, rv_u8 * data, rv_u32 is_store, rv_u32 width) {
@@ -16,11 +16,31 @@ rv_res bus_cb(
     memcpy(is_store ? mem : data, is_store ? data : mem, width);
     return RV_OK;
 }
-rv_u16 program[4] = {
-    // c.li x10, -11
-    0x5555,
-    // c.li x11, 11
-    0x45ad,
+rv_u16 program[100] = {
+    // smile mouth
+    // c.addi x10, 4
+    0x0511,
+    // c.slli x10, 4
+    0x0512,
+    // c.addi x10, 2
+    0x0509,
+    // c.slli x10, 4
+    0x0512,
+    // c.addi x10, 7
+    0x051d,
+    // c.slli x10, 4
+    0x0512,
+    // c.addu x10, 14
+    0x0539,
+    // eyes
+    // c.addi x11, 4
+    0x0591,
+    // c.slli x11, 4
+    0x0592,
+    // c.addi x11, 2
+    0x0589,
+    // c.slli x11, 8
+    0x05a2,
     // ecall
     0x0073
 };
@@ -109,7 +129,7 @@ int main(void) {
         display_all_registers(&cpu);
         if (trap == RV_EMECALL)
             break;
-        Delay_Ms(1000);
+        Delay_Ms(300);
     }
     printf("Environment call @ %lX\n", cpu.csr.mepc);
     display_all_registers(&cpu);

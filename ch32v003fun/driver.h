@@ -4,8 +4,6 @@
 #include "buttons.h"
 #include "ch32v003_GPIO_branchless.h"
 
-#define abs(x) ((x) < 0 ? -(x) : (x))
-
 #ifdef WS2812BSIMPLE_IMPLEMENTATION
 #if FUNCONF_SYSTICK_USE_HCLK != 1
 #error WS2812B Driver Requires FUNCONF_SYSTICK_USE_HCLK

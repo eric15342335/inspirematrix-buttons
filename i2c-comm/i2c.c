@@ -17,6 +17,7 @@
 
 #include "ch32v003fun.h"
 #include <stdio.h>
+#include "music.h"
 
 /* I2C Mode Definition */
 #define HOST_MODE 0
@@ -27,15 +28,31 @@
 #define I2C_MODE 1
 
 /* Global define */
-#define Size 6
 #define RXAdderss 0x02
 #define TxAdderss 0x02
-
+#define FREQ_SIZE 2
+#define DURATION_SIZE 1
 /* Global Variable */
-volatile uint8_t TxData[Size] = {0x10,0x11,0x12,0x13,0x14,0x15};
-volatile uint8_t RxData[5][Size];
+uint8_t RxData[FREQ_SIZE+DURATION_SIZE];
 
-void IIC_Init(uint32_t bound, uint16_t address) {
+int8_t convert_uint8_to_int8(uint8_t data) {
+    return (int8_t)(data - 0x80);
+}
+
+int16_t convert_two_uint8_to_int16(uint8_t first, uint8_t two) {
+    return (int16_t)((first << 8) | two) - 0x8000;
+}
+
+uint8_t convert_int8_to_uint8(int8_t data) {
+    return (uint8_t)(data + 0x80);
+}
+
+void convert_int16_to_two_uint8(int16_t data, uint8_t *first, uint8_t *two) {
+    *first = (uint8_t)((data >> 8) + 0x80);
+    *two = (uint8_t)(data & 0xFF);
+}
+
+void IIC_Init(uint16_t address) {
     // Enable clocks for GPIOC and I2C1
     RCC->APB2PCENR |= RCC_APB2Periph_GPIOC | RCC_APB2Periph_AFIO;
     RCC->APB1PCENR |= RCC_APB1Periph_I2C1;
@@ -46,10 +63,17 @@ void IIC_Init(uint32_t bound, uint16_t address) {
     GPIOC->CFGLR &= ~GPIO_CFGLR_OUT_50Mhz_AF_OD << (4 * 1);
     GPIOC->CFGLR |= GPIO_CFGLR_OUT_50Mhz_AF_OD << (4 * 1);
 
-    // Configure I2C1
-    I2C1->CTLR2 = (FUNCONF_SYSTEM_CORE_CLOCK / 1000000); // PCLK1 frequency in MHz
-    I2C1->CKCFGR = (bound / (2 * FUNCONF_SYSTEM_CORE_CLOCK)) & 0xFFF; // Set clock speed
-    I2C1->OADDR1 = I2C_AcknowledgedAddress_7bit | address; // Set own address
+    // Set module clock frequency
+    uint32_t prerate = 2000000; // I2C Logic clock rate, must be higher than the bus clock rate
+    I2C1->CTLR2 |= (FUNCONF_SYSTEM_CORE_CLOCK/prerate) & I2C_CTLR2_FREQ;
+    // 24MHz?
+    // Set clock configuration
+    uint32_t clockrate = 1000000; // I2C Bus clock rate, must be lower than the logic clock rate
+    I2C1->CKCFGR = ((FUNCONF_SYSTEM_CORE_CLOCK/(3*clockrate))&I2C_CKCFGR_CCR) | I2C_CKCFGR_FS; // Fast mode 33% duty cycle
+    //I2C1->CKCFGR = ((FUNCONF_SYSTEM_CORE_CLOCK/(25*clockrate))&I2C_CKCFGR_CCR) | I2C_CKCFGR_DUTY | I2C_CKCFGR_FS; // Fast mode 36% duty cycle
+    //I2C1->CKCFGR = (FUNCONF_SYSTEM_CORE_CLOCK/(2*clockrate))&I2C_CKCFGR_CCR; // Standard mode good to 100kHz
+
+    I2C1->OADDR1 = address; // Set own address
     I2C1->OADDR2 = 0;
     /* DO NOT SWAP THESE TWO ORDER !!!!!!!!!!!!!
     This bit is set and cleared by
@@ -59,8 +83,6 @@ void IIC_Init(uint32_t bound, uint16_t address) {
     I2C1->CTLR1 |= I2C_CTLR1_ACK; // Enable ACK
     printf("\nInitializing I2C...\n");
 }
-
-#define I2C_SPEED 80000
 
 uint8_t check_i2c_event(uint32_t event) {
     uint16_t STAR1, STAR2 __attribute__((unused));
@@ -75,14 +97,14 @@ const uint32_t timeout_default = 1000000;
 int main(void) {
     SystemInit();
 #if (I2C_MODE == HOST_MODE)
-    printf("\nIIC Host mode\r\n");
-    IIC_Init(I2C_SPEED, TxAdderss);
+    printf("IIC Host mode\r\n");
+    IIC_Init(TxAdderss);
 
     for (uint8_t j = 0; j < 5; j++) {
         uint32_t timeout = timeout_default;
         while (I2C1->STAR1 & I2C_STAR2_BUSY) {
             if (--timeout == 0) {
-                IIC_Init(I2C_SPEED, TxAdderss);
+                IIC_Init(TxAdderss);
                 NVIC_SystemReset();
             }
         }
@@ -93,7 +115,7 @@ int main(void) {
         timeout = timeout_default;
         while (!check_i2c_event(I2C_EVENT_MASTER_MODE_SELECT)) {
             if (--timeout == 0) {
-                IIC_Init(I2C_SPEED, TxAdderss);
+                IIC_Init(TxAdderss);
                 NVIC_SystemReset();
             }
         }
@@ -104,7 +126,7 @@ int main(void) {
         timeout = timeout_default;
         while (!check_i2c_event(I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)) {
             if (--timeout == 0) {
-                IIC_Init(I2C_SPEED, TxAdderss);
+                IIC_Init(TxAdderss);
                 NVIC_SystemReset();
             }
         }
@@ -112,23 +134,43 @@ int main(void) {
 
         (void)I2C1->STAR2; // Clear ADDR flag
 
-        for (uint8_t i = 0; i < 6; i++) {
+        for (int i = 0; i < notes; i++) {
             timeout = timeout_default;
             while (!check_i2c_event(I2C_EVENT_MASTER_BYTE_TRANSMITTING)) {
                 if (--timeout == 0) {
-                    IIC_Init(I2C_SPEED, TxAdderss);
+                    IIC_Init(TxAdderss);
                     NVIC_SystemReset();
                 }
             }
-            printf("Sent %d\r\n", TxData[i]);
-            I2C1->DATAR = TxData[i];
+            uint8_t temp[2] = {0};
+            printf("Sent %d and %d\r\n", melody[i*2], melody[i*2+1]);
+            convert_int16_to_two_uint8(melody[i*2], &temp[0],&temp[1]);
+            I2C1->DATAR = temp[0];
+            
+            timeout = timeout_default;
+            while (!check_i2c_event(I2C_EVENT_MASTER_BYTE_TRANSMITTING)) {
+                if (--timeout == 0) {
+                    IIC_Init(TxAdderss);
+                    NVIC_SystemReset();
+                }
+            }
+            I2C1->DATAR = temp[1];
+            
+            timeout = timeout_default;
+            while (!check_i2c_event(I2C_EVENT_MASTER_BYTE_TRANSMITTING)) {
+                if (--timeout == 0) {
+                    IIC_Init(TxAdderss);
+                    NVIC_SystemReset();
+                }
+            }
+            I2C1->DATAR = convert_int8_to_uint8(melody[i*2+1]);
         }
         printf("Sending finished!\r\n");
 
         timeout = timeout_default;
         while (!check_i2c_event(I2C_EVENT_MASTER_BYTE_TRANSMITTED)) {
             if (--timeout == 0) {
-                IIC_Init(I2C_SPEED, TxAdderss);
+                IIC_Init(TxAdderss);
                 NVIC_SystemReset();
             }
         }
@@ -140,15 +182,14 @@ int main(void) {
 
 #elif (I2C_MODE == SLAVE_MODE)
     printf("IIC Slave mode\r\n");
-    IIC_Init(I2C_SPEED, RXAdderss);
+    IIC_Init(RXAdderss);
 
-    for (uint8_t p = 0; p < 5; p++) {
-        uint8_t i = 0;
+    while (1) {
         printf("Waiting for receiver address match!\n");
         uint32_t timeout = timeout_default;
         while (!check_i2c_event(I2C_EVENT_SLAVE_RECEIVER_ADDRESS_MATCHED)) {
             if (--timeout == 0) {
-                IIC_Init(I2C_SPEED, RXAdderss);
+                IIC_Init(RXAdderss);
                 NVIC_SystemReset();
             }
         }
@@ -156,26 +197,26 @@ int main(void) {
 
         (void)I2C1->STAR2; // Clear ADDR flag
 
-        while (i < 6) {
-            timeout = timeout_default;
-            while (!check_i2c_event(I2C_EVENT_SLAVE_BYTE_RECEIVED)) {
-                if (--timeout == 0) {
-                    IIC_Init(I2C_SPEED, RXAdderss);
-                    NVIC_SystemReset();
+        while (1) {
+            uint8_t i = 0;
+            while (i < 3) {
+                timeout = timeout_default;
+                while (!check_i2c_event(I2C_EVENT_SLAVE_BYTE_RECEIVED)) {
+                    if (--timeout == 0) {
+                        IIC_Init(RXAdderss);
+                        NVIC_SystemReset();
+                    }
                 }
+                RxData[i] = I2C1->DATAR;
+                printf("Received! %d\r\n", RxData[i]);
+                i++;
             }
-            RxData[p][i] = I2C1->DATAR;
-            printf("Received! %d\r\n", RxData[p][i]);
-            i++;
+            int16_t _note = convert_two_uint8_to_int16(RxData[0], RxData[1]);
+            int8_t _duration = convert_uint8_to_int8(RxData[2]);
+            printf("Note: %d, Duration: %d\n", _note, _duration);
+            JOY_sound(_note, convertDuration(_duration));
+            I2C1->CTLR1 &= I2C1->CTLR1;
         }
-        I2C1->CTLR1 &= I2C1->CTLR1;
-    }
-    printf("RxData:\r\n");
-    for (uint8_t p = 0; p < 5; p++) {
-        for (uint8_t i = 0; i < 6; i++) {
-            printf("%02x ", RxData[p][i]);
-        }
-        printf("\r\n");
     }
 
 #endif

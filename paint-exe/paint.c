@@ -44,11 +44,12 @@ int main(void) {
     SystemInit();
     ADC_init();
     clear();
-    for (int i = 0; i < NUM_LEDS; i++) {
-        set_color(i, color_divide(colors[i], 15));
+    while(1) {
+        for (int i = 0; i < NUM_LEDS; i++) {
+            set_color(i, color_divide(colors[i], 10));
+        }
+        WS2812BSimpleSend(GPIOC, 1, (uint8_t *)led_array, NUM_LEDS * 3);
     }
-    WS2812BSimpleSend(GPIOC, 1, (uint8_t *)led_array, NUM_LEDS * 3);
-    while(1);
     Delay_Ms(500);
     printf("\nBackground Initialized\n");
     for (int i = 1; i < NUM_LEDS; i++) {

@@ -1,9 +1,10 @@
+#include "system_mac.h"
+
 #include <AudioToolbox/AudioToolbox.h>
 #include <CoreFoundation/CoreFoundation.h>
 #include <math.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include "system_mac.h"
 
 #define MAX_KEYS 6
 
@@ -14,7 +15,8 @@ pthread_t thread;
 
 void addKey(CGKeyCode keyCode) {
     for (int i = 0; i < pressedKeyCount; i++) {
-        if (pressedKeys[i] == keyCode) return; // Key already in array
+        if (pressedKeys[i] == keyCode)
+            return; // Key already in array
     }
     if (pressedKeyCount < MAX_KEYS) {
         pressedKeys[pressedKeyCount++] = keyCode;
@@ -44,19 +46,22 @@ bool is_key_pressed(CGKeyCode keyCode) {
     return pressed;
 }
 
-CGEventRef keyboardCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *refcon) {
+CGEventRef keyboardCallback(
+    CGEventTapProxy proxy, CGEventType type, CGEventRef event, void * refcon) {
     (void)proxy;
     (void)refcon;
     if (type != kCGEventKeyDown && type != kCGEventKeyUp) {
         return event;
     }
 
-    CGKeyCode keyCode = (CGKeyCode)CGEventGetIntegerValueField(event, kCGKeyboardEventKeycode);
+    CGKeyCode keyCode =
+        (CGKeyCode)CGEventGetIntegerValueField(event, kCGKeyboardEventKeycode);
 
     pthread_mutex_lock(&keyMutex);
     if (type == kCGEventKeyDown) {
         addKey(keyCode);
-    } else if (type == kCGEventKeyUp) {
+    }
+    else if (type == kCGEventKeyUp) {
         removeKey(keyCode);
     }
     pthread_mutex_unlock(&keyMutex);
@@ -64,13 +69,13 @@ CGEventRef keyboardCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef 
     return event;
 }
 
-void* eventTapThread(void* arg) {
+void * eventTapThread(void * arg) {
     (void)arg;
     CFMachPortRef eventTap;
     CFRunLoopSourceRef runLoopSource;
 
     eventTap = CGEventTapCreate(kCGSessionEventTap, kCGHeadInsertEventTap, 0,
-                                kCGEventMaskForAllEvents, keyboardCallback, NULL);
+        kCGEventMaskForAllEvents, keyboardCallback, NULL);
 
     if (!eventTap) {
         fprintf(stderr, "Failed to create event tap\n");
@@ -86,6 +91,4 @@ void* eventTapThread(void* arg) {
     return NULL;
 }
 
-void pthread_init(){
-    pthread_create(&thread, NULL, eventTapThread, NULL);
-}
+void pthread_init() { pthread_create(&thread, NULL, eventTapThread, NULL); }

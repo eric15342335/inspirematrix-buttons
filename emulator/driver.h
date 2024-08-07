@@ -1,8 +1,9 @@
 #pragma once
 
+#include "ws2812b_simple.h"
+
 #include <stdbool.h>
 #include <stdlib.h>
-#include "ws2812b_simple.h"
 
 #ifdef _WIN32
 #define NOMINMAX 1          // Prevent Windows.h from defining min and max macros
@@ -42,7 +43,8 @@ uint16_t ADC_read(void) {
     // Use non blocking is_key_pressed
     for (char i = 'A'; i <= 'D'; i++) {
         if (is_key_pressed(i)) {
-            while (is_key_pressed(i));
+            while (is_key_pressed(i))
+                ;
             printf("Pressed %c, Press 0-9 or A-F\n", i);
             while (true) {
                 for (char j = '0'; j <= '9'; j++) {
@@ -71,9 +73,9 @@ uint16_t ADC_read(void) {
     return 0;
 }
 
-
 #elif defined(__APPLE__)
 #include "system_mac.h"
+
 #include <unistd.h>
 
 #define SystemInit() pthread_init()
@@ -95,7 +97,8 @@ uint16_t ADC_read(void) {
     // Use non blocking is_key_pressed
     for (int i = 0; i < 4; i++) {
         if (is_key_pressed(ABCD[i])) {
-            while (is_key_pressed(ABCD[i]));
+            while (is_key_pressed(ABCD[i]))
+                ;
             printf("Pressed %c, Press 0-9 or A-F\n", ABCD[i]);
             while (true) {
                 for (int j = 0; j < 16; j++) {
@@ -116,10 +119,11 @@ uint16_t ADC_read(void) {
 
 #endif
 
-#define JOY_pad_pressed()                                                              \
+#define JOY_pad_pressed()                                                                \
     (JOY_up_pressed() || JOY_down_pressed() || JOY_left_pressed() || JOY_right_pressed())
-#define JOY_pad_released()                                                             \
-    (!JOY_up_pressed() && !JOY_down_pressed() && !JOY_left_pressed() && !JOY_right_pressed())
+#define JOY_pad_released()                                                               \
+    (!JOY_up_pressed() && !JOY_down_pressed() && !JOY_left_pressed() &&                  \
+        !JOY_right_pressed())
 #define JOY_all_released() (JOY_act_released() && !JOY_pad_released())
 
 void ADC_init(void) {
@@ -137,24 +141,16 @@ int8_t matrix_pressed(uint16_t (*matrix)(void)) {
     return no_button_pressed;
 }
 
-uint16_t ADC_read_pad(void) {
-    return ADC_read();
-}
+uint16_t ADC_read_pad(void) { return ADC_read(); }
 
-uint16_t ADC_read_smallboard(void) {
-    return ADC_read();
-}
+uint16_t ADC_read_smallboard(void) { return ADC_read(); }
 
 uint16_t rnval;
 uint16_t JOY_random(void) {
-  rnval = (rnval >> 0x01) ^ (-(rnval & 0x01) & 0xB400);
-  return rnval;
+    rnval = (rnval >> 0x01) ^ (-(rnval & 0x01) & 0xB400);
+    return rnval;
 }
 
-void JOY_setseed_default(void){
-  rnval = 0x1234;
-}
+void JOY_setseed_default(void) { rnval = 0x1234; }
 
-void JOY_setseed(uint16_t seed){
-  rnval = seed;
-}
+void JOY_setseed(uint16_t seed) { rnval = seed; }

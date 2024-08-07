@@ -1,11 +1,12 @@
 #define WS2812BSIMPLE_IMPLEMENTATION
-#include <stdio.h>
-#include "driver.h"
 #include "colors.h"
+#include "driver.h"
 #include "ws2812b_simple.h"
 
-color_t onColor = {100, 255, 100}; // Green
-color_t offColor = {0, 0, 0}; // Black
+#include <stdio.h>
+
+color_t onColor = {100, 255, 100};      // Green
+color_t offColor = {0, 0, 0};           // Black
 color_t pointerColor = {100, 100, 255}; // Blue
 
 int currentposition = 0;
@@ -29,7 +30,7 @@ int main(void) {
         if (JOY_down_pressed()) {
             currentposition = (NUM_LEDS + currentposition - 8) % NUM_LEDS;
         }
-        if (JOY_left_pressed()){
+        if (JOY_left_pressed()) {
             currentposition = (NUM_LEDS + currentposition + 1) % NUM_LEDS;
         }
         if (JOY_right_pressed()) {

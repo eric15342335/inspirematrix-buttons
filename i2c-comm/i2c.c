@@ -16,15 +16,16 @@
  */
 
 #include "ch32v003fun.h"
-#include <stdio.h>
 #include "music.h"
+
+#include <stdio.h>
 
 /* I2C Mode Definition */
 #define HOST_MODE 0
 #define SLAVE_MODE 1
 
 /* I2C Communication Mode Selection */
-//#define I2C_MODE   HOST_MODE
+// #define I2C_MODE   HOST_MODE
 #define I2C_MODE 1
 
 /* Global define */
@@ -33,21 +34,17 @@
 #define FREQ_SIZE 2
 #define DURATION_SIZE 1
 /* Global Variable */
-uint8_t RxData[FREQ_SIZE+DURATION_SIZE];
+uint8_t RxData[FREQ_SIZE + DURATION_SIZE];
 
-int8_t convert_uint8_to_int8(uint8_t data) {
-    return (int8_t)(data - 0x80);
-}
+int8_t convert_uint8_to_int8(uint8_t data) { return (int8_t)(data - 0x80); }
 
 int16_t convert_two_uint8_to_int16(uint8_t first, uint8_t two) {
     return (int16_t)((first << 8) | two) - 0x8000;
 }
 
-uint8_t convert_int8_to_uint8(int8_t data) {
-    return (uint8_t)(data + 0x80);
-}
+uint8_t convert_int8_to_uint8(int8_t data) { return (uint8_t)(data + 0x80); }
 
-void convert_int16_to_two_uint8(int16_t data, uint8_t *first, uint8_t *two) {
+void convert_int16_to_two_uint8(int16_t data, uint8_t * first, uint8_t * two) {
     *first = (uint8_t)((data >> 8) + 0x80);
     *two = (uint8_t)(data & 0xFF);
 }
@@ -64,14 +61,19 @@ void IIC_Init(uint16_t address) {
     GPIOC->CFGLR |= GPIO_CFGLR_OUT_50Mhz_AF_OD << (4 * 1);
 
     // Set module clock frequency
-    uint32_t prerate = 2000000; // I2C Logic clock rate, must be higher than the bus clock rate
-    I2C1->CTLR2 |= (FUNCONF_SYSTEM_CORE_CLOCK/prerate) & I2C_CTLR2_FREQ;
+    uint32_t prerate =
+        2000000; // I2C Logic clock rate, must be higher than the bus clock rate
+    I2C1->CTLR2 |= (FUNCONF_SYSTEM_CORE_CLOCK / prerate) & I2C_CTLR2_FREQ;
     // 24MHz?
     // Set clock configuration
-    uint32_t clockrate = 1000000; // I2C Bus clock rate, must be lower than the logic clock rate
-    I2C1->CKCFGR = ((FUNCONF_SYSTEM_CORE_CLOCK/(3*clockrate))&I2C_CKCFGR_CCR) | I2C_CKCFGR_FS; // Fast mode 33% duty cycle
-    //I2C1->CKCFGR = ((FUNCONF_SYSTEM_CORE_CLOCK/(25*clockrate))&I2C_CKCFGR_CCR) | I2C_CKCFGR_DUTY | I2C_CKCFGR_FS; // Fast mode 36% duty cycle
-    //I2C1->CKCFGR = (FUNCONF_SYSTEM_CORE_CLOCK/(2*clockrate))&I2C_CKCFGR_CCR; // Standard mode good to 100kHz
+    uint32_t clockrate =
+        1000000; // I2C Bus clock rate, must be lower than the logic clock rate
+    I2C1->CKCFGR = ((FUNCONF_SYSTEM_CORE_CLOCK / (3 * clockrate)) & I2C_CKCFGR_CCR) |
+                   I2C_CKCFGR_FS; // Fast mode 33% duty cycle
+    // I2C1->CKCFGR = ((FUNCONF_SYSTEM_CORE_CLOCK/(25*clockrate))&I2C_CKCFGR_CCR) |
+    // I2C_CKCFGR_DUTY | I2C_CKCFGR_FS; // Fast mode 36% duty cycle I2C1->CKCFGR =
+    // (FUNCONF_SYSTEM_CORE_CLOCK/(2*clockrate))&I2C_CKCFGR_CCR; // Standard mode good to
+    // 100kHz
 
     I2C1->OADDR1 = address; // Set own address
     I2C1->OADDR2 = 0;
@@ -79,7 +81,7 @@ void IIC_Init(uint16_t address) {
     This bit is set and cleared by
     software and cleared by hardware when start is
     sent or PE=0.*/
-    I2C1->CTLR1 |= I2C_CTLR1_PE; // Enable I2C
+    I2C1->CTLR1 |= I2C_CTLR1_PE;  // Enable I2C
     I2C1->CTLR1 |= I2C_CTLR1_ACK; // Enable ACK
     printf("\nInitializing I2C...\n");
 }
@@ -143,10 +145,10 @@ int main(void) {
                 }
             }
             uint8_t temp[2] = {0};
-            printf("Sent %d and %d\r\n", melody[i*2], melody[i*2+1]);
-            convert_int16_to_two_uint8(melody[i*2], &temp[0],&temp[1]);
+            printf("Sent %d and %d\r\n", melody[i * 2], melody[i * 2 + 1]);
+            convert_int16_to_two_uint8(melody[i * 2], &temp[0], &temp[1]);
             I2C1->DATAR = temp[0];
-            
+
             timeout = timeout_default;
             while (!check_i2c_event(I2C_EVENT_MASTER_BYTE_TRANSMITTING)) {
                 if (--timeout == 0) {
@@ -155,7 +157,7 @@ int main(void) {
                 }
             }
             I2C1->DATAR = temp[1];
-            
+
             timeout = timeout_default;
             while (!check_i2c_event(I2C_EVENT_MASTER_BYTE_TRANSMITTING)) {
                 if (--timeout == 0) {
@@ -163,7 +165,7 @@ int main(void) {
                     NVIC_SystemReset();
                 }
             }
-            I2C1->DATAR = convert_int8_to_uint8(melody[i*2+1]);
+            I2C1->DATAR = convert_int8_to_uint8(melody[i * 2 + 1]);
         }
         printf("Sending finished!\r\n");
 
@@ -175,7 +177,7 @@ int main(void) {
             }
         }
         printf("I2C Event master byte transmitted!\r\n");
-        
+
         I2C1->CTLR1 |= I2C_CTLR1_STOP;
         printf("I2C Generated STOP!\r\n");
     }

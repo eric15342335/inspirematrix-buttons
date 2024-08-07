@@ -1,12 +1,13 @@
 #define WS2812BSIMPLE_IMPLEMENTATION
-#include <stdio.h>
-#include "driver.h"
 #include "colors.h"
-#include "ws2812b_simple.h"
+#include "driver.h"
 #include "fonts.h"
+#include "ws2812b_simple.h"
+
+#include <stdio.h>
 
 #define separation 1
-#define space_occupied (font_width+separation)
+#define space_occupied (font_width + separation)
 #define last_appear_x (horizontalButtons - space_occupied + 2)
 #define INSPIRE_MATRIX_HEIGHT 8
 int main(void) {
@@ -33,8 +34,10 @@ int main(void) {
                 int adjustedLedIndex = ledIndex - fontStartPosition;
                 while (adjustedLedIndex >= 0) {
                     if (adjustedLedIndex < last_appear_x) {
-                        font_draw(font_list[fontIndex], colors[8*fontIndex%num_colors],
-                        adjustedLedIndex % last_appear_x + horizontalButtons * verticalOffset);
+                        font_draw(font_list[fontIndex],
+                            colors[8 * fontIndex % num_colors],
+                            adjustedLedIndex % last_appear_x +
+                                horizontalButtons * verticalOffset);
                         break;
                     }
                     // verticalOffset += font_height + separation;

@@ -1,9 +1,9 @@
 #ifndef SYSTEM_MAC_H
 #define SYSTEM_MAC_H
 
-#include <stdbool.h>
-#include <pthread.h>
 #include <ApplicationServices/ApplicationServices.h>
+#include <pthread.h>
+#include <stdbool.h>
 
 #define A_Key 0
 #define B_Key 11
@@ -35,7 +35,8 @@ pthread_t thread;
 CGKeyCode pressedKeys[MAX_KEYS];
 int pressedKeyCount_;
 static const CGKeyCode ABCD[] = {A_Key, B_Key, C_Key, D_Key};
-static const CGKeyCode _0123456789ABCDEF[] = {_0_Key, _1_Key, _2_Key, _3_Key, _4_Key, _5_Key, _6_Key, _7_Key, _8_Key, _9_Key, A_Key, B_Key, C_Key, D_Key, E_Key, F_Key};
+static const CGKeyCode _0123456789ABCDEF[] = {_0_Key, _1_Key, _2_Key, _3_Key, _4_Key,
+    _5_Key, _6_Key, _7_Key, _8_Key, _9_Key, A_Key, B_Key, C_Key, D_Key, E_Key, F_Key};
 
 void pthread_init();
 

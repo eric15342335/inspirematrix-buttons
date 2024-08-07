@@ -1,15 +1,15 @@
 #define WS2812BSIMPLE_IMPLEMENTATION
-#include <stdio.h>
-#include "driver.h"
 #include "colors.h"
-#include "ws2812b_simple.h"
+#include "driver.h"
 #include "rv.h"
+#include "ws2812b_simple.h"
+
+#include <stdio.h>
 #include <string.h>
 #define RAM_BASE 0x80000000
 #define RAM_SIZE 0x400
 
-rv_res bus_cb(
-    void * user, rv_u32 addr, rv_u8 * data, rv_u32 is_store, rv_u32 width) {
+rv_res bus_cb(void * user, rv_u32 addr, rv_u8 * data, rv_u32 is_store, rv_u32 width) {
     rv_u8 * mem = (rv_u8 *)user + addr - RAM_BASE;
     if (addr < RAM_BASE || addr + width >= RAM_BASE + RAM_SIZE)
         return RV_BAD;
@@ -42,8 +42,7 @@ rv_u16 program[100] = {
     // c.slli x11, 8
     0x05a2,
     // ecall
-    0x0073
-};
+    0x0073};
 
 void display_all_registers(rv * cpu) {
     for (int i = 0; i < 32; i++) {
@@ -98,7 +97,7 @@ int main(void) {
     set_color(32, (color_t){255, 255, 255});
     instructionDisplay();
     WS2812BSimpleSend(GPIOC, 1, (uint8_t *)led_array, NUM_LEDS * 3);
-    
+
     inputProgram();
 
     printf("Matrix Pressed\n");
@@ -137,4 +136,3 @@ int main(void) {
         ;
     NVIC_SystemReset();
 }
-

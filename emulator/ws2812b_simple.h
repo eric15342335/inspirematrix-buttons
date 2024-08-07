@@ -1,14 +1,15 @@
 #pragma once
-#include <stdio.h>
-#include "colors.h"
 #include "buttons.h"
 #include "ch32v003fun.h"
+#include "colors.h"
+
+#include <stdio.h>
 
 #define BORDER_X 2
 
-void WS2812BSimpleSend(GPIO_TypeDef *port, int pin, uint8_t *data, int len_in_bytes) {
-    (void) port;
-    (void) pin;
+void WS2812BSimpleSend(GPIO_TypeDef * port, int pin, uint8_t * data, int len_in_bytes) {
+    (void)port;
+    (void)pin;
     if (len_in_bytes != NUM_LEDS * 3) {
         printf("Error: len_in_bytes != NUM_LEDS * 3\n");
         exit(1);
@@ -27,8 +28,10 @@ void WS2812BSimpleSend(GPIO_TypeDef *port, int pin, uint8_t *data, int len_in_by
         printf("%d|", (y - 1) % 10);
         for (uint8_t x = horizontalButtons; x > 0; x--) {
             uint8_t led = (y - 1) * horizontalButtons + (x - 1);
-            printf("\e[38;2;%d;%d;%dm\u2588\x1b[0m", data[led * 3], data[led * 3 + 1], data[led * 3 + 2]);
-            //printf("r:%d g:%d b:%d ", data[led * 3], data[led * 3 + 1], data[led * 3 + 2]);
+            printf("\e[38;2;%d;%d;%dm\u2588\x1b[0m", data[led * 3], data[led * 3 + 1],
+                data[led * 3 + 2]);
+            // printf("r:%d g:%d b:%d ", data[led * 3], data[led * 3 + 1], data[led * 3 +
+            // 2]);
         }
         printf("|\n");
     }

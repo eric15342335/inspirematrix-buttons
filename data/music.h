@@ -7,7 +7,7 @@
 
 void JOY_sound(uint16_t freq, uint16_t dur) {
     funPinMode(PD6, GPIO_Speed_50MHz | GPIO_CNF_OUT_PP);
-    const int sysclk = 1000000;
+    const int sysclk = 1500000;
     if (sysclk < freq)
         return;
     uint32_t delay_us = sysclk / 2 / freq;
@@ -156,25 +156,98 @@ void playAllMusic(void);
  *
  */
 const int melody[] = {
-    NOTE_E4, 4, NOTE_E4, 4, NOTE_F4, 4, NOTE_G4, 4, // 1
-    NOTE_G4, 4, NOTE_F4, 4, NOTE_E4, 4, NOTE_D4, 4, NOTE_C4, 4, NOTE_C4, 4, NOTE_D4, 4,
-    NOTE_E4, 4, NOTE_E4, -4, NOTE_D4, 8, NOTE_D4, 2,
 
-    NOTE_E4, 4, NOTE_E4, 4, NOTE_F4, 4, NOTE_G4, 4, // 4
-    NOTE_G4, 4, NOTE_F4, 4, NOTE_E4, 4, NOTE_D4, 4, NOTE_C4, 4, NOTE_C4, 4, NOTE_D4, 4,
-    NOTE_E4, 4, NOTE_D4, -4, NOTE_C4, 8, NOTE_C4, 2,
+  NOTE_F4, 4, NOTE_G4, 4, NOTE_A4, 8, NOTE_G4, 4, NOTE_A4, 8, //1
+  NOTE_AS4, 4, NOTE_A4, 4, NOTE_G4, 8, NOTE_F4, 4, NOTE_G4, 8,
+  NOTE_A4, 4, NOTE_C4, 8, NOTE_C4, 4, NOTE_C4, 8, NOTE_C4, 4,
+  NOTE_C4, 1, //1st ending
 
-    NOTE_D4, 4, NOTE_D4, 4, NOTE_E4, 4, NOTE_C4, 4, // 8
-    NOTE_D4, 4, NOTE_E4, 8, NOTE_F4, 8, NOTE_E4, 4, NOTE_C4, 4, NOTE_D4, 4, NOTE_E4, 8,
-    NOTE_F4, 8, NOTE_E4, 4, NOTE_D4, 4, NOTE_C4, 4, NOTE_D4, 4, NOTE_G3, 2,
+  NOTE_F4, 4, NOTE_G4, 4, NOTE_A4, 8, NOTE_G4, 4, NOTE_A4, 8, //repeats from 1
+  NOTE_AS4, 4, NOTE_A4, 4, NOTE_G4, 8, NOTE_F4, 4, NOTE_G4, 8,
+  NOTE_A4, 4, NOTE_C4, 8, NOTE_C4, 4, NOTE_C4, 8, NOTE_C4, 4,
+  NOTE_C4, -2,  REST, -8, NOTE_A4, 16, //2nd ending
 
-    NOTE_E4, 4, NOTE_E4, 4, NOTE_F4, 4, NOTE_G4, 4, // 12
-    NOTE_G4, 4, NOTE_F4, 4, NOTE_E4, 4, NOTE_D4, 4, NOTE_C4, 4, NOTE_C4, 4, NOTE_D4, 4,
-    NOTE_E4, 4, NOTE_D4, -4, NOTE_C4, 8, NOTE_C4, 2};
+  NOTE_A4, -8, NOTE_A4, 16, NOTE_A4, -8, NOTE_A4, 16, NOTE_A4, -8, NOTE_A4, 16, NOTE_A4, -8, NOTE_A4, 16, //6
+  NOTE_AS4, -8, NOTE_AS4, 16, NOTE_AS4, -8, NOTE_AS4, 16, NOTE_AS4, -8, NOTE_AS4, 16, NOTE_AS4, -8, NOTE_AS4, 16,
+  NOTE_A4, -8, NOTE_A4, 16, NOTE_A4, -8, NOTE_A4, 16, NOTE_A4, -8, NOTE_A4, 16, NOTE_A4, -8, NOTE_A4, 16,
+  NOTE_G4, -8, NOTE_G4, 16, NOTE_G4, -8, NOTE_G4, 16, NOTE_G4, -8, NOTE_G4, 16, NOTE_G4, -8, NOTE_G4, 16,
+
+  NOTE_A4, -8, NOTE_A4, 16, NOTE_A4, -8, NOTE_A4, 16, NOTE_A4, -8, NOTE_A4, 16, NOTE_A4, -8, NOTE_A4, 16, //10
+  NOTE_AS4, -8, NOTE_AS4, 16, NOTE_AS4, -8, NOTE_AS4, 16, NOTE_AS4, -8, NOTE_AS4, 16, NOTE_AS4, -8, NOTE_AS4, 16,
+  NOTE_A4, -8, NOTE_A4, 16, NOTE_A4, -8, NOTE_A4, 16, NOTE_A4, -8, NOTE_A4, 16, NOTE_A4, -8, NOTE_A4, 16,
+  NOTE_G4, -8, NOTE_G4, 16, NOTE_G4, -8, NOTE_G4, 16, NOTE_G4, -8, NOTE_G4, 16, NOTE_G4, -8, NOTE_G4, 16,
+
+  NOTE_F4, 4, NOTE_G4, 4, NOTE_A4, 8, NOTE_G4, 4, NOTE_A4, 8, //14
+  NOTE_AS4, 4, NOTE_A4, 4, NOTE_G4, 8, NOTE_F4, 4, NOTE_G4, 8,
+  NOTE_A4, 4, NOTE_G4, 4, NOTE_F4, 4, NOTE_A4, 4,
+  NOTE_G4, 1,
+  NOTE_C5, 4, NOTE_A4, 4, NOTE_G4, 8, NOTE_A4, 4, NOTE_C5, 8,
+  NOTE_AS4, 4, NOTE_A4, 4, NOTE_G4, 8, NOTE_F4, 4, NOTE_G4, 8,
+  NOTE_A4, 4, NOTE_G4, 4, NOTE_F4, 4, NOTE_A4, 4,
+  NOTE_G4, 1,
+
+  NOTE_C5, 1, //22
+  NOTE_C5, 4, NOTE_AS4, 8, NOTE_C5, 8, NOTE_AS4, 2,
+  NOTE_A4, 4, NOTE_C4, 8, NOTE_C4, 4, NOTE_C4, 8, NOTE_C4, 4,
+  NOTE_C4, 1,
+
+  REST, 4, NOTE_A4, 8, NOTE_G4, 8, NOTE_F4, 8, NOTE_E4, 8, NOTE_D4, 8, NOTE_C4, 8, 
+  NOTE_D4, 1,
+  REST, 4, NOTE_A4, 8, NOTE_G4, 8, NOTE_F4, 8, NOTE_E4, 8, NOTE_D4, 8, NOTE_C4, 8, 
+  NOTE_D4, 1,
+
+  NOTE_F4, 4, NOTE_G4, 4, NOTE_A4, 8, NOTE_G4, 4, NOTE_A4, 8, //repeats from 14
+  NOTE_AS4, 4, NOTE_A4, 4, NOTE_G4, 8, NOTE_F4, 4, NOTE_G4, 8,
+  NOTE_A4, 4, NOTE_G4, 4, NOTE_F4, 4, NOTE_A4, 4,
+  NOTE_G4, 1,
+  NOTE_C5, 4, NOTE_A4, 4, NOTE_G4, 8, NOTE_A4, 4, NOTE_C5, 8,
+  NOTE_AS4, 4, NOTE_A4, 4, NOTE_G4, 8, NOTE_F4, 4, NOTE_G4, 8,
+  NOTE_A4, 4, NOTE_G4, 4, NOTE_F4, 4, NOTE_A4, 4,
+  NOTE_G4, 1,
+
+  NOTE_C5, 1, //22
+  NOTE_C5, 4, NOTE_AS4, 8, NOTE_C5, 8, NOTE_AS4, 2,
+  NOTE_A4, 4, NOTE_C4, 8, NOTE_C4, 4, NOTE_C4, 8, NOTE_C4, 4,
+  NOTE_C4, 1,
+
+  REST, 4, NOTE_A4, 8, NOTE_G4, 8, NOTE_F4, 8, NOTE_E4, 8, NOTE_D4, 8, NOTE_C4, 8, 
+  NOTE_D4, 1,
+  REST, 4, NOTE_A4, 8, NOTE_G4, 8, NOTE_F4, 8, NOTE_E4, 8, NOTE_D4, 8, NOTE_C4, 8, 
+  NOTE_D4, 1,
+
+  NOTE_F4, 4, NOTE_G4, 4, NOTE_A4, 8, NOTE_G4, 4, NOTE_A4, 8, //30
+  NOTE_AS4, 4, NOTE_A4, 4, NOTE_G4, 8, NOTE_F4, 4, NOTE_G4, 8,
+  NOTE_A4, 4, NOTE_C4, 8, NOTE_C4, 4, NOTE_C4, 8, NOTE_C4, 4,
+  NOTE_C4, 1, 
+
+  NOTE_F4, 4, NOTE_G4, 4, NOTE_A4, 8, NOTE_G4, 4, NOTE_A4, 8, //repeats from 14 (again)
+  NOTE_AS4, 4, NOTE_A4, 4, NOTE_G4, 8, NOTE_F4, 4, NOTE_G4, 8,
+  NOTE_A4, 4, NOTE_G4, 4, NOTE_F4, 4, NOTE_A4, 4,
+  NOTE_G4, 1,
+  NOTE_C5, 4, NOTE_A4, 4, NOTE_G4, 8, NOTE_A4, 4, NOTE_C5, 8,
+  NOTE_AS4, 4, NOTE_A4, 4, NOTE_G4, 8, NOTE_F4, 4, NOTE_G4, 8,
+  NOTE_A4, 4, NOTE_G4, 4, NOTE_F4, 4, NOTE_A4, 4,
+  NOTE_G4, 1,
+
+  NOTE_C5, 1, //22
+  NOTE_C5, 4, NOTE_AS4, 8, NOTE_C5, 8, NOTE_AS4, 2,
+  NOTE_A4, 4, NOTE_C4, 8, NOTE_C4, 4, NOTE_C4, 8, NOTE_C4, 4,
+  NOTE_C4, 1,
+
+  REST, 4, NOTE_A4, 8, NOTE_G4, 8, NOTE_F4, 8, NOTE_E4, 8, NOTE_D4, 8, NOTE_C4, 8, 
+  NOTE_D4, 1,
+  REST, 4, NOTE_A4, 8, NOTE_G4, 8, NOTE_F4, 8, NOTE_E4, 8, NOTE_D4, 8, NOTE_C4, 8, 
+  NOTE_D4, 1,
+
+  NOTE_F4, 4, NOTE_G4, 4, NOTE_A4, 8, NOTE_G4, 4, NOTE_A4, 8, //30
+  NOTE_AS4, 4, NOTE_A4, 4, NOTE_G4, 8, NOTE_F4, 4, NOTE_G4, 8,
+  NOTE_A4, 4, NOTE_C4, 8, NOTE_C4, 4, NOTE_C4, 8, NOTE_C4, 4,
+  NOTE_C4, 1, 
+  };
 
 const int notes = sizeof(melody) / sizeof(melody[0]) / 2;
 // change this to make the song slower or faster
-const int tempo = 150;
+const int tempo = 300;
 // this calculates the duration of a whole note in ms
 const int wholenote = (60000 * 4) / tempo;
 

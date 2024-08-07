@@ -25,15 +25,15 @@
 #define SLAVE_MODE 1
 
 /* I2C Communication Mode Selection */
-// #define I2C_MODE   HOST_MODE
-#define I2C_MODE 0
+//#define I2C_MODE   HOST_MODE
+#define I2C_MODE 1
 
 /* Global define */
 #define RXAdderss 0x02
 #define TxAdderss 0x02
 #define FREQ_SIZE 2
 #define DURATION_SIZE 1
-const uint32_t timeout_default = 1000000;
+const uint32_t timeout_default = 5000000;
 /* Global Variable */
 uint8_t RxData[FREQ_SIZE + DURATION_SIZE];
 
@@ -100,6 +100,7 @@ void wait_for_event(uint32_t event) {
     uint32_t timeout = timeout_default;
     while (!check_i2c_event(event)) {
         if (--timeout == 0) {
+            printf("Resetted due to 0x%08lX timeout!\n", event);
             NVIC_SystemReset();
         }
     }
@@ -134,8 +135,7 @@ int main(void) {
         (void)I2C1->STAR2; // Clear ADDR flag
 
         for (int i = 0; i < notes; i++) {
-            uint8_t notes_properties[2];
-            printf("Sending [%d] with %d and %d\r\n", i, melody[i * 2], melody[i * 2 + 1]);
+            uint8_t notes_properties[2] = {0, 0};
             convert_int16_to_two_uint8(melody[i * 2], &notes_properties[0], &notes_properties[1]);
 
             wait_for_event(I2C_EVENT_MASTER_BYTE_TRANSMITTING);
@@ -146,6 +146,7 @@ int main(void) {
 
             wait_for_event(I2C_EVENT_MASTER_BYTE_TRANSMITTING);
             I2C1->DATAR = convert_int8_to_uint8(melody[i * 2 + 1]);
+            printf("Sent [%d] with %d and %d\r\n", i, melody[i * 2], melody[i * 2 + 1]);
         }
         printf("Sending finished!\r\n");
 
@@ -178,7 +179,9 @@ int main(void) {
             int16_t _note = convert_two_uint8_to_int16(RxData[0], RxData[1]);
             int8_t _duration = convert_uint8_to_int8(RxData[2]);
             printf("Note: %d, Duration: %d\n", _note, _duration);
+            // Delay_Ms(convertDuration(_duration));
             JOY_sound(_note, convertDuration(_duration));
+            Delay_Ms(60 + convertDuration(_duration)*0.1);
             I2C1->CTLR1 &= I2C1->CTLR1;
         }
     }

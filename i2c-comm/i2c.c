@@ -26,13 +26,14 @@
 
 /* I2C Communication Mode Selection */
 // #define I2C_MODE   HOST_MODE
-#define I2C_MODE 1
+#define I2C_MODE 0
 
 /* Global define */
 #define RXAdderss 0x02
 #define TxAdderss 0x02
 #define FREQ_SIZE 2
 #define DURATION_SIZE 1
+const uint32_t timeout_default = 1000000;
 /* Global Variable */
 uint8_t RxData[FREQ_SIZE + DURATION_SIZE];
 
@@ -95,7 +96,15 @@ uint8_t check_i2c_event(uint32_t event) {
     return (status & event) == event;
 }
 
-const uint32_t timeout_default = 1000000;
+void wait_for_event(uint32_t event) {
+    uint32_t timeout = timeout_default;
+    while (!check_i2c_event(event)) {
+        if (--timeout == 0) {
+            NVIC_SystemReset();
+        }
+    }
+}
+
 int main(void) {
     SystemInit();
 #if (I2C_MODE == HOST_MODE)
@@ -106,7 +115,6 @@ int main(void) {
         uint32_t timeout = timeout_default;
         while (I2C1->STAR1 & I2C_STAR2_BUSY) {
             if (--timeout == 0) {
-                IIC_Init(TxAdderss);
                 NVIC_SystemReset();
             }
         }
@@ -114,68 +122,34 @@ int main(void) {
         I2C1->CTLR1 |= I2C_CTLR1_START;
         printf("I2C generated start!\n");
 
-        timeout = timeout_default;
-        while (!check_i2c_event(I2C_EVENT_MASTER_MODE_SELECT)) {
-            if (--timeout == 0) {
-                IIC_Init(TxAdderss);
-                NVIC_SystemReset();
-            }
-        }
+        wait_for_event(I2C_EVENT_MASTER_MODE_SELECT);
         printf("I2C Event master mode selected!\n");
 
         I2C1->DATAR = RXAdderss;
         printf("I2C Write 7-bit Address\n");
-        timeout = timeout_default;
-        while (!check_i2c_event(I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)) {
-            if (--timeout == 0) {
-                IIC_Init(TxAdderss);
-                NVIC_SystemReset();
-            }
-        }
+
+        wait_for_event(I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED);
         printf("I2C Sent 7-bit Address\n");
 
         (void)I2C1->STAR2; // Clear ADDR flag
 
         for (int i = 0; i < notes; i++) {
-            timeout = timeout_default;
-            while (!check_i2c_event(I2C_EVENT_MASTER_BYTE_TRANSMITTING)) {
-                if (--timeout == 0) {
-                    IIC_Init(TxAdderss);
-                    NVIC_SystemReset();
-                }
-            }
-            uint8_t temp[2] = {0};
-            printf("Sent %d and %d\r\n", melody[i * 2], melody[i * 2 + 1]);
-            convert_int16_to_two_uint8(melody[i * 2], &temp[0], &temp[1]);
-            I2C1->DATAR = temp[0];
+            uint8_t notes_properties[2];
+            printf("Sending [%d] with %d and %d\r\n", i, melody[i * 2], melody[i * 2 + 1]);
+            convert_int16_to_two_uint8(melody[i * 2], &notes_properties[0], &notes_properties[1]);
 
-            timeout = timeout_default;
-            while (!check_i2c_event(I2C_EVENT_MASTER_BYTE_TRANSMITTING)) {
-                if (--timeout == 0) {
-                    IIC_Init(TxAdderss);
-                    NVIC_SystemReset();
-                }
-            }
-            I2C1->DATAR = temp[1];
+            wait_for_event(I2C_EVENT_MASTER_BYTE_TRANSMITTING);
+            I2C1->DATAR = notes_properties[0];
 
-            timeout = timeout_default;
-            while (!check_i2c_event(I2C_EVENT_MASTER_BYTE_TRANSMITTING)) {
-                if (--timeout == 0) {
-                    IIC_Init(TxAdderss);
-                    NVIC_SystemReset();
-                }
-            }
+            wait_for_event(I2C_EVENT_MASTER_BYTE_TRANSMITTING);
+            I2C1->DATAR = notes_properties[1];
+
+            wait_for_event(I2C_EVENT_MASTER_BYTE_TRANSMITTING);
             I2C1->DATAR = convert_int8_to_uint8(melody[i * 2 + 1]);
         }
         printf("Sending finished!\r\n");
 
-        timeout = timeout_default;
-        while (!check_i2c_event(I2C_EVENT_MASTER_BYTE_TRANSMITTED)) {
-            if (--timeout == 0) {
-                IIC_Init(TxAdderss);
-                NVIC_SystemReset();
-            }
-        }
+        wait_for_event(I2C_EVENT_MASTER_BYTE_TRANSMITTED);
         printf("I2C Event master byte transmitted!\r\n");
 
         I2C1->CTLR1 |= I2C_CTLR1_STOP;
@@ -188,13 +162,7 @@ int main(void) {
 
     while (1) {
         printf("Waiting for receiver address match!\n");
-        uint32_t timeout = timeout_default;
-        while (!check_i2c_event(I2C_EVENT_SLAVE_RECEIVER_ADDRESS_MATCHED)) {
-            if (--timeout == 0) {
-                IIC_Init(RXAdderss);
-                NVIC_SystemReset();
-            }
-        }
+        wait_for_event(I2C_EVENT_SLAVE_RECEIVER_ADDRESS_MATCHED);
         printf("I2C Event slave receiver address matched!\n");
 
         (void)I2C1->STAR2; // Clear ADDR flag
@@ -202,15 +170,9 @@ int main(void) {
         while (1) {
             uint8_t i = 0;
             while (i < 3) {
-                timeout = timeout_default;
-                while (!check_i2c_event(I2C_EVENT_SLAVE_BYTE_RECEIVED)) {
-                    if (--timeout == 0) {
-                        IIC_Init(RXAdderss);
-                        NVIC_SystemReset();
-                    }
-                }
+                wait_for_event(I2C_EVENT_SLAVE_BYTE_RECEIVED);
                 RxData[i] = I2C1->DATAR;
-                printf("Received! %d\r\n", RxData[i]);
+                printf("Received! %d\n", RxData[i]);
                 i++;
             }
             int16_t _note = convert_two_uint8_to_int16(RxData[0], RxData[1]);

@@ -156,7 +156,6 @@ void playAllMusic(void);
  *
  */
 const int melody[] = {
-
     NOTE_E4, 4, NOTE_E4, 4, NOTE_F4, 4, NOTE_G4, 4, // 1
     NOTE_G4, 4, NOTE_F4, 4, NOTE_E4, 4, NOTE_D4, 4, NOTE_C4, 4, NOTE_C4, 4, NOTE_D4, 4,
     NOTE_E4, 4, NOTE_E4, -4, NOTE_D4, 8, NOTE_D4, 2,
@@ -172,33 +171,12 @@ const int melody[] = {
     NOTE_E4, 4, NOTE_E4, 4, NOTE_F4, 4, NOTE_G4, 4, // 12
     NOTE_G4, 4, NOTE_F4, 4, NOTE_E4, 4, NOTE_D4, 4, NOTE_C4, 4, NOTE_C4, 4, NOTE_D4, 4,
     NOTE_E4, 4, NOTE_D4, -4, NOTE_C4, 8, NOTE_C4, 2};
+
 const int notes = sizeof(melody) / sizeof(melody[0]) / 2;
 // change this to make the song slower or faster
 const int tempo = 150;
 // this calculates the duration of a whole note in ms
 const int wholenote = (60000 * 4) / tempo;
-
-void playMusic(noterange_t range) {
-    int divider = 0;
-    int noteDuration = 0;
-    // iterate over the notes of the melody.
-    // Remember, the array is twice the number of notes (notes + durations)
-    for (int thisNote = range.start * 2; thisNote < range.end * 2; thisNote += 2) {
-
-        // calculates the duration of each note
-        divider = melody[thisNote + 1];
-        if (divider > 0) {
-            // regular note, just proceed
-            noteDuration = (wholenote) / divider;
-        }
-        else if (divider < 0) {
-            // dotted notes are represented with negative durations!!
-            noteDuration = (wholenote) / abs(divider);
-            noteDuration *= 1.5; // increases the duration in half for dotted notes
-        }
-        JOY_sound(melody[thisNote], noteDuration);
-    }
-}
 
 int convertDuration(int duration) {
     int noteDuration = 0;
@@ -212,6 +190,15 @@ int convertDuration(int duration) {
         noteDuration *= 1.5; // increases the duration in half for dotted notes
     }
     return noteDuration;
+}
+
+void playMusic(noterange_t range) {
+    // iterate over the notes of the melody.
+    // Remember, the array is twice the number of notes (notes + durations)
+    for (int thisNote = range.start * 2; thisNote < range.end * 2; thisNote += 2) {
+        JOY_sound(melody[thisNote], convertDuration(melody[thisNote + 1]));
+        Delay_Ms(10);
+    }
 }
 
 /**

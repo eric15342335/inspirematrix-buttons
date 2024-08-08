@@ -47,7 +47,7 @@ int main(void) {
     ADC_init();
     clear();
     for (int i = 0; i < NUM_LEDS; i++) {
-        set_color(i, color_divide(colors[i], 15));
+        set_color(i, color_divide(colors[i], 1));
     }
     WS2812BSimpleSend(GPIOC, 1, (uint8_t *)led_array, NUM_LEDS * 3);
     Delay_Ms(2000);

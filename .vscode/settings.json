@@ -19,6 +19,11 @@
         "ch32v003_gpio_branchless.h": "c",
         "music.h": "c",
         "rv.h": "c",
-        "complex": "c"
+        "complex": "c",
+        "buttons.h": "c",
+        "codebook.h": "c",
+        "mel_mx.h": "c",
+        "twiddles_res13.h": "c",
+        "algorithm": "c"
     },
 }

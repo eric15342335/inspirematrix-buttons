@@ -16,6 +16,7 @@
  */
 
 #include "ch32v003fun.h"
+#include "i2c_events.h"
 #include "music.h"
 
 #include <stdio.h>
@@ -33,7 +34,6 @@
 #define TxAdderss 0x02
 #define FREQ_SIZE 2
 #define DURATION_SIZE 1
-const uint32_t timeout_default = 5000000;
 /* Global Variable */
 uint8_t RxData[FREQ_SIZE + DURATION_SIZE];
 
@@ -85,25 +85,6 @@ void IIC_Init(uint16_t address) {
     I2C1->CTLR1 |= I2C_CTLR1_PE;  // Enable I2C
     I2C1->CTLR1 |= I2C_CTLR1_ACK; // Enable ACK
     printf("\nInitializing I2C...\n");
-}
-
-uint8_t check_i2c_event(uint32_t event) {
-    uint16_t STAR1, STAR2 __attribute__((unused));
-    STAR1 = I2C1->STAR1;
-    STAR2 = I2C1->STAR2;
-    uint32_t status = (STAR1 | (STAR2 << 16)) & 0x00FFFFFF;
-    // Check if the event matches the status
-    return (status & event) == event;
-}
-
-void wait_for_event(uint32_t event) {
-    uint32_t timeout = timeout_default;
-    while (!check_i2c_event(event)) {
-        if (--timeout == 0) {
-            printf("Resetted due to 0x%08lX timeout!\n", event);
-            NVIC_SystemReset();
-        }
-    }
 }
 
 int main(void) {

@@ -160,7 +160,7 @@ CFLAGS+= \
 	-I$(CH32V003FUN)/../extralibs \
 	-I$(CH32V003FUN) \
 	-nostdlib \
-	-I. -I../data -Wall $(EXTRA_CFLAGS) \
+	-I. -I$(CH32V003FUN)/../data -Wall $(EXTRA_CFLAGS) \
 	-Wshadow -Wswitch -Wfloat-equal
 
 LDFLAGS+=-T $(LINKER_SCRIPT) -Wl,--gc-sections

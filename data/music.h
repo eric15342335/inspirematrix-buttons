@@ -7,7 +7,7 @@
 
 void JOY_sound(uint16_t freq, uint16_t dur) {
     funPinMode(PD6, GPIO_Speed_50MHz | GPIO_CNF_OUT_PP);
-    const int sysclk = 1500000;
+    const int sysclk = 1000000;
     if (sysclk < freq)
         return;
     uint32_t delay_us = sysclk / 2 / freq;

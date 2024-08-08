@@ -1,6 +1,5 @@
 #include "ch32v003fun.h"
 #include <stdio.h>
-#include <stdlib.h>
 #include "twiddles_RES13.h"
 #include "mel_mx.h"  // weights to generate 20 mel-scale bins from 65 FFT128 bins
 #include "dctm_20x8_8bit.h" // discrete-cosine transform matrix, 20mel->10cep

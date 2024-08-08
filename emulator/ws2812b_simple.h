@@ -12,7 +12,7 @@ void WS2812BSimpleSend(GPIO_TypeDef * port, int pin, uint8_t * data, int len_in_
     (void)pin;
     if (len_in_bytes != NUM_LEDS * 3) {
         printf("Error: len_in_bytes != NUM_LEDS * 3\n");
-        exit(1);
+        while(1);
     }
     printf("\033[2J\033[H");
     printf("\\x");

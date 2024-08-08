@@ -13,15 +13,15 @@ typedef struct {
 } canvas_t;
 canvas_t canvas[NUM_LEDS] = {0};
 void flushCanvas(void) {
-    for (int i = 1; i < NUM_LEDS; i++) {
-        set_color(i - 1, canvas[i].color);
+    for (int i = 0; i < NUM_LEDS; i++) {
+        set_color(i, canvas[i].color);
     }
     WS2812BSimpleSend(GPIOC, 1, (uint8_t *)led_array, NUM_LEDS * 3);
 }
 
 void displayColorPalette(void) {
-    for (int i = 1; i < NUM_LEDS; i++) {
-        set_color(i - 1, colors[i]);
+    for (int i = 0; i < NUM_LEDS; i++) {
+        set_color(i, colors[i]);
     }
     WS2812BSimpleSend(GPIOC, 1, (uint8_t *)led_array, NUM_LEDS * 3);
     printf("Color palette displayed\n");
@@ -46,13 +46,11 @@ int main(void) {
     SystemInit();
     ADC_init();
     clear();
-    while (1) {
-        for (int i = 0; i < NUM_LEDS; i++) {
-            set_color(i, color_divide(colors[i], 10));
-        }
-        WS2812BSimpleSend(GPIOC, 1, (uint8_t *)led_array, NUM_LEDS * 3);
+    for (int i = 0; i < NUM_LEDS; i++) {
+        set_color(i, color_divide(colors[i], 15));
     }
-    Delay_Ms(500);
+    WS2812BSimpleSend(GPIOC, 1, (uint8_t *)led_array, NUM_LEDS * 3);
+    Delay_Ms(2000);
     printf("\nBackground Initialized\n");
     for (int i = 1; i < NUM_LEDS; i++) {
         canvas[i].layer = BACKGROUND_LAYER;

@@ -39,10 +39,10 @@ Projects:
     * PD2: SW (Analog to Digital PIN)
     * PC6: IN (WS2812B Data PIN)
 
-* `paint-exe`
-  * Paint on `InspireMatrix`
+* `paint`
+  * Paint on `InspireMatrix`.
 
-* `rv`
+* `rv-asm`
   * Coding RISC-V Compressed instructions on a board with buttons, and showing the result on the matrix.
   * Originally from <https://github.com/brian-smith-github/rv>
 

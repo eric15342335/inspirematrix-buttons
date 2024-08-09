@@ -8,8 +8,8 @@ ifeq ($(UNAME_S), Darwin)
     LDFLAGS += -framework CoreFoundation -framework ApplicationServices -pthread
 endif
 
-SRCS=asm.c rv.c
-TARGET=asm
+SRCS=rv-asm.c rv.c
+TARGET=rv-asm
 
 SRCS += $(wildcard ../emulator/*.c)
 ifneq ($(UNAME_S), Darwin)

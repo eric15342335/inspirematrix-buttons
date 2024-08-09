@@ -1,4 +1,4 @@
-# cl -MD -GL -D_HAS_EXCEPTIONS=0 -GR- -O1 -Oy- -W4 -sdl -I../emulator/ -I../data nums.c user32.lib
+# cl -MD -GL -D_HAS_EXCEPTIONS=0 -GR- -O1 -Oy- -W4 -sdl -I../emulator/ -I../data movingnum.c user32.lib
 CC=gcc
 INCLUDES=-I../emulator -I../data -I.
 CFLAGS=-g -Wall -Wextra -Wshadow -Wswitch -Wfloat-equal $(INCLUDES)
@@ -9,8 +9,8 @@ ifeq ($(UNAME_S), Darwin)
     LDFLAGS += -framework CoreFoundation -framework ApplicationServices -pthread
 endif
 
-SRCS=nums.c
-TARGET=nums
+SRCS=movingnum.c
+TARGET=movingnum
 
 SRCS += $(wildcard ../emulator/*.c)
 ifneq ($(UNAME_S), Darwin)

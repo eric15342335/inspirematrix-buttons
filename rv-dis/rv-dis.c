@@ -1,3 +1,7 @@
+/**
+ * Originally from `t2.c`.
+*/
+
 #include <stdio.h>
 
 #include "riscv-disas.h"

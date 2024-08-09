@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build-emulator:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest]
+        game: [movingnum, paint-cursor, paint-exe, rv, tic-tac-toe]
+
+    name: "Build ${{ matrix.game }} on ${{ matrix.os }}"
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Build emulator executable
+      shell: bash
+      run: |
+        cd ${{ matrix.game }}
+        make emulator
+        mkdir -p bin
+        if [ ${{ matrix.os }} == 'windows-latest' ]; then
+          mv ${{ matrix.game }}.exe bin/
+        else
+          mv ${{ matrix.game }} bin/
+        fi
+
+    - name: Upload executable
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.game }}-${{ matrix.os }}
+        path: ${{ matrix.game }}/bin
+        compression-level: 9
+        if-no-files-found: error

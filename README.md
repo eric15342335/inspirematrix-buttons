@@ -44,7 +44,7 @@ Projects:
 
 * `rv`
   * Coding RISC-V Compressed instructions on a board with buttons, and showing the result on the matrix.
-  * Originally from <<https://github.com/brian-smith-github/rv>>
+  * Originally from <https://github.com/brian-smith-github/rv>
 
 * `rv-dis` (Working in progress)
   * Disassemble RISC-V compressed instructions and print the result on an external OLED display (e.g. SSD1306).

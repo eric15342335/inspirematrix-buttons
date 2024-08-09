@@ -5,6 +5,7 @@ clean:
 	$(MAKE) -f Makefile-emulator clean
 
 emulator:
-	$(MAKE) -f Makefile-emulator
+	$(MAKE) -f Makefile-emulator clean
+	$(MAKE) -f Makefile-emulator 
 
 .PHONY: emulator

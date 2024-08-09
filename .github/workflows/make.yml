@@ -11,7 +11,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, windows-latest]
-        game: [movingnum, paint-cursor, paint-exe, rv, tic-tac-toe]
+        game: [movingnum, paint-cursor, paint, rv-asm, tic-tac-toe]
 
     name: "Build ${{ matrix.game }} on ${{ matrix.os }}"
 

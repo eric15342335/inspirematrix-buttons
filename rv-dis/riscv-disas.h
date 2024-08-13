@@ -363,7 +363,7 @@ typedef enum {
     rv_op_fcvt_d_l,
     rv_op_fcvt_d_lu,
     rv_op_fmv_d_x,
-    rv_op_flq,
+    /*rv_op_flq,
     rv_op_fsq,
     rv_op_fmadd_q,
     rv_op_fmsub_q,
@@ -396,7 +396,7 @@ typedef enum {
     rv_op_fcvt_q_l,
     rv_op_fcvt_q_lu,
     rv_op_fmv_x_q,
-    rv_op_fmv_q_x,
+    rv_op_fmv_q_x,*/
     rv_op_c_addi4spn,
     rv_op_c_fld,
     rv_op_c_lw,

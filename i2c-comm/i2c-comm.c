@@ -27,7 +27,7 @@
 
 /* I2C Communication Mode Selection */
 //#define I2C_MODE   HOST_MODE
-#define I2C_MODE 1
+#define I2C_MODE HOST_MODE
 
 /* Global define */
 #define RXAdderss 0x02

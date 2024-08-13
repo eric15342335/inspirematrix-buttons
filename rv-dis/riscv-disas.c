@@ -510,7 +510,7 @@ const rv_opcode_data opcode_data[] = {
     { "fcvt.d.l",  rv_codec_r_m,  rv_fmt_rm_frd_rs1,  NULL,  0},
     { "fcvt.d.lu",  rv_codec_r_m,  rv_fmt_rm_frd_rs1,  NULL,  0},
     { "fmv.d.x",  rv_codec_r,  rv_fmt_frd_rs1,  NULL,  0},
-    { "flq",  rv_codec_i,  rv_fmt_frd_offset_rs1,  NULL,  0},
+    /*{ "flq",  rv_codec_i,  rv_fmt_frd_offset_rs1,  NULL,  0},
     { "fsq",  rv_codec_s,  rv_fmt_frs2_offset_rs1,  NULL,  0},
     { "fmadd.q",  rv_codec_r4_m,  rv_fmt_rm_frd_frs1_frs2_frs3,  NULL,  0},
     { "fmsub.q",  rv_codec_r4_m,  rv_fmt_rm_frd_frs1_frs2_frs3,  NULL,  0},
@@ -543,7 +543,7 @@ const rv_opcode_data opcode_data[] = {
     { "fcvt.q.l",  rv_codec_r_m,  rv_fmt_rm_frd_rs1,  NULL,  0},
     { "fcvt.q.lu",  rv_codec_r_m,  rv_fmt_rm_frd_rs1,  NULL,  0},
     { "fmv.x.q",  rv_codec_r,  rv_fmt_rd_frs1,  NULL,  0},
-    { "fmv.q.x",  rv_codec_r,  rv_fmt_frd_rs1,  NULL,  0},
+    { "fmv.q.x",  rv_codec_r,  rv_fmt_frd_rs1,  NULL,  0},*/
     { "c.addi4spn",  rv_codec_ciw_4spn,  rv_fmt_rd_rs1_imm,  NULL,  rv_op_addi,  rvcd_imm_nz },
     { "c.fld",  rv_codec_cl_ld,  rv_fmt_frd_offset_rs1,  NULL,  rv_op_fld},
     { "c.lw",  rv_codec_cl_lw,  rv_fmt_rd_offset_rs1,  NULL,  rv_op_lw},

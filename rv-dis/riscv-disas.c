@@ -401,7 +401,7 @@ const rv_opcode_data opcode_data[] = {
     { "remud",  rv_codec_r,  rv_fmt_rd_rs1_rs2,  NULL,  0},
     { "lr.w",  rv_codec_r_l,  rv_fmt_aqrl_rd_rs1,  NULL,  0},
     { "sc.w",  rv_codec_r_a,  rv_fmt_aqrl_rd_rs2_rs1,  NULL,  0},
-    { "amoswap.w",  rv_codec_r_a,  rv_fmt_aqrl_rd_rs2_rs1,  NULL,  0},
+    /*{ "amoswap.w",  rv_codec_r_a,  rv_fmt_aqrl_rd_rs2_rs1,  NULL,  0},
     { "amoadd.w",  rv_codec_r_a,  rv_fmt_aqrl_rd_rs2_rs1,  NULL,  0},
     { "amoxor.w",  rv_codec_r_a,  rv_fmt_aqrl_rd_rs2_rs1,  NULL,  0},
     { "amoor.w",  rv_codec_r_a,  rv_fmt_aqrl_rd_rs2_rs1,  NULL,  0},
@@ -431,7 +431,7 @@ const rv_opcode_data opcode_data[] = {
     { "amomin.q",  rv_codec_r_a,  rv_fmt_aqrl_rd_rs2_rs1,  NULL,  0},
     { "amomax.q",  rv_codec_r_a,  rv_fmt_aqrl_rd_rs2_rs1,  NULL,  0},
     { "amominu.q",  rv_codec_r_a,  rv_fmt_aqrl_rd_rs2_rs1,  NULL,  0},
-    { "amomaxu.q",  rv_codec_r_a,  rv_fmt_aqrl_rd_rs2_rs1,  NULL,  0},
+    { "amomaxu.q",  rv_codec_r_a,  rv_fmt_aqrl_rd_rs2_rs1,  NULL,  0},*/
     { "ecall",  rv_codec_none,  rv_fmt_none,  NULL,  0},
     { "ebreak",  rv_codec_none,  rv_fmt_none,  NULL,  0},
     { "uret",  rv_codec_none,  rv_fmt_none,  NULL,  0},
@@ -2099,7 +2099,7 @@ static void decode_inst_format(char *buf, size_t buflen, size_t tab, rv_decode *
     char tmp[64];
     const char *fmt;
 
-    size_t len = inst_length(dec->inst);
+    /*size_t len = inst_length(dec->inst);
     switch (len) {
     case 2:
         snprintf(buf, buflen, INST_FMT_2, dec->inst);
@@ -2113,7 +2113,7 @@ static void decode_inst_format(char *buf, size_t buflen, size_t tab, rv_decode *
     default:
         snprintf(buf, buflen, INST_FMT_8, dec->inst);
         break;
-    }
+    }*/
 
     fmt = opcode_data[dec->op].format;
     // null-pointer check
@@ -2167,7 +2167,7 @@ static void decode_inst_format(char *buf, size_t buflen, size_t tab, rv_decode *
             append(buf, tmp, buflen);
             break;
         case 'i':
-            snprintf(tmp, sizeof(tmp), "l%d", dec->imm);
+            snprintf(tmp, sizeof(tmp), "%d", dec->imm);
             append(buf, tmp, buflen);
             break;
         case 'o':
@@ -2176,7 +2176,7 @@ static void decode_inst_format(char *buf, size_t buflen, size_t tab, rv_decode *
             while (strlen(buf) < tab * 2) {
                 append(buf, " ", buflen);
             }
-            snprintf(tmp, sizeof(tmp), "# 0x%" PRIx64,
+            snprintf(tmp, sizeof(tmp), "# 0x%" PRIxFAST16,
                 dec->pc + dec->imm);
             append(buf, tmp, buflen);
             break;
@@ -2308,5 +2308,8 @@ void disasm_inst(char *buf, size_t buflen, rv_isa isa, uint64_t pc, rv_inst inst
     decode_inst_operands(&dec);
     decode_inst_decompress(&dec, isa);
     decode_inst_lift_pseudo(&dec);
-    decode_inst_format(buf, buflen, 32, &dec);
+    // tab is 21 because it is a magic number related to the
+    // font on OLEDs.
+    // OLED horizontal is 64
+    decode_inst_format(buf, buflen, 21, &dec);
 }

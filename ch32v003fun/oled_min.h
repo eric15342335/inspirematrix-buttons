@@ -78,6 +78,8 @@ void OLED_printB(uint8_t value);  // print hex byte value
 void OLED_scrollDisplay(void);
 void OLED_clear(void);
 
+#define _OLED_refresh_display()
+
 #ifdef __cplusplus
 };
 #endif

@@ -12,22 +12,31 @@
 
 void dissassemble(uint64_t pc, const uint8_t *data, size_t data_len)
 {
-    char buf[128] = { 0 };
     size_t offset = 0, inst_len;
     rv_inst inst;
     while (offset < data_len)
     {
+        char buf[128] = {'\0'};
         inst_fetch(data + offset, &inst, &inst_len);
         disasm_inst(buf, sizeof(buf), rv32, pc + offset, inst);
+
         OLED_clear();
-        OLED_print("0x");
+
+        OLED_print("PC   : 0x");
         OLED_printW(pc + offset);
-        OLED_print(":");
+        printf("PC: 0x%lx", pc + offset);
+
+        OLED_print("\nBytes: 0x");
+        OLED_printW(inst);
+        printf("\nBytes: 0x%04x", inst);
+
+        OLED_print("\nDisassembly:\n");
         OLED_println(buf);
-        offset += inst_len;
+        printf("\nDisassembly:\n%s\n", buf);
         _OLED_refresh_display();
-        printf("0x%" PRIx32 ":  %s\n", pc + offset, buf);
-        Delay_Ms(1000);
+        
+        offset += inst_len;
+        Delay_Ms(700);
     }
 }
 
@@ -72,4 +81,5 @@ int main()
     SystemInit();
     OLED_init();
     t1();
+    NVIC_SystemReset();
 }

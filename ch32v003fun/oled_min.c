@@ -129,18 +129,18 @@ const uint8_t OLED_FONT[] = {
 uint8_t line, column, scroll;
 
 // OLED set cursor to line start
-void OLED_setline(uint8_t line) {
+void OLED_setline(uint8_t _line) {
   I2C_start(OLED_ADDR);                   // start transmission to OLED
   I2C_write(OLED_CMD_MODE);               // set command mode
-  I2C_write(OLED_PAGE + line);            // set line
+  I2C_write(OLED_PAGE + _line);            // set line
   I2C_write(0x00); I2C_write(0x10);       // set column to "0"
   I2C_stop();                             // stop transmission
 }
 
 // OLED clear line
-void OLED_clearline(uint8_t line) {
+void OLED_clearline(uint8_t _line) {
   uint8_t i;
-  OLED_setline(line);                     // set cursor to line start
+  OLED_setline(_line);                     // set cursor to line start
   I2C_start(OLED_ADDR);                   // start transmission to OLED
   I2C_write(OLED_DAT_MODE);               // set data mode
   for(i=128; i; i--) I2C_write(0x00);     // clear the line

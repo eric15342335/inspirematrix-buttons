@@ -254,7 +254,7 @@ typedef enum {
     rv_op_remud,
     rv_op_lr_w,
     rv_op_sc_w,
-    rv_op_amoswap_w,
+    /*rv_op_amoswap_w,
     rv_op_amoadd_w,
     rv_op_amoxor_w,
     rv_op_amoor_w,
@@ -284,7 +284,7 @@ typedef enum {
     rv_op_amomin_q,
     rv_op_amomax_q,
     rv_op_amominu_q,
-    rv_op_amomaxu_q,
+    rv_op_amomaxu_q,*/
     rv_op_ecall,
     rv_op_ebreak,
     rv_op_uret,

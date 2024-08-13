@@ -5,7 +5,7 @@
 #include <stdio.h>
 
 #include "riscv-disas.h"
-#include "ch32v003fun.h"
+//#include "driver.h"
 
 #define array_size(arr) (sizeof(arr) / sizeof(arr[0]))
 
@@ -23,26 +23,24 @@ void dissassemble(uint64_t pc, const uint8_t *data, size_t data_len)
     }
 }
 
-uint16_t program[] = {
+const uint16_t program[] = {
+    // 0: c.li a0, 5
     0x4515,
     // 2: c.li a1, 4
     0x4591,
-    // copy a0 to a2
-    // 4: c.andi a2, 0
-    0x8a01,
-    // 6: c.or a2, a0
+    // 4: c.or a2, a0
     0x8e49,
-    // 8: c.addi a1, -1
+    // 6: c.addi a1, -1
     0x15fd,
-    // 10: c.beqz a1, 8
+    // 8: c.beqz a1, 8
     0xc581,
-    // 12: c.addi a1, -1
+    // 10: c.addi a1, -1
     0x15fd,
-    // 14: c.add a0, a2
+    // 12: c.add a0, a2
     0x9532,
-    // 16: c.j -6
+    // 14: c.j -6
     0xbfed,
-    // 18: ecall
+    // 16: ecall
     0x0073
 };
 
@@ -63,6 +61,6 @@ void t1()
 
 int main()
 {
-    SystemInit();
+    //SystemInit();
     t1();
 }

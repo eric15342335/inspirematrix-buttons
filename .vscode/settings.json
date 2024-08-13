@@ -24,6 +24,7 @@
         "codebook.h": "c",
         "mel_mx.h": "c",
         "twiddles_res13.h": "c",
-        "algorithm": "c"
+        "algorithm": "c",
+        "inttypes.h": "c"
     },
 }

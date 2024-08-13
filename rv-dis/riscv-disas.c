@@ -25,6 +25,28 @@
 
 #include "riscv-disas.h"
 
+char* strncat(char* dest, const char* src, size_t n) {
+    char* dest_ptr = dest;
+    
+    // Move the pointer to the end of the destination string
+    while (*dest_ptr != '\0') {
+        dest_ptr++;
+    }
+    
+    // Copy characters from the source string to the destination string
+    while (*src != '\0' && n > 0) {
+        *dest_ptr = *src;
+        dest_ptr++;
+        src++;
+        n--;
+    }
+    
+    // Add null terminator to the end of the destination string
+    *dest_ptr = '\0';
+    
+    return dest;
+}
+
 typedef struct {
     const int op;
     const rvc_constraint *constraints;
@@ -998,7 +1020,7 @@ static void decode_inst_opcode(rv_decode *dec, rv_isa isa)
         break;
     case 3:
         switch (((inst >> 2) & 0b11111)) {
-        case 0:
+        /*case 0:
             switch (((inst >> 12) & 0b111)) {
             case 0: op = rv_op_lb; break;
             case 1: op = rv_op_lh; break;
@@ -1413,7 +1435,7 @@ static void decode_inst_opcode(rv_decode *dec, rv_isa isa)
             case 0: op = rv_op_jalr; break;
             }
             break;
-        case 27: op = rv_op_jal; break;
+        case 27: op = rv_op_jal; break;*/
         case 28:
             switch (((inst >> 12) & 0b111)) {
             case 0:
@@ -1425,7 +1447,7 @@ static void decode_inst_opcode(rv_decode *dec, rv_isa isa)
                     case 64: op = rv_op_uret; break;
                     }
                     break;
-                case 256:
+                /*case 256:
                     switch (((inst >> 20) & 0b11111)) {
                     case 2:
                         switch (((inst >> 15) & 0b11111)) {
@@ -1455,18 +1477,18 @@ static void decode_inst_opcode(rv_decode *dec, rv_isa isa)
                     switch (((inst >> 15) & 0b1111111111)) {
                     case 576: op = rv_op_dret; break;
                     }
-                    break;
+                    break;*/
                 }
                 break;
-            case 1: op = rv_op_csrrw; break;
+            /*case 1: op = rv_op_csrrw; break;
             case 2: op = rv_op_csrrs; break;
             case 3: op = rv_op_csrrc; break;
             case 5: op = rv_op_csrrwi; break;
             case 6: op = rv_op_csrrsi; break;
-            case 7: op = rv_op_csrrci; break;
+            case 7: op = rv_op_csrrci; break;*/
             }
             break;
-        case 30:
+        /*case 30:
             switch (((inst >> 22) & 0b1111111000) | ((inst >> 12) & 0b0000000111)) {
             case 0: op = rv_op_addd; break;
             case 1: op = rv_op_slld; break;
@@ -1480,6 +1502,7 @@ static void decode_inst_opcode(rv_decode *dec, rv_isa isa)
             case 261: op = rv_op_srad; break;
             }
             break;
+        */
         }
         break;
     }
@@ -2092,6 +2115,13 @@ static void decode_inst_format(char *buf, size_t buflen, size_t tab, rv_decode *
     }
 
     fmt = opcode_data[dec->op].format;
+    // null-pointer check
+    if (!fmt) {
+        // Print opcode_data[dec->op] info
+        printf("\nDEBUG: %d\n", opcode_data[dec->op].name);
+        return;
+    }
+
     while (*fmt) {
         switch (*fmt) {
         case 'O':

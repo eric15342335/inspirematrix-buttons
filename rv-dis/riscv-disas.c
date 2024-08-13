@@ -77,12 +77,12 @@ static const char rv_ireg_name_sym[32][5] = {
     "s8",   "s9",   "s10",  "s11",  "t3",   "t4",   "t5",   "t6",
 };
 
-static const char rv_freg_name_sym[32][5] = {
+/*static const char rv_freg_name_sym[32][5] = {
     "ft0",  "ft1",  "ft2",  "ft3",  "ft4",  "ft5",  "ft6",  "ft7",
     "fs0",  "fs1",  "fa0",  "fa1",  "fa2",  "fa3",  "fa4",  "fa5",
     "fa6",  "fa7",  "fs2",  "fs3",  "fs4",  "fs5",  "fs6",  "fs7",
     "fs8",  "fs9",  "fs10", "fs11", "ft8",  "ft9",  "ft10", "ft11",
-};
+};*/
 
 /* instruction formats */
 
@@ -2147,16 +2147,20 @@ static void decode_inst_format(char *buf, size_t buflen, size_t tab, rv_decode *
             append(buf, rv_ireg_name_sym[dec->rs2], buflen);
             break;
         case '3':
-            append(buf, rv_freg_name_sym[dec->rd], buflen);
+            //append(buf, rv_freg_name_sym[dec->rd], buflen);
+            printf("DEBUG: %d\n", __LINE__);
             break;
         case '4':
-            append(buf, rv_freg_name_sym[dec->rs1], buflen);
+            //append(buf, rv_freg_name_sym[dec->rs1], buflen);
+            printf("DEBUG: %d\n", __LINE__);
             break;
         case '5':
-            append(buf, rv_freg_name_sym[dec->rs2], buflen);
+            //append(buf, rv_freg_name_sym[dec->rs2], buflen);
+            printf("DEBUG: %d\n", __LINE__);
             break;
         case '6':
-            append(buf, rv_freg_name_sym[dec->rs3], buflen);
+            //append(buf, rv_freg_name_sym[dec->rs3], buflen);
+            printf("DEBUG: %d\n", __LINE__);
             break;
         case '7':
             snprintf(tmp, sizeof(tmp), "%d", dec->rs1);
@@ -2188,7 +2192,7 @@ static void decode_inst_format(char *buf, size_t buflen, size_t tab, rv_decode *
         }
         case 'r':
             switch (dec->rm) {
-            case rv_rm_rne:
+            /*case rv_rm_rne:
                 append(buf, "rne", buflen);
                 break;
             case rv_rm_rtz:
@@ -2205,13 +2209,14 @@ static void decode_inst_format(char *buf, size_t buflen, size_t tab, rv_decode *
                 break;
             case rv_rm_dyn:
                 append(buf, "dyn", buflen);
-                break;
+                break;*/
             default:
-                append(buf, "inv", buflen);
+                //append(buf, "inv", buflen);
+                printf("DEBUG: %d\n", __LINE__);
                 break;
             }
             break;
-        case 'p':
+        /*case 'p':
             if (dec->pred & rv_fence_i) {
                 append(buf, "i", buflen);
             }
@@ -2238,7 +2243,7 @@ static void decode_inst_format(char *buf, size_t buflen, size_t tab, rv_decode *
             if (dec->succ & rv_fence_w) {
                 append(buf, "w", buflen);
             }
-            break;
+            break;*/
         case '\t':
             while (strlen(buf) < tab) {
                 append(buf, " ", buflen);

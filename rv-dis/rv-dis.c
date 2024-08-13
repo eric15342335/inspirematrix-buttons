@@ -6,6 +6,7 @@
 
 #include "riscv-disas.h"
 #include "driver.h"
+#include "oled_min.h"
 
 #define array_size(arr) (sizeof(arr) / sizeof(arr[0]))
 
@@ -18,8 +19,15 @@ void dissassemble(uint64_t pc, const uint8_t *data, size_t data_len)
     {
         inst_fetch(data + offset, &inst, &inst_len);
         disasm_inst(buf, sizeof(buf), rv32, pc + offset, inst);
-        printf("0x%" PRIx32 ":  %s\n", pc + offset, buf);
+        OLED_clear();
+        OLED_print("0x");
+        OLED_printW(pc + offset);
+        OLED_print(":");
+        OLED_println(buf);
         offset += inst_len;
+        _OLED_refresh_display();
+        printf("0x%" PRIx32 ":  %s\n", pc + offset, buf);
+        Delay_Ms(1000);
     }
 }
 
@@ -56,11 +64,12 @@ void t1()
         inst_arr[i * 2] = program[i] & 0xff;
         inst_arr[i * 2 + 1] = program[i] >> 8;
     }
-    dissassemble(0x10078, inst_arr, array_size(inst_arr));
+    dissassemble(0x0, inst_arr, array_size(inst_arr));
 }
 
 int main()
 {
     SystemInit();
+    OLED_init();
     t1();
 }

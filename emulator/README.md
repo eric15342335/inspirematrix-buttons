@@ -4,11 +4,14 @@
 * 'Emulator' folder is for compiling Windows and MacOs version
 
 ## How to use
-* Type ```make emulator``` for compiling the emulator version on Windows/MacOs
+
+* Type `make emulator` for compiling the emulator version on Windows/MacOs
 * Run the executable
 
 ## Controls
+
 press keyboard to control the matrix emulator, listing out the keys
+
 * I -> up
 * J -> left
 * K -> down
@@ -18,7 +21,8 @@ press keyboard to control the matrix emulator, listing out the keys
 * O -> YKey
 
 for the buttons on the matrix, it follows the coding writting on the circuit board
-![circuit board](/inspire_matrix.jpeg) <br />
+![circuit board](/inspire_matrix.jpeg)
+
 first press ```ABCD``` on button to choose row, the press ```0-F``` to choose the specific button in HEX
 
 ## Notes for emulator

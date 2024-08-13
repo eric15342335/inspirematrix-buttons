@@ -45,21 +45,21 @@ typedef enum {
     rv128
 } rv_isa;
 
-typedef enum {
+/*typedef enum {
     rv_rm_rne = 0,
     rv_rm_rtz = 1,
     rv_rm_rdn = 2,
     rv_rm_rup = 3,
     rv_rm_rmm = 4,
     rv_rm_dyn = 7,
-} rv_rm;
+} rv_rm;*/
 
-typedef enum {
+/*typedef enum {
     rv_fence_i = 8,
     rv_fence_o = 4,
     rv_fence_r = 2,
     rv_fence_w = 1,
-} rv_fence;
+} rv_fence;*/
 
 typedef enum {
     rv_ireg_zero,

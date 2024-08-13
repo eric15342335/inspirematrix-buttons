@@ -15,7 +15,7 @@
 #define I2C_MODE I2C_MASTER_PROGRAM
 
 #define MAIN_CPU_I2C_ADDRESS 0x02
-#define SLAVE_CPU_I2C_ADDRESS 0x03
+#define SLAVE_CPU_I2C_ADDRESS 0x04
 #define OLED_I2C_ADDRESS OLED_ADDR // Just a note to myself
 
 void IIC_Init(uint16_t address) {

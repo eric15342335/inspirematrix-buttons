@@ -18,8 +18,6 @@ endif
 
 
 MINICHLINK?=$(CH32V003FUN)/../minichlink
-
-CFLAGS?=-g -Os -flto -ffunction-sections -fdata-sections -fmessage-length=0 -msmall-data-limit=8
 LDFLAGS+=-Wl,--print-memory-usage
 
 ifeq ($(TARGET_MCU),CH32V003)

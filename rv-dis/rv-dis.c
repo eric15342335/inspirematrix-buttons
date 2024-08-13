@@ -5,7 +5,7 @@
 #include <stdio.h>
 
 #include "riscv-disas.h"
-//#include "driver.h"
+#include "driver.h"
 
 #define array_size(arr) (sizeof(arr) / sizeof(arr[0]))
 
@@ -61,6 +61,6 @@ void t1()
 
 int main()
 {
-    //SystemInit();
+    SystemInit();
     t1();
 }

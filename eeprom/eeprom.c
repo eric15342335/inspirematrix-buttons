@@ -3,6 +3,13 @@
 #include "ch32v003_i2c.h"
 // obtained from i2c_scan(), before shifting by 1 bit
 #define EEPROM_ADDR 0x51
+
+/**
+ * @brief AT24C256 (EEPROM) forbids sequential write across multiple pages (one page = 64 bytes)
+ * This is a wrapper function for the original i2c_write() in ch32v003_i2c.h
+ */
+i2c_result_e i2c_write_pages(uint16_t devAddr, uint16_t regAddr, i2c_regAddr_bytes_e regAddrBytes, uint8_t *data, uint8_t sz);
+
 int main(void) {
     while (1) {
         SystemInit();
@@ -15,11 +22,8 @@ int main(void) {
         Delay_Ms(1000);
 
         #define addr_begin 0
-        #define addr_end 64 // warning: sequential write is limited to 64 bytes
-        #define reg_size (addr_end - addr_begin + 1) // must <= 64
-        #if reg_size > 64
-        #pragma warning "reg_size must be <= 64"
-        #endif
+        #define addr_end 64
+        #define reg_size (addr_end - addr_begin + 1)
         #define matrix_hori (reg_size / 6)
 
         // write
@@ -28,7 +32,7 @@ int main(void) {
             data[i] = i;
         }
         result =
-            i2c_write(EEPROM_ADDR, addr_begin, I2C_REGADDR_2B, data, reg_size);
+            i2c_write_pages(EEPROM_ADDR, addr_begin, I2C_REGADDR_2B, data, reg_size);
         printf("write result: %d\n", result);
         printf("Written data as matrix:\n");
         for (int i = 0; i < reg_size; i++) {
@@ -55,4 +59,26 @@ int main(void) {
         printf("\n");
         Delay_Ms(1000);
     }
+}
+
+
+i2c_result_e i2c_write_pages(uint16_t devAddr, uint16_t regAddr, i2c_regAddr_bytes_e regAddrBytes, uint8_t *data, uint8_t sz) {
+    i2c_result_e result = I2C_RESULT_OK;
+    uint8_t *data_ptr = data;
+    uint8_t *data_end = data + sz;
+    while (data_ptr < data_end) {
+        uint8_t page_sz = data_end - data_ptr;
+        if (page_sz > 64) {
+            page_sz = 64;
+        }
+        result = i2c_write(devAddr, regAddr, regAddrBytes, data_ptr, page_sz);
+        if (result != I2C_RESULT_OK) {
+            break;
+        }
+        data_ptr += page_sz;
+        regAddr += page_sz;
+        //
+        Delay_Ms(5);
+    }
+    return result;
 }

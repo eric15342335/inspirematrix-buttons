@@ -27,6 +27,7 @@
         "algorithm": "c",
         "inttypes.h": "c",
         "i2c_events.h": "c",
-        "riscv-disas.h": "c"
+        "riscv-disas.h": "c",
+        "ch32v003_i2c.h": "c"
     },
 }

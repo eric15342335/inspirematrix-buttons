@@ -6,7 +6,7 @@ TARGET_EXT?=c
 CH32V003FUN?=../ch32v003fun
 
 WRITE_SECTION?=flash
-SYSTEM_C?=$(CH32V003FUN)/ch32v003fun.c
+SYSTEM_C?=$(CH32V003FUN)/*.c
 CFLAGS?=-g -Os -flto -ffunction-sections -fdata-sections -fmessage-length=0 -msmall-data-limit=8
 
 # Fedora places newlib in a different location

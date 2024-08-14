@@ -21,7 +21,14 @@ int toggle[64] = {0};
 uint16_t act_func(void) { return GPIO_analogRead(GPIO_Ain0_A2); }
 int main(void) {
     SystemInit();
-    GPIO_ADCinit();
+    JOY_setseed_default();
+    while (1) {
+        fill_color((color_t){JOY_random() % 10, JOY_random() % 10, JOY_random() % 10});
+        WS2812BSimpleSend(GPIOC, 1, (uint8_t *)led_array, NUM_LEDS * 3);
+        printf("Hello, World!\n");
+        Delay_Ms(300);
+    }
+    //GPIO_ADCinit();
     while (1) {
         clear();
         for (int i = 0; i < NUM_LEDS; i++) {

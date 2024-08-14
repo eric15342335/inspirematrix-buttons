@@ -171,6 +171,11 @@ $(TARGET).bin : $(TARGET).elf
 	$(PREFIX)-objcopy -O ihex $< $(TARGET).hex
 	$(MAKE) elf-size
 
+cppcheck:
+	cppcheck --enable=all -I$(CH32V003FUN) -I$(CH32V003FUN)/../data \
+	-I. $(TARGET).$(TARGET_EXT) $(ADDITIONAL_C_FILES) \
+	--force --quiet --suppress=unusedFunction --suppress=missingIncludeSystem --check-level=exhaustive
+
 ifeq ($(OS),Windows_NT)
 closechlink :
 	-taskkill /F /IM minichlink.exe /T

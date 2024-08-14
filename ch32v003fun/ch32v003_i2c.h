@@ -458,6 +458,66 @@ void I2C1_ER_IRQHandler(void)
 
 
 #endif // CH32V003_I2C_MODE_IRQ
+
+// CUSTOM IMPLEMENTATION FOR EEPROM AT24C256
+
+
+/**
+ * @brief AT24C256 (EEPROM) forbids sequential write across multiple pages (one page = 64 bytes)
+ * This is a wrapper function for the original i2c_write() in ch32v003_i2c.h
+ */
+i2c_result_e i2c_write_pages(uint16_t devAddr, uint16_t regAddr, i2c_regAddr_bytes_e regAddrBytes, uint8_t *data, uint16_t sz);
+
+/**
+ * @brief Original function i2c_read() takes sz parameter as uint8_t, which is not enough for EEPROM with 32KB capacity
+ * This is a wrapper function for the original i2c_read() in ch32v003_i2c.h
+ */
+i2c_result_e i2c_read_pages(uint16_t devAddr, uint16_t regAddr, i2c_regAddr_bytes_e regAddrBytes, uint8_t *data, uint16_t sz);
+
+i2c_result_e i2c_write_pages(uint16_t devAddr, uint16_t regAddr, i2c_regAddr_bytes_e regAddrBytes, uint8_t *data, uint16_t sz) {
+    i2c_result_e result = I2C_RESULT_OK;
+    uint8_t *data_ptr = data;
+    uint8_t *data_end = data + sz;
+    while (data_ptr < data_end) {
+        uint16_t page_sz = data_end - data_ptr;
+        if (page_sz > 64) {
+            page_sz = 64;
+        }
+        result = i2c_write(devAddr, regAddr, regAddrBytes, data_ptr, page_sz);
+        if (result != I2C_RESULT_OK) {
+            break;
+        }
+        data_ptr += page_sz;
+        regAddr += page_sz;
+        //
+        Delay_Ms(5);
+    }
+    return result;
+}
+
+i2c_result_e i2c_read_pages(uint16_t devAddr, uint16_t regAddr, i2c_regAddr_bytes_e regAddrBytes, uint8_t *data, uint16_t sz) {
+    i2c_result_e result = I2C_RESULT_OK;
+    uint8_t *data_ptr = data;
+    uint8_t *data_end = data + sz;
+    while (data_ptr < data_end) {
+        uint16_t page_sz = data_end - data_ptr;
+        if (page_sz > 64) {
+            page_sz = 64;
+        }
+        result = i2c_read(devAddr, regAddr, regAddrBytes, data_ptr, page_sz);
+        if (result != I2C_RESULT_OK) {
+            break;
+        }
+        data_ptr += page_sz;
+        regAddr += page_sz;
+        //
+        Delay_Ms(5);
+    }
+    return result;
+}
+
+
+
 #endif // CH32V003_I2C_IMPLEMENTATION
 
 #endif // _CH32V003_I2C_H

@@ -11,10 +11,10 @@
 // first 8 pages are used for status
 void init_storage(void);
 
-// save paint data to eeprom, paint 1 stored in page 8 (out of page 0 to 511)
+// save paint data to eeprom, paint 0 stored in page 8 (out of page 0 to 511)
 void save_paint(uint16_t paint_no, color_t *data);
 
-// load paint data from eeprom, paint 1 stored in page 8 (out of page 0 to 511)
+// load paint data from eeprom, paint 0 stored in page 8 (out of page 0 to 511)
 void load_paint(uint16_t paint_no, color_t *data);
 
 // set page status to 0 or 1

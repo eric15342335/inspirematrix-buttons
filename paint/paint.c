@@ -5,7 +5,7 @@
 
 #include <stdio.h>
 
-#define LED_PINS GPIOC, 1
+#define LED_PINS GPIOA, 2
 
 color_t foreground = {100, 0, 0};
 color_t background = {0, 0, 100};
@@ -32,7 +32,7 @@ void displayColorPalette(void) {
 void colorPaletteSelection(color_t * selectedColor) {
     displayColorPalette();
     while (1) {
-        int8_t button = matrix_pressed(ADC_read_smallboard);
+        int8_t button = matrix_pressed_two();
         if (button != no_button_pressed) {
             *selectedColor = colors[button];
             break;
@@ -54,7 +54,7 @@ int main(void) {
     WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
     Delay_Ms(2000);
     printf("\nBackground Initialized\n");
-    for (int i = 1; i < NUM_LEDS; i++) {
+    for (int i = 0; i < NUM_LEDS; i++) {
         canvas[i].layer = BACKGROUND_LAYER;
         canvas[i].color = (color_t){0, 0, 0};
     }
@@ -64,7 +64,7 @@ int main(void) {
         // printf("Foreground color: R:%d G:%d B:%d\n", foreground.r, foreground.g,
         // foreground.b); printf("Background color: R:%d G:%d B:%d\n", background.r,
         // background.g, background.b);
-        int8_t user_input = matrix_pressed(ADC_read_smallboard);
+        int8_t user_input = matrix_pressed_two();
         if (user_input == no_button_pressed) {
             if (JOY_Y_pressed()) {
                 colorPaletteSelection(&foreground);

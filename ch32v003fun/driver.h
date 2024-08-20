@@ -25,7 +25,7 @@ uint32_t gpio_act_pressed(void) {
     return !(GPIOA->INDR >> 2);
 }
 void ADC_init(void) {
-    gpio_init_act();
+    // gpio_init_act();
     GPIO_ADCinit();
 }
 
@@ -46,7 +46,6 @@ uint16_t multiple_ADC_reads(uint16_t (*matrix)(void), uint8_t samples) {
     uint64_t adc = 0;
     for (int8_t i = 0; i < samples; i++) {
         uint16_t _adc = matrix();
-        //printf("ADC: %d\n", _adc);
         adc += _adc;
     }
     adc /= samples;
@@ -109,6 +108,7 @@ uint16_t upper_half_ADC_channel(void) {return GPIO_analogRead(GPIO_Ain4_D3);}
 int8_t matrix_pressed_two(void) {
     const int8_t samples = 5;
     uint16_t adc = multiple_ADC_reads(lower_half_ADC_channel, samples);
+    printf("lower ADC: %d\n", adc);
     #define LOWER_HALF_BUTTONS 32
     for (int8_t i = 0; i < LOWER_HALF_BUTTONS; i++) {
         int deviation = abs(adc - buttons[i]);
@@ -117,6 +117,7 @@ int8_t matrix_pressed_two(void) {
         }
     }
     adc = multiple_ADC_reads(upper_half_ADC_channel, samples);
+    printf("upper ADC: %d\n", adc);
     #define UPPER_HALF_BUTTONS_START 32
     for (int8_t i = UPPER_HALF_BUTTONS_START; i < NUM_BUTTONS; i++) {
         int deviation = abs(adc - buttons[i]);

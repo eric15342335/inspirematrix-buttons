@@ -95,8 +95,8 @@ const uint8_t font_D[font_size] = {
 
 // clang-format on
 
-const uint8_t * font_list[] = {font_1, font_2, font_3, font_4, font_5, font_6, font_7,
-    font_8, font_9, font_0, font_X, font_D};
+const uint8_t * font_list[] = {font_0, font_1, font_2, font_3, font_4, font_5, font_6, font_7,
+    font_8, font_9, font_X, font_D};
 
 const int num_fonts = sizeof(font_list) / sizeof(font_list[0]);
 

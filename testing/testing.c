@@ -26,11 +26,9 @@ uint16_t act_func(void) { return GPIO_analogRead(GPIO_Ain0_A2); }
 uint16_t external_matrix_button(void) { return GPIO_analogRead(GPIO_Ain1_A1); }
 int main(void) {
     SystemInit();
-    while(1) {
-        i2c_init();
-        i2c_scan();
-        Delay_Ms(1000);
-    }
+    i2c_init();
+    i2c_scan();
+    Delay_Ms(1000);
     while(0) {
         playAllMusic();
     }

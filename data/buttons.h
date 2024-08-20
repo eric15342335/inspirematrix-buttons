@@ -91,10 +91,10 @@
 #define BUTTON_63 62
 #define BUTTON_X 20
 #define BUTTON_Y 10
-#define BUTTON_UP 48
+#define BUTTON_UP 46
 #define BUTTON_DOWN 30
 #define BUTTON_LEFT 55
-#define BUTTON_RIGHT 38
+#define BUTTON_RIGHT 37
 #define SPECIAL_BUTTON_DEVIATION 1
 
 /// @brief Array of buttons corresponding to the ADC values, for linear searching

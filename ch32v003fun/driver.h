@@ -46,6 +46,7 @@ uint16_t multiple_ADC_reads(uint16_t (*matrix)(void), uint8_t samples) {
     uint64_t adc = 0;
     for (int8_t i = 0; i < samples; i++) {
         uint16_t _adc = matrix();
+        //printf("ADC: %d\n", _adc);
         adc += _adc;
     }
     adc /= samples;

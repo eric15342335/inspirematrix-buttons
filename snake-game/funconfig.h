@@ -9,7 +9,7 @@
 #define verticalButtons 8
 #define NUM_LEDS (horizontalButtons * verticalButtons)
 
-#define CH32V003J4M6_USE_PD6_AS_UART_TX
 #define FUNCONF_SYSTICK_USE_HCLK 1
+#define INTERNAL_INSPIRE_MATRIX
 
 #endif

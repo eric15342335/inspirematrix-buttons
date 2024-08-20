@@ -2,6 +2,9 @@
 #include "colors.h"
 #include "driver.h"
 #include "ws2812b_simple.h"
+#include <stdbool.h>
+
+#define LED_PINS GPIOA, 2
 
 typedef struct snakePartDir{
     char part;
@@ -46,7 +49,7 @@ void display(){
                 set_color(i,(color_t) {0, 0, 0});
                 break;
         }
-        WS2812BSimpleSend(GPIOC, 2, (uint8_t *)led_array, NUM_LEDS * 3);
+        WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
     }
 }
 
@@ -124,7 +127,7 @@ int main(void) {
     display();
     uint16_t seed = 0;
     bool apple;
-    while (!JOY_pad_pressed()) {
+    while (!JOY_Y_pressed()) {
         seed++;
         if (seed > 0xFFF0) {
             seed = 0;
@@ -135,7 +138,7 @@ int main(void) {
     }
     JOY_setseed(seed);
     int8_t currentDirection = 1;
-    while (1){
+    while (1) {
         for (uint8_t i = 0; i < 7; i++) {
             currentDirection = direction(currentDirection);
             Delay_Ms(100);
@@ -150,4 +153,11 @@ int main(void) {
         }
         display();
     }
+    fill_color((color_t){10, 0, 0});
+    WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
+    while (!JOY_Y_pressed()) {
+        Delay_Ms(1);
+        // wait for the button to be pressed
+    }
+    NVIC_SystemReset();
 }

@@ -21,12 +21,12 @@
 #ifdef INTERNAL_INSPIRE_MATRIX
 
 #define BUTTON_NONE 40
-#define BUTTON_DEVIATION 1
+#define BUTTON_DEVIATION 2
 #define BUTTON_DEVIATION_UPPER_HALF 2
 // PD2 PIN as for now
 #define BUTTON_0 686
 #define BUTTON_1 653
-#define BUTTON_2 621
+#define BUTTON_2 625
 #define BUTTON_3 597
 #define BUTTON_4 572
 #define BUTTON_5 549
@@ -42,9 +42,9 @@
 #define BUTTON_15 385
 #define BUTTON_16 374
 #define BUTTON_17 362
-#define BUTTON_18 348
-#define BUTTON_19 336
-#define BUTTON_20 327
+#define BUTTON_18 352
+#define BUTTON_19 342
+#define BUTTON_20 332
 #define BUTTON_21 323
 #define BUTTON_22 314
 #define BUTTON_23 306
@@ -52,7 +52,7 @@
 #define BUTTON_25 290
 #define BUTTON_26 282
 #define BUTTON_27 275
-#define BUTTON_28 268
+#define BUTTON_28 266
 #define BUTTON_29 260
 #define BUTTON_30 255
 #define BUTTON_31 246

@@ -5,9 +5,11 @@
 
 #include <stdint.h>
 
+/// @brief NOT FOLLOWING THE R,G,B ORDER!!!
+/// See here: https://cdn-shop.adafruit.com/datasheets/WS2812B.pdf
 typedef struct color_256 {
-    uint8_t r;
     uint8_t g;
+    uint8_t r;
     uint8_t b;
 } color_t;
 
@@ -16,7 +18,7 @@ color_t led_array[NUM_LEDS] = {0};
 
 // clang-format off
 const color_t colors[NUM_LEDS] = {
-    {3,15,53},{3,29,44},{0,28,14},{57,34,0},{54,19,0},{57,7,0},{34,6,55},{13,13,13},
+    {3,15,53},{3,29,44},{0,28,14},{57,34,0},{54,19,0},{57,7,0},{34,6,55},{0,0,0},
     {1,42,108},{1,61,95},{3,55,32},{103,73,3},{107,36,4},{107,18,14},{62,16,106},{29,30,35},
     {9,55,166},{14,85,147},{5,81,42},{147,113,5},{161,60,18},{149,39,22},{104,32,168},{54,55,60},
     {18,82,214},{5,122,199},{0,110,57},{200,148,2},{210,86,24},{216,53,48},{135,51,207},{83,83,95},
@@ -34,7 +36,7 @@ color_t color_divide(color_t color, uint8_t divider) {
 }
 
 void set_color(uint8_t led, color_t color) {
-    uint8_t divider = 1;
+    uint8_t divider = 8;
     led_array[led].r = color.r / divider;
     led_array[led].g = color.g / divider;
     led_array[led].b = color.b / divider;

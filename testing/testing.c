@@ -33,7 +33,7 @@ int main(void) {
         playAllMusic();
     }
     JOY_setseed_default();
-    while (1) {
+    while (0) {
         fill_color((color_t){JOY_random() % 10, JOY_random() % 10, JOY_random() % 10});
         WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
         printf("Hello, World!\n");

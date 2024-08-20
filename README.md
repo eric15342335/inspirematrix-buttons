@@ -10,7 +10,7 @@ Projects:
 
 * `ch32v003fun`
   * `driver.h`: Contains the most frequently used functions for the CH32V003.
-  * `i2c_events.`: Contains some frequently used I2C functions.
+  * `i2c_events.h`: Contains some frequently used I2C functions.
   * Originally from <https://github.com/cnlohr/ch32v003fun>
 
 * `data`

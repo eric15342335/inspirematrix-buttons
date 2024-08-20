@@ -5,6 +5,8 @@
 
 #include <stdio.h>
 
+#define LED_PINS GPIOC, 2
+
 color_t onColor = {100, 255, 100};      // Green
 color_t offColor = {0, 0, 0};           // Black
 color_t pointerColor = {100, 100, 255}; // Blue
@@ -16,10 +18,10 @@ int main(void) {
     SystemInit();
     ADC_init();
     fill_color(onColor);
-    WS2812BSimpleSend(GPIOC, 2, (uint8_t *)led_array, NUM_LEDS * 3);
+    WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
     Delay_Ms(100);
     clear();
-    WS2812BSimpleSend(GPIOC, 2, (uint8_t *)led_array, NUM_LEDS * 3);
+    WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
     while (1) {
         clear();
         int act_pressed = JOY_act_pressed();
@@ -50,7 +52,7 @@ int main(void) {
         for (int i = 0; i < NUM_LEDS; i++)
             set_color(i, toggle[i] ? onColor : offColor);
         set_color(currentposition, pointerColor);
-        WS2812BSimpleSend(GPIOC, 2, (uint8_t *)led_array, NUM_LEDS * 3);
+        WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
         Delay_Ms(200);
     }
 }

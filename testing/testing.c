@@ -10,6 +10,8 @@
 
 #include <stdio.h>
 
+#define LED_PINS GPIOA, 2
+
 int linear_search(int value, const int array[], int size) {
     for (int i = 0; i < size; i++) {
         if (abs(array[i] - value) < BUTTON_DEVIATION) {
@@ -24,21 +26,24 @@ uint16_t act_func(void) { return GPIO_analogRead(GPIO_Ain0_A2); }
 uint16_t external_matrix_button(void) { return GPIO_analogRead(GPIO_Ain1_A1); }
 int main(void) {
     SystemInit();
-    i2c_init();
-    i2c_scan();
+    while(1) {
+        i2c_init();
+        i2c_scan();
+        Delay_Ms(1000);
+    }
     while(0) {
         playAllMusic();
     }
     JOY_setseed_default();
     while (0) {
         fill_color((color_t){JOY_random() % 10, JOY_random() % 10, JOY_random() % 10});
-        WS2812BSimpleSend(GPIOA, 2, (uint8_t *)led_array, NUM_LEDS * 3);
+        WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
         printf("Hello, World!\n");
         Delay_Ms(300);
     }
     GPIO_ADCinit();
     clear();
-    WS2812BSimpleSend(GPIOA, 2, (uint8_t *)led_array, NUM_LEDS * 3);
+    WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
     while (1) {
         clear();
         for (int i = 0; i < NUM_LEDS; i++) {
@@ -68,7 +73,7 @@ int main(void) {
             act: pa2, gpio possible
              */
             //set_color(i-1, colors[i % num_colors]);
-            //WS2812BSimpleSend(GPIOA, 2, (uint8_t *)led_array, NUM_LEDS * 3);
+            //WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
             Delay_Ms(200);
         }
     }

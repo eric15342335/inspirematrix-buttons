@@ -54,6 +54,7 @@ uint8_t is_storage_initialized(void);
 #define paint_page_no 0
 #define delay 1000
 
+#define LED_PINS GPIOC, 5
 void setup_unique_pattern(void) {
     for (int i = 0; i < NUM_LEDS; i++) {
         set_color(i, colors[i]);
@@ -63,7 +64,7 @@ void setup_unique_pattern(void) {
 int main(void) {
     SystemInit();
     clear();
-    WS2812BSimpleSend(GPIOC, 5, (uint8_t *)led_array, NUM_LEDS * 3);
+    WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
     Delay_Ms(delay);
 
     i2c_init();
@@ -78,7 +79,7 @@ int main(void) {
     }
     
     // setup_unique_pattern();
-    WS2812BSimpleSend(GPIOC, 5, (uint8_t *)led_array, NUM_LEDS * 3);
+    WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
 
     if (!is_page_used(paint_page_no + page_status_addr_begin)) {
         save_paint(paint_page_no, led_array);

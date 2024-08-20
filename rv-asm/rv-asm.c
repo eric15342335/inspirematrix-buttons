@@ -9,6 +9,8 @@
 #define RAM_BASE 0x80000000
 #define RAM_SIZE 0x400
 
+#define LED_PINS GPIOC, 1
+
 rv_res bus_cb(void * user, rv_u32 addr, rv_u8 * data, rv_u32 is_store, rv_u32 width) {
     rv_u8 * mem = (rv_u8 *)user + addr - RAM_BASE;
     if (addr < RAM_BASE || addr + width >= RAM_BASE + RAM_SIZE)
@@ -84,7 +86,7 @@ void inputProgram(void) {
         clear();
         set_color(32, (color_t){255, 255, 255});
         instructionDisplay();
-        WS2812BSimpleSend(GPIOC, 1, (uint8_t *)led_array, NUM_LEDS * 3);
+        WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
     }
 }
 
@@ -96,7 +98,7 @@ int main(void) {
     clear();
     set_color(32, (color_t){255, 255, 255});
     instructionDisplay();
-    WS2812BSimpleSend(GPIOC, 1, (uint8_t *)led_array, NUM_LEDS * 3);
+    WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
 
     inputProgram();
 
@@ -121,7 +123,7 @@ int main(void) {
             }
         }
         instructionDisplay();
-        WS2812BSimpleSend(GPIOC, 1, (uint8_t *)led_array, NUM_LEDS * 3);
+        WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
         printf("PC: %lX, ", cpu.pc);
         printf("Trap: %lX\n", trap);
         printf("Opcode: %X, ", program[next_pos]);

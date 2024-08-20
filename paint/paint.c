@@ -5,6 +5,8 @@
 
 #include <stdio.h>
 
+#define LED_PINS GPIOC, 1
+
 color_t foreground = {100, 0, 0};
 color_t background = {0, 0, 100};
 typedef struct {
@@ -16,14 +18,14 @@ void flushCanvas(void) {
     for (int i = 0; i < NUM_LEDS; i++) {
         set_color(i, canvas[i].color);
     }
-    WS2812BSimpleSend(GPIOC, 1, (uint8_t *)led_array, NUM_LEDS * 3);
+    WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
 }
 
 void displayColorPalette(void) {
     for (int i = 0; i < NUM_LEDS; i++) {
         set_color(i, colors[i]);
     }
-    WS2812BSimpleSend(GPIOC, 1, (uint8_t *)led_array, NUM_LEDS * 3);
+    WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
     printf("Color palette displayed\n");
 }
 
@@ -49,7 +51,7 @@ int main(void) {
     for (int i = 0; i < NUM_LEDS; i++) {
         set_color(i, color_divide(colors[i], 1));
     }
-    WS2812BSimpleSend(GPIOC, 1, (uint8_t *)led_array, NUM_LEDS * 3);
+    WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
     Delay_Ms(2000);
     printf("\nBackground Initialized\n");
     for (int i = 1; i < NUM_LEDS; i++) {

@@ -5,6 +5,8 @@
 
 #include <stdio.h>
 
+#define LED_PINS GPIOA, 2
+
 color_t gridColor = {0, 0, 150};   // Blue
 color_t playerColor = {0, 150, 0}; // Green
 color_t botColor = {150, 0, 0};
@@ -191,18 +193,18 @@ int main(void) {
     SystemInit();
     ADC_init();
     fillgrid();
-    WS2812BSimpleSend(GPIOA, 2, (uint8_t *)led_array, NUM_LEDS * 3);
+    WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
     while (1) {
         selectposition();
         fillallcirclecross();
-        WS2812BSimpleSend(GPIOA, 2, (uint8_t *)led_array, NUM_LEDS * 3);
+        WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
         winner = checkwinside();
         Delay_Ms(200);
         if (winner != 0)
             break;
         play();
         fillallcirclecross();
-        WS2812BSimpleSend(GPIOA, 2, (uint8_t *)led_array, NUM_LEDS * 3);
+        WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
         winner = checkwinside();
         Delay_Ms(200);
         if (winner != 0)

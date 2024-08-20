@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 
+#define LED_PINS GPIOC, 1
 #define separation 1
 #define space_occupied (font_width + separation)
 #define last_appear_x (horizontalButtons - space_occupied + 2)
@@ -17,11 +18,11 @@ int main(void) {
         for (int ledIndex = 0; ledIndex < NUM_LEDS; ledIndex++) {
             clear();
             Delay_Us(1);
-            WS2812BSimpleSend(GPIOC, 1, (uint8_t *)led_array, NUM_LEDS * 3);
+            WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
             Delay_Us(1);
             set_color(ledIndex, colors[ledIndex % num_colors]);
             Delay_Ms(100);
-            WS2812BSimpleSend(GPIOC, 1, (uint8_t *)led_array, NUM_LEDS * 3);
+            WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
             Delay_Ms(100);
         }
     }
@@ -46,7 +47,7 @@ int main(void) {
                 }
             }
             printf("%d\n", ledIndex);
-            WS2812BSimpleSend(GPIOC, 1, (uint8_t *)led_array, NUM_LEDS * 3);
+            WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
             Delay_Ms(100);
             if (ledIndex > 76) {
                 break;

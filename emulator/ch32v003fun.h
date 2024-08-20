@@ -1,6 +1,7 @@
 #pragma once
 #include <stdint.h>
 
+#define GPIOA ((GPIO_TypeDef *)0)
 #define GPIOC ((GPIO_TypeDef *)0)
 #define GPIOD ((GPIO_TypeDef *)0)
 #define __IO volatile

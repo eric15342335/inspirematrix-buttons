@@ -9,11 +9,14 @@
 
 color_t foreground = {100, 0, 0};
 color_t background = {0, 0, 100};
+
 typedef struct {
     enum { FOREGROUND_LAYER, BACKGROUND_LAYER } layer;
     color_t color;
 } canvas_t;
+
 canvas_t canvas[NUM_LEDS] = {0};
+
 void flushCanvas(void) {
     for (int i = 0; i < NUM_LEDS; i++) {
         set_color(i, canvas[i].color);

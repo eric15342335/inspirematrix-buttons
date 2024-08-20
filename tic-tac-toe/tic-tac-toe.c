@@ -191,18 +191,18 @@ int main(void) {
     SystemInit();
     ADC_init();
     fillgrid();
-    WS2812BSimpleSend(GPIOC, 2, (uint8_t *)led_array, NUM_LEDS * 3);
+    WS2812BSimpleSend(GPIOA, 2, (uint8_t *)led_array, NUM_LEDS * 3);
     while (1) {
         selectposition();
         fillallcirclecross();
-        WS2812BSimpleSend(GPIOC, 2, (uint8_t *)led_array, NUM_LEDS * 3);
+        WS2812BSimpleSend(GPIOA, 2, (uint8_t *)led_array, NUM_LEDS * 3);
         winner = checkwinside();
         Delay_Ms(200);
         if (winner != 0)
             break;
         play();
         fillallcirclecross();
-        WS2812BSimpleSend(GPIOC, 2, (uint8_t *)led_array, NUM_LEDS * 3);
+        WS2812BSimpleSend(GPIOA, 2, (uint8_t *)led_array, NUM_LEDS * 3);
         winner = checkwinside();
         Delay_Ms(200);
         if (winner != 0)

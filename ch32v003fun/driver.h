@@ -47,10 +47,8 @@ uint16_t multiple_ADC_reads(uint16_t (*matrix)(void), uint8_t samples) {
     for (int8_t i = 0; i < samples; i++) {
         uint16_t _adc = matrix();
         adc += _adc;
-        printf("%d, ", _adc);
     }
     adc /= samples;
-    printf("%d\n", adc);
     return adc;
 }
 
@@ -103,6 +101,30 @@ JOY_Button JOY_check_button(uint16_t adc_value) {
 #define JOY_right_pressed() (JOY_check_button(multiple_ADC_reads(ADC_read_smallboard, 5)) == JOY_RIGHT)
 #define JOY_X_pressed() (JOY_check_button(multiple_ADC_reads(ADC_read_smallboard, 5)) == JOY_X)
 #define JOY_Y_pressed() (JOY_check_button(multiple_ADC_reads(ADC_read_smallboard, 5)) == JOY_Y)
+
+uint16_t lower_half_ADC_channel(void) {return GPIO_analogRead(GPIO_Ain3_D2);}
+uint16_t upper_half_ADC_channel(void) {return GPIO_analogRead(GPIO_Ain4_D3);}
+#define no_button_pressed -1
+int8_t matrix_pressed_two(void) {
+    const int8_t samples = 5;
+    uint16_t adc = multiple_ADC_reads(lower_half_ADC_channel, samples);
+    #define LOWER_HALF_BUTTONS 32
+    for (int8_t i = 0; i < LOWER_HALF_BUTTONS; i++) {
+        int deviation = abs(adc - buttons[i]);
+        if (deviation <= BUTTON_DEVIATION) {
+            return i;
+        }
+    }
+    adc = multiple_ADC_reads(upper_half_ADC_channel, samples);
+    #define UPPER_HALF_BUTTONS_START 32
+    for (int8_t i = UPPER_HALF_BUTTONS_START; i < NUM_BUTTONS; i++) {
+        int deviation = abs(adc - buttons[i]);
+        if (deviation <= BUTTON_DEVIATION_UPPER_HALF) {
+            return i;
+        }
+    }
+    return no_button_pressed;
+}
 
 #else
 

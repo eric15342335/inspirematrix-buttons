@@ -34,7 +34,7 @@ static inline color_t color_divide(color_t color, uint8_t divider) {
 }
 
 static inline void set_color(uint8_t led, color_t color) {
-    uint8_t divider = 1;
+    uint8_t divider = 8;
     led_array[led].r = color.r / divider;
     led_array[led].g = color.g / divider;
     led_array[led].b = color.b / divider;

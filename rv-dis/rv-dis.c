@@ -11,8 +11,8 @@
 #define num_of_instructions_display (NUM_LEDS / instruction_size)
 #define LED_PINS GPIOA, 2
 
-const color_t instructions_color = {255, 0, 0};
-const color_t highlight_color = {0, 255, 0};
+const color_t instructions_color = {30, 0, 0};
+const color_t highlight_color = {0, 0, 50};
 
 void display_four_instructions(size_t offset);
 
@@ -38,7 +38,7 @@ void dissassemble(uint64_t pc, const uint8_t *data, size_t data_len)
 
         OLED_print("\nBytes: 0x");
         OLED_printW(inst);
-        printf("\nBytes: 0x%04x", inst);
+        printf("\nBytes: 0x%x", inst);
 
         OLED_print("\nDisassembly:\n");
         OLED_println(buf);
@@ -82,6 +82,7 @@ void t1()
     {
         inst_arr[i * 2] = program[i] & 0xff;
         inst_arr[i * 2 + 1] = program[i] >> 8;
+        printf("0x%02x, 0x%02x\n", inst_arr[i * 2], inst_arr[i * 2 + 1]);
     }
     dissassemble(0x0, inst_arr, array_size(inst_arr));
 }

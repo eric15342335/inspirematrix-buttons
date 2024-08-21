@@ -930,6 +930,7 @@ static void decode_inst_opcode(rv_decode *dec, rv_isa isa)
 {
     rv_inst inst = dec->inst;
     rv_opcode op = rv_op_illegal;
+    printf("inst: %x\n", inst);
     switch (((inst >> 0) & 0b11)) {
     case 0:
         switch (((inst >> 13) & 0b111)) {
@@ -2281,7 +2282,8 @@ size_t inst_length(rv_inst inst)
      */
 
     return (inst &      0b11) != 0b11      ? 2
-         : (inst &   0b11100) != 0b11100   ? 4
+         : (inst &   0b11100) != 0b11100   ? 2 // Originally is 4, now changed to 2
+         // because of ecall instruction only.
          : (inst &  0b111111) == 0b011111  ? 6
          : (inst & 0b1111111) == 0b0111111 ? 8
          : 0;

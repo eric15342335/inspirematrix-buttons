@@ -96,7 +96,7 @@
 #define BUTTON_LEFT 55
 #define BUTTON_RIGHT 37 /// @note When using battery power source without laptop grounding,
 // right button seems cannot reliably detected.
-#define SPECIAL_BUTTON_DEVIATION 1
+#define SPECIAL_BUTTON_DEVIATION 2
 
 /// @brief Array of buttons corresponding to the ADC values, for linear searching
 static const int buttons[NUM_BUTTONS] = {BUTTON_0, BUTTON_1, BUTTON_2, BUTTON_3, BUTTON_4,

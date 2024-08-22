@@ -15,7 +15,7 @@
 void init_storage(void);
 
 // save paint data to eeprom, paint 0 stored in page ?? (out of page 0 to 511)
-void save_paint(uint16_t paint_no, color_t *data);
+void save_paint(uint16_t paint_no, color_t *data, uint8_t is_icon);
 
 // load paint data from eeprom, paint 0 stored in page ?? (out of page 0 to 511)
 void load_paint(uint16_t paint_no, color_t *data, uint8_t is_icon);
@@ -43,14 +43,12 @@ void display_number_centered(uint8_t number);
 #define init_status_addr_end 7
 #define init_status_reg_size (init_status_addr_end - init_status_addr_begin + 1)
 
-#define init_status_format " %c "
+#define init_status_format "  %c "
 #define init_status_data (uint8_t*)"IL000001"
 
 #define page_status_addr_begin 8
 #define page_status_addr_end 511
 #define page_status_reg_size (page_status_addr_end - page_status_addr_begin + 1)
-
-#define page_status_format "%02X "
 
 #define sizeof_paint_data (3 * NUM_LEDS)
 #define sizeof_paint_data_aspage (sizeof_paint_data/page_size)
@@ -112,7 +110,11 @@ void setup_unique_pattern(void);
 
 void choose_save_paint_page(void);
 
+void choose_load_paint_page(void);
+
 void led_display_paint_page_status(void);
+
+uint16_t calculate_page_no(uint16_t paint_no, uint8_t is_icon);
 
 void any_paint_exist(uint8_t *paint_exist);
 
@@ -173,7 +175,6 @@ int main(void) {
     i2c_init();
     printf("I2C Initialized\n");
     init_storage();
-
     // Hold button Y at startup to reset all paints
     uint16_t delay_countdown = 50;
     while (delay_countdown-- > 0) {
@@ -190,7 +191,7 @@ int main(void) {
 
     print_status_storage();
 
-#if STORE_ICONS == 1
+#if STORE_ICONS
     app_selected app = paint;
 #else
     app_selected app = paint;
@@ -236,15 +237,14 @@ int main(void) {
 
 void erase_all_paint_saves(void) {
     // Set status of paint pages to 0
-    for (uint16_t _paint_page_no = paint_page_no; _paint_page_no < paint_page_no_max + paint_page_no; _paint_page_no++) {
-        for (uint16_t i = _paint_page_no + page_status_addr_begin; i < _paint_page_no + page_status_addr_begin + sizeof_paint_data_aspage; i++) {
-            set_page_status(i, 0);
-            Delay_Ms(3);
-        }
+    for (uint16_t _paint_page_no = paint_page_no + page_status_addr_begin; _paint_page_no < paint_page_no_max + paint_page_no; _paint_page_no++) {
+        set_page_status(_paint_page_no, 0);
+        printf("Page is now status: %d\n", is_page_used(_paint_page_no));
+        Delay_Ms(3);
     }
     printf("All paint saves status erased\n");
     // Erase existing data to 0
-    for (uint16_t _paint_page_no = paint_page_no; _paint_page_no < paint_page_no_max + paint_page_no; _paint_page_no+=sizeof(uint8_t)) {
+    for (uint16_t _paint_page_no = paint_page_no + page_status_addr_begin; _paint_page_no < paint_page_no_max + paint_page_no; _paint_page_no+=sizeof(uint8_t)) {
         i2c_result_e err =
             i2c_write_pages(EEPROM_ADDR, _paint_page_no * page_size, I2C_REGADDR_2B, (uint8_t[]){0}, sizeof(uint8_t));
         printf("Erase paint result: %d\n", err);
@@ -388,11 +388,11 @@ void display_stored_paints(void) {
             current_display_paint = paint_page_no_max / sizeof_paint_data_aspage - 1;
         }
 
-        uint16_t _paint_page_no = current_display_paint * sizeof_paint_data_aspage + paint_page_no;
+        uint16_t _paint_page_no = calculate_page_no(current_display_paint, 0);
         clear();
-        if (!is_page_used(_paint_page_no + page_status_addr_begin) ||
-            !is_page_used(_paint_page_no + page_status_addr_begin + 1) ||
-            !is_page_used(_paint_page_no + page_status_addr_begin + 2)) {
+        if (!is_page_used(_paint_page_no ) ||
+            !is_page_used(_paint_page_no + 1) ||
+            !is_page_used(_paint_page_no + 2)) {
             printf("Paint %d not found\n", _paint_page_no / sizeof_paint_data_aspage);
             printf("DEBUG: %d\n", __LINE__);
             current_display_paint += last_direction_pressed;
@@ -400,8 +400,8 @@ void display_stored_paints(void) {
         }
         display_number_centered(current_display_paint);
         Delay_Ms(500);
-        printf("Displaying paint %d\n", _paint_page_no / sizeof_paint_data_aspage);
-        load_paint(_paint_page_no / sizeof_paint_data_aspage, led_array, 0);
+        printf("Displaying paint %d\n", current_display_paint);
+        load_paint(current_display_paint, led_array, 0);
         // setup_unique_pattern();
         WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
 
@@ -452,24 +452,20 @@ void choose_save_paint_page(void) {
     while (1) {
         button = matrix_pressed_two();
         if (button != no_button_pressed) {
-            if (is_page_used(button * sizeof_paint_data_aspage + page_status_addr_begin)) {
+            if (is_page_used(button * sizeof_paint_data_aspage + paint_page_no + page_status_addr_begin)) {
                 printf("Page %d already used\n", button);
-                // Fill the screen with red to indicate error
-                fill_color((color_t){.r = 100, .g = 0, .b = 0});
-                WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
-                Delay_Ms(1000);
-                led_display_paint_page_status();
-                #if STORE_ICONS == 1
-                #else
-                continue;
-                #endif
+                // Overwrite save
             }
             printf("Selected page %d\n", button);
             // Put canvas to led_array
             for (int i = 0; i < NUM_LEDS; i++) {
                 set_color(i, canvas[i].color);
             }
-            save_paint(button, led_array);
+            #if STORE_ICONS
+            save_paint(button, led_array, 1);
+            #else
+            save_paint(button, led_array, 0);
+            #endif
             printf("Paint saved\n");
             Delay_Ms(1000);
             break;
@@ -526,7 +522,11 @@ void print_status_storage(void) {
     for (uint16_t addr = page_status_addr_begin; addr < page_status_addr_begin + page_status_reg_size; addr++) {
         uint8_t data = 0;
         i2c_read(EEPROM_ADDR, addr, I2C_REGADDR_2B, &data, sizeof(data));
-        printf(page_status_format, data);
+        if (data) {
+            printf("%d ", addr);
+        } else {
+            printf("    ");
+        }
         if ((addr + 1) % matrix_hori == 0) {
             printf("\n");
         }
@@ -562,13 +562,22 @@ uint8_t is_page_used(uint16_t page_no) {
     return data;
 }
 
-void save_paint(uint16_t paint_no, color_t *data) {
+uint16_t calculate_page_no(uint16_t paint_no, uint8_t is_icon) {
+    if (is_icon) {
+        return (paint_no + app_icon_page_no) * sizeof_paint_data_aspage + page_status_addr_begin;
+    }
+    else {
+        return paint_no * sizeof_paint_data_aspage + paint_page_no + page_status_addr_begin;
+    }
+}
+
+void save_paint(uint16_t paint_no, color_t *data, uint8_t is_icon) {
     if (paint_no < 0 || paint_no > page_status_addr_end) {
         printf("Invalid paint number %d\n", paint_no);
         printf("DEBUG: %d\n", __LINE__);
         while(1);
     }
-    uint16_t page_no_start = paint_no * sizeof_paint_data_aspage + paint_page_no + page_status_addr_begin;
+    uint16_t page_no_start = calculate_page_no(paint_no, is_icon);
     for (uint16_t i = page_no_start; i < page_no_start + sizeof_paint_data_aspage; i++) {
         if (is_page_used(i)) {
             printf("Paint %d already used, overwriting\n", paint_no);
@@ -589,13 +598,7 @@ void load_paint(uint16_t paint_no, color_t *data, uint8_t is_icon) {
         printf("DEBUG: %d\n", __LINE__);
         while(1);
     }
-    uint16_t page_no_start = 0;
-    if (is_icon) {
-        page_no_start = (paint_no + app_icon_page_no) * sizeof_paint_data_aspage + page_status_addr_begin;
-    }
-    else {
-        page_no_start = paint_no * sizeof_paint_data_aspage + paint_page_no + page_status_addr_begin;
-    }
+    uint16_t page_no_start = calculate_page_no(paint_no, is_icon);
     printf("Loading paint_no %d from page %d, is_icon: %d\n", paint_no, page_no_start, is_icon);
     if (!is_page_used(page_no_start)) {
         printf("Paint %d not found\n", paint_no);
@@ -639,6 +642,36 @@ void colorPaletteSelection(color_t * selectedColor) {
     flushCanvas();
 }
 
+void choose_load_paint_page(void) {
+    led_display_paint_page_status();
+    int8_t button = no_button_pressed;
+    while (1) {
+        button = matrix_pressed_two();
+        if (button != no_button_pressed) {
+            if (!is_page_used(button * sizeof_paint_data_aspage + paint_page_no + page_status_addr_begin)) {
+                printf("Page %d is not used\n", button);
+                // Fill the screen with red to indicate error
+                fill_color((color_t){.r = 100, .g = 0, .b = 0});
+                WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
+                Delay_Ms(1000);
+                led_display_paint_page_status();
+                continue;
+            }
+            printf("Selected page %d\n", button);
+            load_paint(button, led_array, 0);
+            // Put led_array to canvas
+            for (int i = 0; i < NUM_LEDS; i++) {
+                canvas[i].color = led_array[i];
+            }
+            printf("Paint load\n");
+            Delay_Ms(1000);
+            break;
+        }
+        Delay_Ms(200);
+    }
+    flushCanvas();
+}
+
 void painting_routine(void) {
     for (int i = 0; i < NUM_LEDS; i++) {
         canvas[i].layer = BACKGROUND_LAYER;
@@ -647,10 +680,6 @@ void painting_routine(void) {
     flushCanvas();
     while (1) {
         Delay_Ms(200);
-        // printf("Foreground color: R:%d G:%d B:%d\n", foreground.r, foreground.g,
-        // foreground.b); printf("Background color: R:%d G:%d B:%d\n", background.r,
-        // background.g, background.b);
-        printf("test\n");
         int8_t user_input = matrix_pressed_two();
         if (user_input == no_button_pressed) {
             if (JOY_Y_pressed()) {
@@ -659,11 +688,12 @@ void painting_routine(void) {
             else if (JOY_X_pressed()) {
                 colorPaletteSelection(&background);
             }
-            else if (JOY_down_pressed()) {
-                printf("System reset\n");
-                NVIC_SystemReset();
-            }
             else if (JOY_up_pressed()) {
+                printf("Enter paint loading screen!\n");
+                choose_load_paint_page();
+                flushCanvas();
+            }
+            else if (JOY_down_pressed()) {
                 // save paint
                 printf("Exit paint mode, entering save\n");
                 break;

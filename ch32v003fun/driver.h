@@ -77,7 +77,7 @@ typedef enum {
 } JOY_Button;
 
 JOY_Button JOY_check_button(uint16_t adc_value) {
-    printf("Special ADC: %d\n", adc_value);
+    // printf("Special ADC: %d\n", adc_value);
     if (abs(adc_value - BUTTON_UP) <= SPECIAL_BUTTON_DEVIATION)
         return JOY_UP;
     else if (abs(adc_value - BUTTON_DOWN) <= SPECIAL_BUTTON_DEVIATION)
@@ -109,7 +109,7 @@ uint16_t upper_half_ADC_channel(void) {return GPIO_analogRead(GPIO_Ain4_D3);}
 int8_t matrix_pressed_two(void) {
     const int8_t samples = 5;
     uint16_t adc = multiple_ADC_reads(lower_half_ADC_channel, samples);
-    printf("lower ADC: %d\n", adc);
+    // printf("lower ADC: %d\n", adc);
     #define LOWER_HALF_BUTTONS 32
     // non-linear ADC delta value 
     for (int8_t i = 0; i < LOWER_HALF_BUTTONS / 2; i++) {
@@ -126,7 +126,7 @@ int8_t matrix_pressed_two(void) {
     }
     // end non linear
     adc = multiple_ADC_reads(upper_half_ADC_channel, samples);
-    printf("upper ADC: %d\n", adc);
+    // printf("upper ADC: %d\n", adc);
     #define UPPER_HALF_BUTTONS_START 32
     for (int8_t i = UPPER_HALF_BUTTONS_START; i < NUM_BUTTONS; i++) {
         int deviation = abs(adc - buttons[i]);

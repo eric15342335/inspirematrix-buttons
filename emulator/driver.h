@@ -154,3 +154,5 @@ uint16_t JOY_random(void) {
 void JOY_setseed_default(void) { rnval = 0x1234; }
 
 void JOY_setseed(uint16_t seed) { rnval = seed; }
+
+#define matrix_pressed_two() matrix_pressed(ADC_read)

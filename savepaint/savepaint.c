@@ -1,12 +1,13 @@
 #define CH32V003_I2C_IMPLEMENTATION
 #define WS2812BSIMPLE_IMPLEMENTATION
-#include <stdio.h>
-#include <stdbool.h>
 #include "ch32v003_i2c.h"
 #include "colors.h"
 #include "driver.h"
-#include "ws2812b_simple.h"
 #include "fonts.h"
+#include "ws2812b_simple.h"
+
+#include <stdbool.h>
+#include <stdio.h>
 // obtained from i2c_scan(), before shifting by 1 bit
 #define EEPROM_ADDR 0x51
 
@@ -15,10 +16,10 @@
 void init_storage(void);
 
 // save paint data to eeprom, paint 0 stored in page ?? (out of page 0 to 511)
-void save_paint(uint16_t paint_no, color_t *data, uint8_t is_icon);
+void save_paint(uint16_t paint_no, color_t * data, uint8_t is_icon);
 
 // load paint data from eeprom, paint 0 stored in page ?? (out of page 0 to 511)
-void load_paint(uint16_t paint_no, color_t *data, uint8_t is_icon);
+void load_paint(uint16_t paint_no, color_t * data, uint8_t is_icon);
 
 // set page status to 0 or 1
 void set_page_status(uint16_t page_no, uint8_t status);
@@ -44,29 +45,29 @@ void display_number_centered(uint8_t number);
 #define init_status_reg_size (init_status_addr_end - init_status_addr_begin + 1)
 
 #define init_status_format "  %c "
-#define init_status_data (uint8_t*)"IL000001"
+#define init_status_data (uint8_t *)"IL000001"
 
 #define page_status_addr_begin 8
 #define page_status_addr_end 511
 #define page_status_reg_size (page_status_addr_end - page_status_addr_begin + 1)
 
 #define sizeof_paint_data (3 * NUM_LEDS)
-#define sizeof_paint_data_aspage (sizeof_paint_data/page_size)
+#define sizeof_paint_data_aspage (sizeof_paint_data / page_size)
 #define matrix_hori 16
 
-#define paint_page_no (8*sizeof_paint_data_aspage)
-#define paint_page_no_max (8*sizeof_paint_data_aspage)
+#define paint_page_no (8 * sizeof_paint_data_aspage)
+#define paint_page_no_max (8 * sizeof_paint_data_aspage)
 #define num_paint_saves (paint_page_no_max / sizeof_paint_data_aspage)
 
 // store icons in EEPROM
 #define STORE_ICONS 0
 #if STORE_ICONS
 #undef paint_page_no
-#define paint_page_no (0*sizeof_paint_data_aspage)
+#define paint_page_no (0 * sizeof_paint_data_aspage)
 #endif
 
-#define app_icon_page_no (0*sizeof_paint_data_aspage)
-#define app_icon_page_no_max (8*sizeof_paint_data_aspage)
+#define app_icon_page_no (0 * sizeof_paint_data_aspage)
+#define app_icon_page_no_max (8 * sizeof_paint_data_aspage)
 
 #define delay 1000
 
@@ -90,9 +91,9 @@ canvas_t canvas[NUM_LEDS] = {0};
  */
 typedef enum _app_selected {
     paint = 0,
-    music = 1,
-    rec = 2,
-    risc_v_code = 3,
+    music = 1,       // not implemented
+    rec = 2,         // not implemented
+    risc_v_code = 3, // not implemented
     game_tic_tac_toe = 4,
     game_snake = 5,
     robot_car = 6,
@@ -116,7 +117,7 @@ void led_display_paint_page_status(void);
 
 uint16_t calculate_page_no(uint16_t paint_no, uint8_t is_icon);
 
-void any_paint_exist(uint8_t *paint_exist);
+void any_paint_exist(uint8_t * paint_exist);
 
 void display_stored_paints(void);
 
@@ -227,7 +228,7 @@ int main(void) {
     }
 
     Delay_Ms(delay);
-    while(1) {
+    while (1) {
         if (JOY_Y_pressed()) {
             NVIC_SystemReset();
         }
@@ -237,16 +238,19 @@ int main(void) {
 
 void erase_all_paint_saves(void) {
     // Set status of paint pages to 0
-    for (uint16_t _paint_page_no = paint_page_no + page_status_addr_begin; _paint_page_no < paint_page_no_max + paint_page_no; _paint_page_no++) {
+    for (uint16_t _paint_page_no = paint_page_no + page_status_addr_begin;
+         _paint_page_no < paint_page_no_max + paint_page_no; _paint_page_no++) {
         set_page_status(_paint_page_no, 0);
         printf("Page is now status: %d\n", is_page_used(_paint_page_no));
         Delay_Ms(3);
     }
     printf("All paint saves status erased\n");
     // Erase existing data to 0
-    for (uint16_t _paint_page_no = paint_page_no + page_status_addr_begin; _paint_page_no < paint_page_no_max + paint_page_no; _paint_page_no+=sizeof(uint8_t)) {
-        i2c_result_e err =
-            i2c_write_pages(EEPROM_ADDR, _paint_page_no * page_size, I2C_REGADDR_2B, (uint8_t[]){0}, sizeof(uint8_t));
+    for (uint16_t _paint_page_no = paint_page_no + page_status_addr_begin;
+         _paint_page_no < paint_page_no_max + paint_page_no;
+         _paint_page_no += sizeof(uint8_t)) {
+        i2c_result_e err = i2c_write_pages(EEPROM_ADDR, _paint_page_no * page_size,
+            I2C_REGADDR_2B, (uint8_t[]){0}, sizeof(uint8_t));
         printf("Erase paint result: %d\n", err);
         Delay_Ms(3);
     }
@@ -262,14 +266,14 @@ void app_selection(app_selected * app) {
     printf("App selection\n");
 
     // Display app icon menu just like paint saves
-    
+
     // todo: add missing icon check
-    
+
     int8_t current_display_icon = 0;
     display_number_centered(current_display_icon);
     Delay_Ms(1000);
 
-    typedef enum direction_pressed {
+    typedef enum _direction_pressed {
         up_pressed = -1,
         down_pressed = 1,
     } direction_pressed;
@@ -289,7 +293,8 @@ void app_selection(app_selected * app) {
             current_display_icon = paint_page_no_max / sizeof_paint_data_aspage - 1;
         }
 
-        uint16_t _icon_page_no = current_display_icon * sizeof_paint_data_aspage + app_icon_page_no;
+        uint16_t _icon_page_no =
+            current_display_icon * sizeof_paint_data_aspage + app_icon_page_no;
         clear();
         if (!is_page_used(_icon_page_no + page_status_addr_begin) ||
             !is_page_used(_icon_page_no + page_status_addr_begin + 1) ||
@@ -333,8 +338,10 @@ void app_selection(app_selected * app) {
     *app = current_display_icon;
 }
 
-void any_paint_exist(uint8_t *paint_exist) {
-    for (uint16_t _paint_page_no = paint_page_no; _paint_page_no < paint_page_no_max + paint_page_no; _paint_page_no+=sizeof_paint_data_aspage) {
+void any_paint_exist(uint8_t * paint_exist) {
+    for (uint16_t _paint_page_no = paint_page_no;
+         _paint_page_no < paint_page_no_max + paint_page_no;
+         _paint_page_no += sizeof_paint_data_aspage) {
         if (is_page_used(_paint_page_no + page_status_addr_begin) &&
             is_page_used(_paint_page_no + page_status_addr_begin + 1) &&
             is_page_used(_paint_page_no + page_status_addr_begin + 2)) {
@@ -348,7 +355,8 @@ void any_paint_exist(uint8_t *paint_exist) {
 void display_number_centered(uint8_t number) {
     clear();
     printf("Displaying number %d\n", number);
-    font_draw(font_list[number], color_savefile_empty, horizontalButtons * 1 + verticalButtons / font_width);
+    font_draw(font_list[number], color_savefile_empty,
+        horizontalButtons * 1 + verticalButtons / font_width);
     WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
 }
 
@@ -363,7 +371,7 @@ void display_stored_paints(void) {
         Delay_Ms(1000);
         return;
     }
-    
+
     int8_t current_display_paint = 0;
     display_number_centered(current_display_paint);
     Delay_Ms(1000);
@@ -390,8 +398,7 @@ void display_stored_paints(void) {
 
         uint16_t _paint_page_no = calculate_page_no(current_display_paint, 0);
         clear();
-        if (!is_page_used(_paint_page_no ) ||
-            !is_page_used(_paint_page_no + 1) ||
+        if (!is_page_used(_paint_page_no) || !is_page_used(_paint_page_no + 1) ||
             !is_page_used(_paint_page_no + 2)) {
             printf("Paint %d not found\n", _paint_page_no / sizeof_paint_data_aspage);
             printf("DEBUG: %d\n", __LINE__);
@@ -434,13 +441,18 @@ void display_stored_paints(void) {
 
 void led_display_paint_page_status(void) {
     clear();
-    for (uint16_t _paint_page_no = paint_page_no; _paint_page_no < paint_page_no_max + paint_page_no; _paint_page_no+=sizeof_paint_data_aspage) {
+    for (uint16_t _paint_page_no = paint_page_no;
+         _paint_page_no < paint_page_no_max + paint_page_no;
+         _paint_page_no += sizeof_paint_data_aspage) {
         if (is_page_used(_paint_page_no + paint_page_no + page_status_addr_begin) &&
             is_page_used(_paint_page_no + paint_page_no + page_status_addr_begin + 1) &&
             is_page_used(_paint_page_no + paint_page_no + page_status_addr_begin + 2)) {
-            set_color((_paint_page_no - paint_page_no) / sizeof_paint_data_aspage, color_savefile_exist);
-        } else {
-            set_color((_paint_page_no - paint_page_no) / sizeof_paint_data_aspage, color_savefile_empty);
+            set_color((_paint_page_no - paint_page_no) / sizeof_paint_data_aspage,
+                color_savefile_exist);
+        }
+        else {
+            set_color((_paint_page_no - paint_page_no) / sizeof_paint_data_aspage,
+                color_savefile_empty);
         }
     }
     WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
@@ -452,7 +464,8 @@ void choose_save_paint_page(void) {
     while (1) {
         button = matrix_pressed_two();
         if (button != no_button_pressed) {
-            if (is_page_used(button * sizeof_paint_data_aspage + paint_page_no + page_status_addr_begin)) {
+            if (is_page_used(button * sizeof_paint_data_aspage + paint_page_no +
+                             page_status_addr_begin)) {
                 printf("Page %d already used\n", button);
                 // Overwrite save
             }
@@ -461,11 +474,11 @@ void choose_save_paint_page(void) {
             for (int i = 0; i < NUM_LEDS; i++) {
                 set_color(i, canvas[i].color);
             }
-            #if STORE_ICONS
+#if STORE_ICONS
             save_paint(button, led_array, 1);
-            #else
+#else
             save_paint(button, led_array, 0);
-            #endif
+#endif
             printf("Paint saved\n");
             Delay_Ms(1000);
             break;
@@ -486,16 +499,18 @@ void init_storage(void) {
     if (!is_storage_initialized()) {
         reset_storage();
         printf("Storage initialized\n");
-    } else {
+    }
+    else {
         printf("Storage already initialized\n");
     }
 }
 
 uint8_t is_storage_initialized(void) {
     uint8_t data[init_status_reg_size];
-    i2c_read(EEPROM_ADDR, init_status_addr_begin, I2C_REGADDR_2B, data, init_status_reg_size);
+    i2c_read(
+        EEPROM_ADDR, init_status_addr_begin, I2C_REGADDR_2B, data, init_status_reg_size);
     for (uint8_t i = 0; i < init_status_reg_size; i++) {
-        if (data[i] != *(init_status_data+i)) {
+        if (data[i] != *(init_status_data + i)) {
             return 0;
         }
     }
@@ -503,9 +518,11 @@ uint8_t is_storage_initialized(void) {
 }
 
 void reset_storage(void) {
-    i2c_write(EEPROM_ADDR, init_status_addr_begin, I2C_REGADDR_2B, init_status_data, init_status_reg_size);
+    i2c_write(EEPROM_ADDR, init_status_addr_begin, I2C_REGADDR_2B, init_status_data,
+        init_status_reg_size);
     Delay_Ms(3);
-    for (uint16_t addr = page_status_addr_begin; addr < page_status_addr_begin + page_status_reg_size; addr++) {
+    for (uint16_t addr = page_status_addr_begin;
+         addr < page_status_addr_begin + page_status_reg_size; addr++) {
         i2c_write(EEPROM_ADDR, addr, I2C_REGADDR_2B, (uint8_t[]){0}, sizeof(uint8_t));
         Delay_Ms(3);
     }
@@ -514,17 +531,20 @@ void reset_storage(void) {
 
 void print_status_storage(void) {
     printf("Status storage data:\n");
-    for (uint16_t addr = init_status_addr_begin; addr < init_status_addr_begin + init_status_reg_size; addr++) {
+    for (uint16_t addr = init_status_addr_begin;
+         addr < init_status_addr_begin + init_status_reg_size; addr++) {
         uint8_t data = 0;
         i2c_read(EEPROM_ADDR, addr, I2C_REGADDR_2B, &data, sizeof(data));
         printf(init_status_format, data);
     }
-    for (uint16_t addr = page_status_addr_begin; addr < page_status_addr_begin + page_status_reg_size; addr++) {
+    for (uint16_t addr = page_status_addr_begin;
+         addr < page_status_addr_begin + page_status_reg_size; addr++) {
         uint8_t data = 0;
         i2c_read(EEPROM_ADDR, addr, I2C_REGADDR_2B, &data, sizeof(data));
         if (data) {
             printf("%d ", addr);
-        } else {
+        }
+        else {
             printf("    ");
         }
         if ((addr + 1) % matrix_hori == 0) {
@@ -538,12 +558,14 @@ void set_page_status(uint16_t page_no, uint8_t status) {
     if (status > 1) {
         printf("Invalid status %d\n", status);
         printf("DEBUG: %d\n", __LINE__);
-        while(1);
+        while (1)
+            ;
     }
     if (page_no < page_status_addr_begin || page_no > page_status_addr_end) {
         printf("Invalid page number %d\n", page_no);
         printf("DEBUG: %d\n", __LINE__);
-        while(1);
+        while (1)
+            ;
     }
     i2c_write(EEPROM_ADDR, page_no, I2C_REGADDR_2B, &status, sizeof(status));
     Delay_Ms(3);
@@ -554,7 +576,8 @@ uint8_t is_page_used(uint16_t page_no) {
     if (page_no < page_status_addr_begin || page_no > page_status_addr_end) {
         printf("Invalid page number %d\n", page_no);
         printf("DEBUG: %d\n", __LINE__);
-        while(1);
+        while (1)
+            ;
     }
     uint8_t data = 0;
     i2c_read(EEPROM_ADDR, page_no, I2C_REGADDR_2B, &data, sizeof(data));
@@ -564,18 +587,21 @@ uint8_t is_page_used(uint16_t page_no) {
 
 uint16_t calculate_page_no(uint16_t paint_no, uint8_t is_icon) {
     if (is_icon) {
-        return (paint_no + app_icon_page_no) * sizeof_paint_data_aspage + page_status_addr_begin;
+        return (paint_no + app_icon_page_no) * sizeof_paint_data_aspage +
+               page_status_addr_begin;
     }
     else {
-        return paint_no * sizeof_paint_data_aspage + paint_page_no + page_status_addr_begin;
+        return paint_no * sizeof_paint_data_aspage + paint_page_no +
+               page_status_addr_begin;
     }
 }
 
-void save_paint(uint16_t paint_no, color_t *data, uint8_t is_icon) {
+void save_paint(uint16_t paint_no, color_t * data, uint8_t is_icon) {
     if (paint_no < 0 || paint_no > page_status_addr_end) {
         printf("Invalid paint number %d\n", paint_no);
         printf("DEBUG: %d\n", __LINE__);
-        while(1);
+        while (1)
+            ;
     }
     uint16_t page_no_start = calculate_page_no(paint_no, is_icon);
     for (uint16_t i = page_no_start; i < page_no_start + sizeof_paint_data_aspage; i++) {
@@ -585,28 +611,31 @@ void save_paint(uint16_t paint_no, color_t *data, uint8_t is_icon) {
         }
         set_page_status(i, 1);
     }
-    i2c_result_e err =
-        i2c_write_pages(EEPROM_ADDR, page_no_start * page_size, I2C_REGADDR_2B, (uint8_t*)data, sizeof_paint_data);
+    i2c_result_e err = i2c_write_pages(EEPROM_ADDR, page_no_start * page_size,
+        I2C_REGADDR_2B, (uint8_t *)data, sizeof_paint_data);
     printf("Save paint result: %d\n", err);
     Delay_Ms(3);
     printf("Paint %d saved\n", paint_no);
 }
 
-void load_paint(uint16_t paint_no, color_t *data, uint8_t is_icon) {
+void load_paint(uint16_t paint_no, color_t * data, uint8_t is_icon) {
     if (paint_no < 0 || paint_no > page_status_addr_end) {
         printf("Invalid paint number %d\n", paint_no);
         printf("DEBUG: %d\n", __LINE__);
-        while(1);
+        while (1)
+            ;
     }
     uint16_t page_no_start = calculate_page_no(paint_no, is_icon);
-    printf("Loading paint_no %d from page %d, is_icon: %d\n", paint_no, page_no_start, is_icon);
+    printf("Loading paint_no %d from page %d, is_icon: %d\n", paint_no, page_no_start,
+        is_icon);
     if (!is_page_used(page_no_start)) {
         printf("Paint %d not found\n", paint_no);
         printf("DEBUG: %d\n", __LINE__);
-        while(1);
+        while (1)
+            ;
     }
-    i2c_result_e err =
-        i2c_read_pages(EEPROM_ADDR, page_no_start * page_size, I2C_REGADDR_2B, (uint8_t*)data, sizeof_paint_data);
+    i2c_result_e err = i2c_read_pages(EEPROM_ADDR, page_no_start * page_size,
+        I2C_REGADDR_2B, (uint8_t *)data, sizeof_paint_data);
     printf("Load paint result: %d\n", err);
     Delay_Ms(3);
     printf("Paint %d loaded\n", paint_no);
@@ -648,7 +677,8 @@ void choose_load_paint_page(void) {
     while (1) {
         button = matrix_pressed_two();
         if (button != no_button_pressed) {
-            if (!is_page_used(button * sizeof_paint_data_aspage + paint_page_no + page_status_addr_begin)) {
+            if (!is_page_used(button * sizeof_paint_data_aspage + paint_page_no +
+                              page_status_addr_begin)) {
                 printf("Page %d is not used\n", button);
                 // Fill the screen with red to indicate error
                 fill_color((color_t){.r = 100, .g = 0, .b = 0});
@@ -821,7 +851,8 @@ void moveSnake(int8_t currentDirection, const bool apple) {
 
 bool collision(int8_t currentDirection) {
     int8_t nextSnakeHead = snakeHead + currentDirection;
-    if (snake_game_gameboard[nextSnakeHead].part == 'b' || snake_game_gameboard[nextSnakeHead].part == 't') {
+    if (snake_game_gameboard[nextSnakeHead].part == 'b' ||
+        snake_game_gameboard[nextSnakeHead].part == 't') {
         return true;
     }
     if (nextSnakeHead % 8 == 0 && currentDirection == 1) {
@@ -835,7 +866,6 @@ bool collision(int8_t currentDirection) {
     }
     return false;
 }
-
 
 void snake_game_routine(void) {
     game_init();
@@ -891,7 +921,8 @@ color_t gridColor = {.r = 0, .g = 0, .b = 150};   // Blue
 color_t playerColor = {.r = 0, .g = 150, .b = 0}; // Green
 color_t botColor = {.r = 150, .g = 0, .b = 0};
 
-char tictactoe_gameboard[9] = {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}; // 3x3 gameboard
+char tictactoe_gameboard[9] = {
+    ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}; // 3x3 gameboard
 const int8_t * topleft = (const int8_t[]){0, 1, 8, 9};
 const int8_t * topmiddle = (const int8_t[]){3, 4, 11, 12};
 const int8_t * topright = (const int8_t[]){6, 7, 14, 15};
@@ -957,11 +988,13 @@ char checkwinside() {
         }
     }
     // vertical
-    if (tictactoe_gameboard[0] == tictactoe_gameboard[4] && tictactoe_gameboard[4] == tictactoe_gameboard[8] &&
+    if (tictactoe_gameboard[0] == tictactoe_gameboard[4] &&
+        tictactoe_gameboard[4] == tictactoe_gameboard[8] &&
         tictactoe_gameboard[0] != ' ') {
         return tictactoe_gameboard[0];
     }
-    if (tictactoe_gameboard[2] == tictactoe_gameboard[4] && tictactoe_gameboard[4] == tictactoe_gameboard[6] &&
+    if (tictactoe_gameboard[2] == tictactoe_gameboard[4] &&
+        tictactoe_gameboard[4] == tictactoe_gameboard[6] &&
         tictactoe_gameboard[2] != ' ') {
         return tictactoe_gameboard[2];
     }
@@ -1098,7 +1131,7 @@ void tic_tac_toe_routine(void) {
 // Save which buttons are toggledy
 uint8_t toggle_state[NUM_LEDS] = {0};
 
-uint8_t is_array_all_one(uint8_t *array, uint8_t size) {
+uint8_t is_array_all_one(uint8_t * array, uint8_t size) {
     for (uint8_t i = 0; i < size; i++) {
         if (array[i] != 1) {
             return 0;
@@ -1129,7 +1162,6 @@ void movingcar_routine(void) {
     clear();
     WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
 
-
     while (1) {
         if (JOY_Y_pressed()) {
             break;
@@ -1157,10 +1189,10 @@ void movingcar_routine(void) {
     // Start executing the car moving instructions
     // and fill LEDs with color.
 
-    #define RED_COLOR_BUTTON 3
-    #define GREEN_COLOR_BUTTON 2
-    #define BLUE_COLOR_BUTTON 1
-    #define X_COLOR_BUTTON 0
+#define RED_COLOR_BUTTON 3
+#define GREEN_COLOR_BUTTON 2
+#define BLUE_COLOR_BUTTON 1
+#define X_COLOR_BUTTON 0
 
     uint8_t execution_step = 0;
     while (execution_step < verticalButtons) {
@@ -1177,7 +1209,8 @@ void movingcar_routine(void) {
         funDigitalWrite(R0, 0);
         funDigitalWrite(R1, 0);
 
-        const uint8_t starting_index = horizontalButtons*(verticalButtons-execution_step) - horizontalButtons;
+        const uint8_t starting_index =
+            horizontalButtons * (verticalButtons - execution_step) - horizontalButtons;
         // verify if RESET command is detected.
         if (is_array_all_one(&toggle_state[starting_index], horizontalButtons)) {
             execution_step = 0;
@@ -1185,20 +1218,21 @@ void movingcar_routine(void) {
         }
 
         // Fill the LEDs with the color of the current step
-        color_t current_step_color = {1,1,1};
-        
+        color_t current_step_color = {1, 1, 1};
+
         current_step_color.r = toggle_state[starting_index + RED_COLOR_BUTTON] ? 255 : 0;
-        current_step_color.g = toggle_state[starting_index + GREEN_COLOR_BUTTON] ? 255 : 0;
+        current_step_color.g =
+            toggle_state[starting_index + GREEN_COLOR_BUTTON] ? 255 : 0;
         current_step_color.b = toggle_state[starting_index + BLUE_COLOR_BUTTON] ? 255 : 0;
 
         fill_color(current_step_color);
         WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
 
-        // Move the car according to the current step
-        #define L0_ON_INDEX 7
-        #define L1_ON_INDEX 6
-        #define R0_ON_INDEX 5
-        #define R1_ON_INDEX 4
+// Move the car according to the current step
+#define L0_ON_INDEX 7
+#define L1_ON_INDEX 6
+#define R0_ON_INDEX 5
+#define R1_ON_INDEX 4
 
         funDigitalWrite(L0, toggle_state[starting_index + L0_ON_INDEX]);
         funDigitalWrite(L1, toggle_state[starting_index + L1_ON_INDEX]);

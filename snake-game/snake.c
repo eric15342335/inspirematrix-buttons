@@ -18,25 +18,25 @@ color_t snakeHeadColor = {0, 255, 255};  // Green
 color_t snakeBodyColor = {51, 255, 51};  // Green
 color_t snakeTailColor = {255, 255, 51}; // Yellow
 
-snakePartDir gameboard[64]; // 8x8 gameboard
+snakePartDir snake_game_gameboard[64]; // 8x8 gameboard
 int8_t snakeHead = 45;
 int8_t snakeTail = 47;
 
 void game_init() {
     char * ptr;
-    for (ptr = (char *)gameboard; ptr < (char *)(gameboard + 64);
+    for (ptr = (char *)snake_game_gameboard; ptr < (char *)(snake_game_gameboard + 64);
          ptr += sizeof(snakePartDir)) {
         *(snakePartDir *)ptr = (snakePartDir){'0', 0};
     }
-    gameboard[47] = (snakePartDir){'t', -1};
-    gameboard[46] = (snakePartDir){'b', -1};
-    gameboard[45] = (snakePartDir){'h', 0};
-    gameboard[42] = (snakePartDir){'a', 0};
+    snake_game_gameboard[47] = (snakePartDir){'t', -1};
+    snake_game_gameboard[46] = (snakePartDir){'b', -1};
+    snake_game_gameboard[45] = (snakePartDir){'h', 0};
+    snake_game_gameboard[42] = (snakePartDir){'a', 0};
 }
 void display() {
     clear();
     for (int i = 0; i < 64; i++) {
-        switch (gameboard[i].part) {
+        switch (snake_game_gameboard[i].part) {
             case 't':
                 set_color(i, snakeTailColor);
                 break;
@@ -58,16 +58,16 @@ void display() {
 }
 
 int8_t direction(int8_t currentDirection) {
-    if (JOY_up_pressed() && gameboard[snakeHead + 8].part != 'b') {
+    if (JOY_up_pressed() && snake_game_gameboard[snakeHead + 8].part != 'b') {
         return 8; // go up
     }
-    if (JOY_down_pressed() && gameboard[snakeHead - 8].part != 'b') {
+    if (JOY_down_pressed() && snake_game_gameboard[snakeHead - 8].part != 'b') {
         return -8; // go down
     }
-    if (JOY_left_pressed() && gameboard[snakeHead + 1].part != 'b') {
+    if (JOY_left_pressed() && snake_game_gameboard[snakeHead + 1].part != 'b') {
         return 1; // go left
     }
-    if (JOY_right_pressed() && gameboard[snakeHead - 1].part != 'b') {
+    if (JOY_right_pressed() && snake_game_gameboard[snakeHead - 1].part != 'b') {
         printf("right\n");
         return -1; // go right
     }
@@ -77,7 +77,7 @@ int8_t direction(int8_t currentDirection) {
 }
 
 bool checkApple(int8_t currentDirection) {
-    if (gameboard[snakeHead + currentDirection].part == 'a') {
+    if (snake_game_gameboard[snakeHead + currentDirection].part == 'a') {
         return true;
     }
     return false;
@@ -87,30 +87,30 @@ void generate_apple(void) {
     uint8_t applePos;
     do {
         applePos = JOY_random() % 64;
-    } while (gameboard[applePos].part != '0');
-    gameboard[applePos] = (snakePartDir){'a', 0};
+    } while (snake_game_gameboard[applePos].part != '0');
+    snake_game_gameboard[applePos] = (snakePartDir){'a', 0};
     // random a location to put down an apple
     // random till that is a empty space
 }
 
 void moveSnake(int8_t currentDirection, const bool apple) {
-    gameboard[snakeHead].part = 'b';
-    gameboard[snakeHead].direction = currentDirection;
+    snake_game_gameboard[snakeHead].part = 'b';
+    snake_game_gameboard[snakeHead].direction = currentDirection;
     snakeHead += currentDirection;
-    gameboard[snakeHead].part = 'h';
+    snake_game_gameboard[snakeHead].part = 'h';
     if (apple) {
         return;
     }
     // if the snake eats the apple, the tail will not move
     // move the tail when the snake does not eat the apple
-    gameboard[snakeTail].part = '0';
-    snakeTail += gameboard[snakeTail].direction;
-    gameboard[snakeTail].part = 't';
+    snake_game_gameboard[snakeTail].part = '0';
+    snakeTail += snake_game_gameboard[snakeTail].direction;
+    snake_game_gameboard[snakeTail].part = 't';
 }
 
 bool collision(int8_t currentDirection) {
     int8_t nextSnakeHead = snakeHead + currentDirection;
-    if (gameboard[nextSnakeHead].part == 'b' || gameboard[nextSnakeHead].part == 't') {
+    if (snake_game_gameboard[nextSnakeHead].part == 'b' || snake_game_gameboard[nextSnakeHead].part == 't') {
         return true;
     }
     if (nextSnakeHead % 8 == 0 && currentDirection == 1) {

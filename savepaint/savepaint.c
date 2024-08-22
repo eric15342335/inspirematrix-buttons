@@ -1,10 +1,12 @@
 #define CH32V003_I2C_IMPLEMENTATION
 #define WS2812BSIMPLE_IMPLEMENTATION
 #include <stdio.h>
+#include <stdbool.h>
 #include "ch32v003_i2c.h"
 #include "colors.h"
 #include "driver.h"
 #include "ws2812b_simple.h"
+#include "fonts.h"
 // obtained from i2c_scan(), before shifting by 1 bit
 #define EEPROM_ADDR 0x51
 
@@ -12,11 +14,11 @@
 // first 8 pages are used for status
 void init_storage(void);
 
-// save paint data to eeprom, paint 0 stored in page 8-10 (out of page 0 to 511)
+// save paint data to eeprom, paint 0 stored in page ?? (out of page 0 to 511)
 void save_paint(uint16_t paint_no, color_t *data);
 
-// load paint data from eeprom, paint 0 stored in page 8-10 (out of page 0 to 511)
-void load_paint(uint16_t paint_no, color_t *data);
+// load paint data from eeprom, paint 0 stored in page ?? (out of page 0 to 511)
+void load_paint(uint16_t paint_no, color_t *data, uint8_t is_icon);
 
 // set page status to 0 or 1
 void set_page_status(uint16_t page_no, uint8_t status);
@@ -32,6 +34,8 @@ uint8_t is_page_used(uint16_t page_no);
 
 // check if already initialized data, aka init_status_data is set
 uint8_t is_storage_initialized(void);
+
+void display_number_centered(uint8_t number);
 
 #define page_size 64
 // range of byte that stores status of page[x]
@@ -52,8 +56,20 @@ uint8_t is_storage_initialized(void);
 #define sizeof_paint_data_aspage (sizeof_paint_data/page_size)
 #define matrix_hori 16
 
-#define paint_page_no 0
+#define paint_page_no (8*sizeof_paint_data_aspage)
 #define paint_page_no_max (8*sizeof_paint_data_aspage)
+#define num_paint_saves (paint_page_no_max / sizeof_paint_data_aspage)
+
+// store icons in EEPROM
+#define STORE_ICONS 0
+#if STORE_ICONS
+#undef paint_page_no
+#define paint_page_no (0*sizeof_paint_data_aspage)
+#endif
+
+#define app_icon_page_no (0*sizeof_paint_data_aspage)
+#define app_icon_page_no_max (8*sizeof_paint_data_aspage)
+
 #define delay 1000
 
 #define LED_PINS GPIOA, 2
@@ -71,6 +87,19 @@ typedef struct {
 
 canvas_t canvas[NUM_LEDS] = {0};
 
+/** @brief Numbers are arranged by the order of icons
+ * in the EEPROM!!!!! Read app_selection() for more info.
+ */
+typedef enum _app_selected {
+    paint = 0,
+    music = 1,
+    rec = 2,
+    risc_v_code = 3,
+    game_tic_tac_toe = 4,
+    game_snake = 5,
+    robot_car = 6,
+} app_selected;
+
 void flushCanvas(void);
 
 void displayColorPalette(void);
@@ -85,8 +114,36 @@ void choose_save_paint_page(void);
 
 void led_display_paint_page_status(void);
 
+void any_paint_exist(uint8_t *paint_exist);
 
 void display_stored_paints(void);
+
+void app_selection(app_selected * app);
+
+void red_screen(void);
+
+void erase_all_paint_saves(void);
+
+// snake game
+
+void drawScore(uint8_t score);
+
+bool collision(int8_t currentDirection);
+
+void snake_game_routine(void);
+
+void moveSnake(int8_t currentDirection, const bool apple);
+
+void generate_apple(void);
+
+bool checkApple(int8_t currentDirection);
+
+int8_t direction(int8_t currentDirection);
+
+void display(void);
+
+void game_init(void);
+// end snake game
 
 int main(void) {
     SystemInit();
@@ -99,15 +156,14 @@ int main(void) {
     printf("I2C Initialized\n");
     init_storage();
 
-    // Hold button Y at startup to reset storage
+    // Hold button Y at startup to reset all paints
     uint16_t delay_countdown = 50;
     while (delay_countdown-- > 0) {
         if (JOY_Y_pressed()) {
-            reset_storage();
-            // Visual indication of storage reset
-            fill_color((color_t){.r = 100, .g = 0, .b = 0});
-            WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
-            printf("Storage reset\n");
+            erase_all_paint_saves();
+            // Visual indication of paint save reset
+            red_screen();
+            printf("Paint reset\n");
             printf("DEBUG: %d\n", __LINE__);
             Delay_Ms(1000);
         }
@@ -116,49 +172,257 @@ int main(void) {
 
     print_status_storage();
 
-    display_stored_paints();
-
-    painting_routine();
-
-    choose_save_paint_page();
+#if STORE_ICONS == 1
+    app_selected app = paint;
+#else
+    app_selected app = paint;
+    app_selection(&app);
+#endif
+    switch (app) {
+        case paint:
+            display_stored_paints();
+            painting_routine();
+            choose_save_paint_page();
+            break;
+        case music:
+            red_screen();
+            break;
+        case rec:
+            red_screen();
+            break;
+        case risc_v_code:
+            red_screen();
+            break;
+        case game_tic_tac_toe:
+            red_screen();
+            break;
+        case game_snake:
+            snake_game_routine();
+            break;
+        case robot_car:
+            red_screen();
+            break;
+        default:
+            red_screen();
+            break;
+    }
 
     Delay_Ms(delay);
     while(1) {
-        if (JOY_up_pressed()) {
+        if (JOY_Y_pressed()) {
             NVIC_SystemReset();
         }
         Delay_Ms(200);
     }
 }
 
+void erase_all_paint_saves(void) {
+    // Set status of paint pages to 0
+    for (uint16_t _paint_page_no = paint_page_no; _paint_page_no < paint_page_no_max + paint_page_no; _paint_page_no++) {
+        for (uint16_t i = _paint_page_no + page_status_addr_begin; i < _paint_page_no + page_status_addr_begin + sizeof_paint_data_aspage; i++) {
+            set_page_status(i, 0);
+            Delay_Ms(3);
+        }
+    }
+    printf("All paint saves status erased\n");
+    // Erase existing data to 0
+    for (uint16_t _paint_page_no = paint_page_no; _paint_page_no < paint_page_no_max + paint_page_no; _paint_page_no+=sizeof(uint8_t)) {
+        i2c_result_e err =
+            i2c_write_pages(EEPROM_ADDR, _paint_page_no * page_size, I2C_REGADDR_2B, (uint8_t[]){0}, sizeof(uint8_t));
+        printf("Erase paint result: %d\n", err);
+        Delay_Ms(3);
+    }
+}
+
+void red_screen(void) {
+    fill_color((color_t){.r = 100, .g = 0, .b = 0});
+    WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
+}
+
+void app_selection(app_selected * app) {
+    clear();
+    printf("App selection\n");
+
+    // Display app icon menu just like paint saves
+    
+    // todo: add missing icon check
+    
+    int8_t current_display_icon = 0;
+    display_number_centered(current_display_icon);
+    Delay_Ms(1000);
+
+    typedef enum direction_pressed {
+        up_pressed = -1,
+        down_pressed = 1,
+    } direction_pressed;
+    direction_pressed last_direction_pressed = down_pressed;
+
+    uint8_t leave = 0;
+
+    while (1) {
+        if (leave) {
+            break;
+        }
+
+        if (current_display_icon >= paint_page_no_max / sizeof_paint_data_aspage) {
+            current_display_icon = 0;
+        }
+        if (current_display_icon < 0) {
+            current_display_icon = paint_page_no_max / sizeof_paint_data_aspage - 1;
+        }
+
+        uint16_t _icon_page_no = current_display_icon * sizeof_paint_data_aspage + app_icon_page_no;
+        clear();
+        if (!is_page_used(_icon_page_no + page_status_addr_begin) ||
+            !is_page_used(_icon_page_no + page_status_addr_begin + 1) ||
+            !is_page_used(_icon_page_no + page_status_addr_begin + 2)) {
+            printf("Icon %d not found\n", _icon_page_no / 3);
+            printf("DEBUG: %d\n", __LINE__);
+            current_display_icon += last_direction_pressed;
+            continue;
+        }
+        display_number_centered(current_display_icon);
+        Delay_Ms(500);
+        printf("Displaying icon %d\n", _icon_page_no);
+        load_paint(_icon_page_no / sizeof_paint_data_aspage, led_array, 1);
+        // setup_unique_pattern();
+        WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
+
+        while (1) {
+            if (JOY_left_pressed()) {
+                leave = 1;
+                break;
+            }
+            if (JOY_down_pressed()) {
+                current_display_icon++;
+                printf("Down pressed\n");
+                last_direction_pressed = down_pressed;
+                break;
+            }
+            else if (JOY_up_pressed()) {
+                current_display_icon--;
+                printf("Up pressed\n");
+                last_direction_pressed = up_pressed;
+                break;
+            }
+            Delay_Ms(100);
+        }
+    }
+    printf("All stored icons displayed\n");
+    clear();
+    red_screen();
+    Delay_Ms(delay);
+    *app = current_display_icon;
+}
+
+void any_paint_exist(uint8_t *paint_exist) {
+    for (uint16_t _paint_page_no = paint_page_no; _paint_page_no < paint_page_no_max + paint_page_no; _paint_page_no+=sizeof_paint_data_aspage) {
+        if (is_page_used(_paint_page_no + page_status_addr_begin) &&
+            is_page_used(_paint_page_no + page_status_addr_begin + 1) &&
+            is_page_used(_paint_page_no + page_status_addr_begin + 2)) {
+            *paint_exist = 1;
+            return;
+        }
+    }
+    *paint_exist = 0;
+}
+
+void display_number_centered(uint8_t number) {
+    clear();
+    printf("Displaying number %d\n", number);
+    font_draw(font_list[number], color_savefile_empty, horizontalButtons * 1 + verticalButtons / font_width);
+    WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
+}
+
 void display_stored_paints(void) {
-    for (uint16_t _paint_page_no = paint_page_no; _paint_page_no < paint_page_no_max; _paint_page_no+=sizeof_paint_data_aspage) {
+    // Check if any paint to display
+    uint8_t paint_exist = 0;
+    any_paint_exist(&paint_exist);
+    if (!paint_exist) {
+        printf("No paint to display\n");
+        fill_color((color_t){.r = 100, .g = 0, .b = 0});
+        WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
+        Delay_Ms(1000);
+        return;
+    }
+    
+    int8_t current_display_paint = 0;
+    display_number_centered(current_display_paint);
+    Delay_Ms(1000);
+
+    typedef enum direction_pressed {
+        up_pressed = -1,
+        down_pressed = 1,
+    } direction_pressed;
+    direction_pressed last_direction_pressed = down_pressed;
+
+    uint8_t leave = 0;
+
+    while (1) {
+        if (leave) {
+            break;
+        }
+
+        if (current_display_paint >= paint_page_no_max / sizeof_paint_data_aspage) {
+            current_display_paint = 0;
+        }
+        if (current_display_paint < 0) {
+            current_display_paint = paint_page_no_max / sizeof_paint_data_aspage - 1;
+        }
+
+        uint16_t _paint_page_no = current_display_paint * sizeof_paint_data_aspage + paint_page_no;
         clear();
         if (!is_page_used(_paint_page_no + page_status_addr_begin) ||
             !is_page_used(_paint_page_no + page_status_addr_begin + 1) ||
             !is_page_used(_paint_page_no + page_status_addr_begin + 2)) {
-            printf("Paint %d not found\n", _paint_page_no / 3);
+            printf("Paint %d not found\n", _paint_page_no / sizeof_paint_data_aspage);
             printf("DEBUG: %d\n", __LINE__);
-            break;
+            current_display_paint += last_direction_pressed;
+            continue;
         }
-        printf("Displaying paint %d\n", _paint_page_no);
-        load_paint(_paint_page_no / sizeof_paint_data_aspage, led_array);
+        display_number_centered(current_display_paint);
+        Delay_Ms(500);
+        printf("Displaying paint %d\n", _paint_page_no / sizeof_paint_data_aspage);
+        load_paint(_paint_page_no / sizeof_paint_data_aspage, led_array, 0);
         // setup_unique_pattern();
         WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
-        Delay_Ms(delay);
+
+        while (1) {
+            if (JOY_left_pressed()) {
+                leave = 1;
+                break;
+            }
+            if (JOY_down_pressed()) {
+                current_display_paint++;
+                printf("Down pressed\n");
+                last_direction_pressed = down_pressed;
+                break;
+            }
+            else if (JOY_up_pressed()) {
+                current_display_paint--;
+                printf("Up pressed\n");
+                last_direction_pressed = up_pressed;
+                break;
+            }
+            Delay_Ms(100);
+        }
     }
     printf("All stored paints displayed\n");
+    clear();
+    fill_color((color_t){.r = 100, .g = 0, .b = 0});
+    WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
+    Delay_Ms(delay);
 }
 
 void led_display_paint_page_status(void) {
     clear();
-    for (uint16_t _paint_page_no = 0; _paint_page_no < paint_page_no_max - paint_page_no; _paint_page_no+=sizeof_paint_data_aspage) {
-        if (is_page_used(_paint_page_no + page_status_addr_begin) &&
-            is_page_used(_paint_page_no + page_status_addr_begin + 1) &&
-            is_page_used(_paint_page_no + page_status_addr_begin + 2)) {
-            set_color(_paint_page_no / sizeof_paint_data_aspage, color_savefile_exist);
+    for (uint16_t _paint_page_no = paint_page_no; _paint_page_no < paint_page_no_max + paint_page_no; _paint_page_no+=sizeof_paint_data_aspage) {
+        if (is_page_used(_paint_page_no + paint_page_no + page_status_addr_begin) &&
+            is_page_used(_paint_page_no + paint_page_no + page_status_addr_begin + 1) &&
+            is_page_used(_paint_page_no + paint_page_no + page_status_addr_begin + 2)) {
+            set_color((_paint_page_no - paint_page_no) / sizeof_paint_data_aspage, color_savefile_exist);
         } else {
-            set_color(_paint_page_no / sizeof_paint_data_aspage, color_savefile_empty);
+            set_color((_paint_page_no - paint_page_no) / sizeof_paint_data_aspage, color_savefile_empty);
         }
     }
     WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
@@ -190,10 +454,8 @@ void choose_save_paint_page(void) {
         }
         Delay_Ms(200);
     }
-    // Display saved paint
-    display_stored_paints();
-    Delay_Ms(delay);
-    printf("Saved paint %d displayed\n", button);
+    clear();
+    WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
 }
 
 void setup_unique_pattern(void) {
@@ -284,7 +546,7 @@ void save_paint(uint16_t paint_no, color_t *data) {
         printf("DEBUG: %d\n", __LINE__);
         while(1);
     }
-    uint16_t page_no_start = paint_no * sizeof_paint_data_aspage + page_status_addr_begin;
+    uint16_t page_no_start = paint_no * sizeof_paint_data_aspage + paint_page_no + page_status_addr_begin;
     for (uint16_t i = page_no_start; i < page_no_start + sizeof_paint_data_aspage; i++) {
         if (is_page_used(i)) {
             printf("Paint %d already used, overwriting\n", paint_no);
@@ -299,13 +561,20 @@ void save_paint(uint16_t paint_no, color_t *data) {
     printf("Paint %d saved\n", paint_no);
 }
 
-void load_paint(uint16_t paint_no, color_t *data) {
+void load_paint(uint16_t paint_no, color_t *data, uint8_t is_icon) {
     if (paint_no < 0 || paint_no > page_status_addr_end) {
         printf("Invalid paint number %d\n", paint_no);
         printf("DEBUG: %d\n", __LINE__);
         while(1);
     }
-    uint16_t page_no_start = paint_no * sizeof_paint_data_aspage + page_status_addr_begin;
+    uint16_t page_no_start = 0;
+    if (is_icon) {
+        page_no_start = (paint_no + app_icon_page_no) * sizeof_paint_data_aspage + page_status_addr_begin;
+    }
+    else {
+        page_no_start = paint_no * sizeof_paint_data_aspage + paint_page_no + page_status_addr_begin;
+    }
+    printf("Loading paint_no %d from page %d, is_icon: %d\n", paint_no, page_no_start, is_icon);
     if (!is_page_used(page_no_start)) {
         printf("Paint %d not found\n", paint_no);
         printf("DEBUG: %d\n", __LINE__);
@@ -394,4 +663,172 @@ void painting_routine(void) {
             canvas[user_input].color.g, canvas[user_input].color.b);
         flushCanvas();
     }
+}
+
+// snake game
+
+typedef struct snakePartDir {
+    char part;
+    int8_t direction;
+} snakePartDir;
+
+color_t appleColor = {255, 0, 0};        // red
+color_t snakeHeadColor = {0, 255, 255};  // Green
+color_t snakeBodyColor = {51, 255, 51};  // Green
+color_t snakeTailColor = {255, 255, 51}; // Yellow
+
+snakePartDir snake_game_gameboard[64]; // 8x8 gameboard
+int8_t snakeHead = 45;
+int8_t snakeTail = 47;
+
+void game_init(void) {
+    char * ptr;
+    for (ptr = (char *)snake_game_gameboard; ptr < (char *)(snake_game_gameboard + 64);
+         ptr += sizeof(snakePartDir)) {
+        *(snakePartDir *)ptr = (snakePartDir){'0', 0};
+    }
+    snake_game_gameboard[47] = (snakePartDir){'t', -1};
+    snake_game_gameboard[46] = (snakePartDir){'b', -1};
+    snake_game_gameboard[45] = (snakePartDir){'h', 0};
+    snake_game_gameboard[42] = (snakePartDir){'a', 0};
+}
+void display(void) {
+    clear();
+    for (int i = 0; i < 64; i++) {
+        switch (snake_game_gameboard[i].part) {
+            case 't':
+                set_color(i, snakeTailColor);
+                break;
+            case 'b':
+                set_color(i, snakeBodyColor);
+                break;
+            case 'h':
+                set_color(i, snakeHeadColor);
+                break;
+            case 'a':
+                set_color(i, appleColor);
+                break;
+            default:
+                set_color(i, (color_t){0, 0, 0});
+                break;
+        }
+    }
+    WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
+}
+
+int8_t direction(int8_t currentDirection) {
+    if (JOY_up_pressed() && snake_game_gameboard[snakeHead + 8].part != 'b') {
+        return 8; // go up
+    }
+    if (JOY_down_pressed() && snake_game_gameboard[snakeHead - 8].part != 'b') {
+        return -8; // go down
+    }
+    if (JOY_left_pressed() && snake_game_gameboard[snakeHead + 1].part != 'b') {
+        return 1; // go left
+    }
+    if (JOY_right_pressed() && snake_game_gameboard[snakeHead - 1].part != 'b') {
+        printf("right\n");
+        return -1; // go right
+    }
+    // check if the snake is running to itself
+    // if not then set the direction
+    return currentDirection;
+}
+
+bool checkApple(int8_t currentDirection) {
+    if (snake_game_gameboard[snakeHead + currentDirection].part == 'a') {
+        return true;
+    }
+    return false;
+}
+
+void generate_apple(void) {
+    uint8_t applePos;
+    do {
+        applePos = JOY_random() % 64;
+    } while (snake_game_gameboard[applePos].part != '0');
+    snake_game_gameboard[applePos] = (snakePartDir){'a', 0};
+    // random a location to put down an apple
+    // random till that is a empty space
+}
+
+void moveSnake(int8_t currentDirection, const bool apple) {
+    snake_game_gameboard[snakeHead].part = 'b';
+    snake_game_gameboard[snakeHead].direction = currentDirection;
+    snakeHead += currentDirection;
+    snake_game_gameboard[snakeHead].part = 'h';
+    if (apple) {
+        return;
+    }
+    // if the snake eats the apple, the tail will not move
+    // move the tail when the snake does not eat the apple
+    snake_game_gameboard[snakeTail].part = '0';
+    snakeTail += snake_game_gameboard[snakeTail].direction;
+    snake_game_gameboard[snakeTail].part = 't';
+}
+
+bool collision(int8_t currentDirection) {
+    int8_t nextSnakeHead = snakeHead + currentDirection;
+    if (snake_game_gameboard[nextSnakeHead].part == 'b' || snake_game_gameboard[nextSnakeHead].part == 't') {
+        return true;
+    }
+    if (nextSnakeHead % 8 == 0 && currentDirection == 1) {
+        return true;
+    }
+    if (nextSnakeHead % 8 == 7 && currentDirection == -1) {
+        return true;
+    }
+    if (nextSnakeHead < 0 || nextSnakeHead > 63) {
+        return true;
+    }
+    return false;
+}
+
+
+void snake_game_routine(void) {
+    game_init();
+    display();
+    uint16_t seed = 0;
+    uint8_t score = 0;
+    bool apple;
+    while (!JOY_Y_pressed()) {
+        seed++;
+        if (seed > 0xFFF0) {
+            seed = 0;
+        } // boundary check of uint16_t rnval
+        // generate a seed according to the time between boot and button pressed
+        Delay_Ms(10);
+        // wait for the button to be pressed
+    }
+    JOY_setseed(seed);
+    int8_t currentDirection = -1;
+    while (1) {
+        currentDirection = direction(currentDirection);
+        if (collision(currentDirection)) {
+            break;
+        }
+        apple = checkApple(currentDirection);
+        moveSnake(currentDirection, apple);
+        if (apple) {
+            generate_apple();
+            score++;
+        }
+        display();
+        Delay_Ms(700);
+    }
+    drawScore(score);
+    while (!JOY_Y_pressed()) {
+        Delay_Ms(1);
+        // wait for the button to be pressed
+    }
+    NVIC_SystemReset();
+}
+
+void drawScore(uint8_t score) {
+    clear();
+    const uint8_t tenth_digit = score / 10;
+    const uint8_t unit_digit = score % 10;
+    font_draw(font_list[tenth_digit], colors[8 * tenth_digit % num_colors], 4);
+    font_draw(font_list[unit_digit], colors[8 * unit_digit % num_colors], 0);
+    WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
 }

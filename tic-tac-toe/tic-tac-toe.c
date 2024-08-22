@@ -11,7 +11,7 @@ color_t gridColor = {0, 0, 150};   // Blue
 color_t playerColor = {0, 150, 0}; // Green
 color_t botColor = {150, 0, 0};
 
-char gameboard[9] = {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}; // 3x3 gameboard
+char tictactoe_gameboard[9] = {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}; // 3x3 gameboard
 const int8_t * topleft = (const int8_t[]){0, 1, 8, 9};
 const int8_t * topmiddle = (const int8_t[]){3, 4, 11, 12};
 const int8_t * topright = (const int8_t[]){6, 7, 14, 15};
@@ -59,34 +59,34 @@ void fillcirclecross(uint8_t coord, char circlecross) {
 
 void fillallcirclecross() {
     for (int i = 0; i < 9; i++) {
-        fillcirclecross(initcoord[i], gameboard[i]);
+        fillcirclecross(initcoord[i], tictactoe_gameboard[i]);
     }
 }
 
 char checkwinside() {
     char * charptr;
-    for (charptr = gameboard; charptr < gameboard + 9; charptr += 3) {
+    for (charptr = tictactoe_gameboard; charptr < tictactoe_gameboard + 9; charptr += 3) {
         if (*charptr == *(charptr + 1) && *charptr == *(charptr + 2) && *charptr != ' ') {
             return *charptr;
         }
     }
     // horizontal
-    for (charptr = gameboard; charptr < gameboard + 3; charptr++) {
+    for (charptr = tictactoe_gameboard; charptr < tictactoe_gameboard + 3; charptr++) {
         if (*charptr == *(charptr + 3) && *charptr == *(charptr + 6) && *charptr != ' ') {
             return *charptr;
         }
     }
     // vertical
-    if (gameboard[0] == gameboard[4] && gameboard[4] == gameboard[8] &&
-        gameboard[0] != ' ') {
-        return gameboard[0];
+    if (tictactoe_gameboard[0] == tictactoe_gameboard[4] && tictactoe_gameboard[4] == tictactoe_gameboard[8] &&
+        tictactoe_gameboard[0] != ' ') {
+        return tictactoe_gameboard[0];
     }
-    if (gameboard[2] == gameboard[4] && gameboard[4] == gameboard[6] &&
-        gameboard[2] != ' ') {
-        return gameboard[2];
+    if (tictactoe_gameboard[2] == tictactoe_gameboard[4] && tictactoe_gameboard[4] == tictactoe_gameboard[6] &&
+        tictactoe_gameboard[2] != ' ') {
+        return tictactoe_gameboard[2];
     }
     // 2 diagonals
-    for (charptr = gameboard; charptr < gameboard + 9; charptr++) {
+    for (charptr = tictactoe_gameboard; charptr < tictactoe_gameboard + 9; charptr++) {
         if (*charptr == ' ')
             return 0;
     }
@@ -113,64 +113,64 @@ void selectposition() {
         JOY_setseed(seed);
         for (loopptr = topleft; loopptr < topleft + 4; loopptr++) {
             i = *loopptr;
-            if (position == i && gameboard[0] == ' ') {
-                gameboard[0] = 'X';
+            if (position == i && tictactoe_gameboard[0] == ' ') {
+                tictactoe_gameboard[0] = 'X';
                 return;
             }
         }
         for (loopptr = topmiddle; loopptr < topmiddle + 4; loopptr++) {
             i = *loopptr;
-            if (position == i && gameboard[1] == ' ') {
-                gameboard[1] = 'X';
+            if (position == i && tictactoe_gameboard[1] == ' ') {
+                tictactoe_gameboard[1] = 'X';
                 return;
             }
         }
         for (loopptr = topright; loopptr < topright + 4; loopptr++) {
             i = *loopptr;
-            if (position == i && gameboard[2] == ' ') {
-                gameboard[2] = 'X';
+            if (position == i && tictactoe_gameboard[2] == ' ') {
+                tictactoe_gameboard[2] = 'X';
                 return;
             }
         }
         for (loopptr = middleleft; loopptr < middleleft + 4; loopptr++) {
             i = *loopptr;
-            if (position == i && gameboard[3] == ' ') {
-                gameboard[3] = 'X';
+            if (position == i && tictactoe_gameboard[3] == ' ') {
+                tictactoe_gameboard[3] = 'X';
                 return;
             }
         }
         for (loopptr = middlemiddle; loopptr < middlemiddle + 4; loopptr++) {
             i = *loopptr;
-            if (position == i && gameboard[4] == ' ') {
-                gameboard[4] = 'X';
+            if (position == i && tictactoe_gameboard[4] == ' ') {
+                tictactoe_gameboard[4] = 'X';
                 return;
             }
         }
         for (loopptr = middleright; loopptr < middleright + 4; loopptr++) {
             i = *loopptr;
-            if (position == i && gameboard[5] == ' ') {
-                gameboard[5] = 'X';
+            if (position == i && tictactoe_gameboard[5] == ' ') {
+                tictactoe_gameboard[5] = 'X';
                 return;
             }
         }
         for (loopptr = bottomleft; loopptr < bottomleft + 4; loopptr++) {
             i = *loopptr;
-            if (position == i && gameboard[6] == ' ') {
-                gameboard[6] = 'X';
+            if (position == i && tictactoe_gameboard[6] == ' ') {
+                tictactoe_gameboard[6] = 'X';
                 return;
             }
         }
         for (loopptr = bottommiddle; loopptr < bottommiddle + 4; loopptr++) {
             i = *loopptr;
-            if (position == i && gameboard[7] == ' ') {
-                gameboard[7] = 'X';
+            if (position == i && tictactoe_gameboard[7] == ' ') {
+                tictactoe_gameboard[7] = 'X';
                 return;
             }
         }
         for (loopptr = bottomright; loopptr < bottomright + 4; loopptr++) {
             i = *loopptr;
-            if (position == i && gameboard[8] == ' ') {
-                gameboard[8] = 'X';
+            if (position == i && tictactoe_gameboard[8] == ' ') {
+                tictactoe_gameboard[8] = 'X';
                 return;
             }
         }
@@ -180,8 +180,8 @@ void selectposition() {
 void play() {
     while (1) {
         uint8_t randpos = JOY_random() % 9;
-        if (gameboard[randpos] == ' ') {
-            gameboard[randpos] = 'O';
+        if (tictactoe_gameboard[randpos] == ' ') {
+            tictactoe_gameboard[randpos] = 'O';
             Delay_Ms(300);
             break;
         }

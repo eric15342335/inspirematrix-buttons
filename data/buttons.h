@@ -92,9 +92,10 @@
 #define BUTTON_X 20
 #define BUTTON_Y 10
 #define BUTTON_UP 46
-#define BUTTON_DOWN 30
+#define BUTTON_DOWN 29
 #define BUTTON_LEFT 55
-#define BUTTON_RIGHT 37
+#define BUTTON_RIGHT 37 /// @note When using battery power source without laptop grounding,
+// right button seems cannot reliably detected.
 #define SPECIAL_BUTTON_DEVIATION 1
 
 /// @brief Array of buttons corresponding to the ADC values, for linear searching

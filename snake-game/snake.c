@@ -13,10 +13,11 @@ typedef struct snakePartDir {
     int8_t direction;
 } snakePartDir;
 
-color_t appleColor = {255, 0, 0};        // red
-color_t snakeHeadColor = {0, 255, 255};  // Green
-color_t snakeBodyColor = {51, 255, 51};  // Green
-color_t snakeTailColor = {255, 255, 51}; // Yellow
+color_t appleColor = {.r = 255, .g = 0, .b = 0};        // red
+color_t snakeHeadColor = {.r = 0, .g = 255, .b = 255};  // Green
+color_t snakeBodyColor = {.r = 51, .g = 255, .b = 51};  // Green
+color_t snakeTailColor = {.r = 255, .g = 255, .b = 51}; // Yellow
+
 
 snakePartDir snake_game_gameboard[64]; // 8x8 gameboard
 int8_t snakeHead = 45;

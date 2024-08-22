@@ -7,9 +7,9 @@
 
 #define LED_PINS GPIOA, 2
 
-color_t gridColor = {0, 0, 150};   // Blue
-color_t playerColor = {0, 150, 0}; // Green
-color_t botColor = {150, 0, 0};
+color_t gridColor = {.r = 0, .g = 0, .b = 150};   // Blue
+color_t playerColor = {.r = 0, .g = 150, .b = 0}; // Green
+color_t botColor = {.r = 150, .g = 0, .b = 0};
 
 char tictactoe_gameboard[9] = {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}; // 3x3 gameboard
 const int8_t * topleft = (const int8_t[]){0, 1, 8, 9};

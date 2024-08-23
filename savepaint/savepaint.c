@@ -149,7 +149,7 @@ void game_init(void);
 
 // tic-tac-toe game
 
-// void tic_tac_toe_routine(void);
+void tic_tac_toe_routine(void);
 
 // end tic-tac-toe game
 
@@ -212,8 +212,7 @@ int main(void) {
             red_screen();
             break;
         case game_tic_tac_toe:
-            // tic_tac_toe_routine();
-            red_screen();
+            tic_tac_toe_routine();
             break;
         case game_snake:
             snake_game_routine();
@@ -915,7 +914,7 @@ void drawScore(uint8_t score) {
 }
 
 // tic-tac-toe game
-/*
+
 color_t gridColor = {.r = 0, .g = 0, .b = 150};   // Blue
 color_t playerColor = {.r = 0, .g = 150, .b = 0}; // Green
 color_t botColor = {.r = 150, .g = 0, .b = 0};
@@ -1122,7 +1121,7 @@ void tic_tac_toe_routine(void) {
             break;
     }
 }
-*/
+
 // end of tic-tac-toe game
 
 // moving car

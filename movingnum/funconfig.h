@@ -7,7 +7,7 @@
 #define FUNCONF_UART_PRINTF_BAUD 115200
 #define FUNCONF_SYSTICK_USE_HCLK 1
 #define horizontalButtons 8
-#define verticalButtons 24
+#define verticalButtons 8
 #define NUM_LEDS (horizontalButtons * verticalButtons)
 
 #endif

@@ -6,7 +6,7 @@
 
 #include <stdio.h>
 
-#define LED_PINS GPIOC, 1
+#define LED_PINS GPIOA, 2
 #define separation 1
 #define space_occupied (font_width + separation)
 #define last_appear_x (horizontalButtons - space_occupied + 2)
@@ -49,7 +49,7 @@ int main(void) {
             printf("%d\n", ledIndex);
             WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
             Delay_Ms(100);
-            if (ledIndex > 76) {
+            if (ledIndex > 70) {
                 break;
             }
         }

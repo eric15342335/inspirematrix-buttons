@@ -207,6 +207,11 @@ int main(void) {
         display_all_registers(&cpu);
 
         Delay_Ms(900);
+
+        while (JOY_Y_pressed()) {
+            Delay_Ms(100);
+            printf("Waiting for Y to be released\n");
+        }
     }
 
     printf("Environment call @ %lX\n", cpu.csr.mepc);

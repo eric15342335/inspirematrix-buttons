@@ -31,29 +31,29 @@ void add_no_page_ontop(uint16_t current_no_page) {
 
 rv_u16 program[num_of_instructions] = {
     // smile mouth
-    // c.addi x10, 4
-    0x0511,
-    // c.slli x10, 4
-    0x0512,
-    // c.addi x10, 2
-    0x0509,
-    // c.slli x10, 4
-    0x0512,
-    // c.addi x10, 7
-    0x051d,
-    // c.slli x10, 4
-    0x0512,
-    // c.addu x10, 14
-    0x0539,
+    // c.addi x5, 4
+    0x0291,
+    // c.slli x5, 4
+    0x0292,
+    // c.addi x5, 2
+    0x0289,
+    // c.slli x5, 4
+    0x0292,
+    // c.addi x5, 7
+    0x029d,
+    // c.slli x5, 4
+    0x0292,
+    // c.addi x5, 14
+    0x02b9,
     // eyes
-    // c.addi x11, 4
-    0x0591,
-    // c.slli x11, 4
-    0x0592,
-    // c.addi x11, 2
-    0x0589,
-    // c.slli x11, 8
-    0x05a2,
+    // c.addi x6, 4
+    0x0311,
+    // c.slli x6, 4
+    0x0312,
+    // c.addi x6, 2
+    0x0309,
+    // c.slli x6, 8
+    0x0322,
     // ecall
     0x0073,
     // 13-20: filler with zeros.
@@ -157,11 +157,11 @@ void inputProgram(void) {
     }
 }
 
-#define register_r10_cpu_r_index 10
-#define register_r11_cpu_r_index 11
+#define register_r5_cpu_r_index 5
+#define register_r6_cpu_r_index 6
 
-#define register_r10_color (color_t){0, 255, 0}
-#define register_r11_color (color_t){0, 0, 255}
+#define register_r5_color (color_t){0, 255, 0}
+#define register_r6_color (color_t){0, 0, 255}
 
 int main(void) {
     SystemInit();
@@ -183,11 +183,11 @@ int main(void) {
         clear();
         for (int8_t bit = instruction_size - 1; bit >= 0; bit--) {
             // display register r10, r11 value at led 32-47, 48-63
-            if (cpu.r[register_r10_cpu_r_index] & (1 << bit)) {
-                set_color(bit + 32, register_r10_color);
+            if (cpu.r[register_r5_cpu_r_index] & (1 << bit)) {
+                set_color(bit + 32, register_r5_color);
             }
-            if (cpu.r[register_r11_cpu_r_index] & (1 << bit)) {
-                set_color(bit + 48, register_r11_color);
+            if (cpu.r[register_r6_cpu_r_index] & (1 << bit)) {
+                set_color(bit + 48, register_r6_color);
             }
         }
         if (trap == RV_EMECALL) {

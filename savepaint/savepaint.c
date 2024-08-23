@@ -443,9 +443,9 @@ void led_display_paint_page_status(void) {
     for (uint16_t _paint_page_no = paint_page_no;
          _paint_page_no < paint_page_no_max + paint_page_no;
          _paint_page_no += sizeof_paint_data_aspage) {
-        if (is_page_used(_paint_page_no + paint_page_no + page_status_addr_begin) &&
-            is_page_used(_paint_page_no + paint_page_no + page_status_addr_begin + 1) &&
-            is_page_used(_paint_page_no + paint_page_no + page_status_addr_begin + 2)) {
+        if (is_page_used(_paint_page_no + page_status_addr_begin) &&
+            is_page_used(_paint_page_no + page_status_addr_begin + 1) &&
+            is_page_used(_paint_page_no + page_status_addr_begin + 2)) {
             set_color((_paint_page_no - paint_page_no) / sizeof_paint_data_aspage,
                 color_savefile_exist);
         }
@@ -642,7 +642,7 @@ void load_paint(uint16_t paint_no, color_t * data, uint8_t is_icon) {
 
 void flushCanvas(void) {
     for (int i = 0; i < NUM_LEDS; i++) {
-        set_color(i, canvas[i].color);
+        led_array[i] = canvas[i].color;
     }
     WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
 }

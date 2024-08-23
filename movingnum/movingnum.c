@@ -6,7 +6,7 @@
 
 #include <stdio.h>
 
-#define LED_PINS GPIOA, 2
+#define LED_PINS GPIOC, 1
 #define separation 1
 #define space_occupied (font_width + separation)
 #define last_appear_x (horizontalButtons - space_occupied + 2)

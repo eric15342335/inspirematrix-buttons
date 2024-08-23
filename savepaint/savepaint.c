@@ -641,7 +641,7 @@ void load_paint(uint16_t paint_no, color_t * data, uint8_t is_icon) {
 
 void flushCanvas(void) {
     for (int i = 0; i < NUM_LEDS; i++) {
-        led_array[i] = canvas[i].color;
+        set_color(i, canvas[i].color);
     }
     WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
 }
@@ -719,7 +719,7 @@ void painting_routine(void) {
             else if (JOY_up_pressed()) {
                 printf("Enter paint loading screen!\n");
                 choose_load_paint_page();
-                flushCanvas();
+                Delay_Ms(1000);
             }
             else if (JOY_down_pressed()) {
                 // save paint

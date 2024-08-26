@@ -1241,7 +1241,7 @@ void movingcar_routine(void) {
         execution_step++;
 
         // Delays
-        Delay_Ms(1000);
+        Delay_Ms(500);
     }
     NVIC_SystemReset();
 }

@@ -53,7 +53,8 @@ It is recommended to separate paint storage and
 program storage to different pages with gap.
 */
 #define program_store_page_no ((8+64) * size_of_one_saveprogram_in_page)
-#define program_store_page_no_max ((8+64+8) * size_of_one_saveprogram_in_page)
+// the size of all program pages
+#define program_store_page_no_max (64 * size_of_one_saveprogram_in_page)
 
 void rv_asm_routine(void);
 rv_res bus_cb(void * user, rv_u32 addr, rv_u8 * data, rv_u32 is_store, rv_u32 width);
@@ -62,6 +63,7 @@ void init_storage(void);
 void reset_storage(void);
 uint8_t is_storage_initialized(void);
 uint8_t is_page_used(uint16_t page_no);
+void red_screen(void);
 
 void choose_save_program_page(void);
 void choose_load_program_page(void);
@@ -75,7 +77,25 @@ const color_t color_savefile_empty = {.r = 0, .g = 100, .b = 0};
 
 // print storage data to console
 void print_status_storage(void);
+void set_page_status(uint16_t page_no, uint8_t status);
 
+void set_page_status(uint16_t page_no, uint8_t status) {
+    if (status > 1) {
+        printf("Invalid status %d\n", status);
+        printf("DEBUG: %d\n", __LINE__);
+        while (1)
+            ;
+    }
+    if (page_no < page_status_addr_begin || page_no > page_status_addr_end) {
+        printf("Invalid page number %d\n", page_no);
+        printf("DEBUG: %d\n", __LINE__);
+        while (1)
+            ;
+    }
+    i2c_write(EEPROM_ADDR, page_no, I2C_REGADDR_2B, &status, sizeof(status));
+    Delay_Ms(3);
+    printf("Page %d status set to %d\n", page_no, status);
+}
 void print_status_storage(void) {
     printf("Status storage data:\n");
     for (uint16_t addr = init_status_addr_begin;
@@ -164,20 +184,32 @@ rv_u16 program[num_of_instructions] = {
 
 void save_program(uint16_t program_no, rv_u16 * _program) {
     uint16_t addr = page_status_addr_begin + program_store_page_no + program_no;
-    i2c_write(EEPROM_ADDR, addr, I2C_REGADDR_2B, (uint8_t *)_program, size_of_one_saveprogram);
-    printf("Program %d saved.\n", program_no);
+    if (is_page_used(addr)) {
+        printf("Paint %d already used, overwriting\n", addr);
+        Delay_Ms(500);
+    }
+    set_page_status(addr, 1);
+    addr *= page_size;
+    i2c_write_pages(EEPROM_ADDR, addr, I2C_REGADDR_2B, (uint8_t *)_program, size_of_one_saveprogram);
+    printf("Program %d saved at page %d\n", program_no, addr/page_size);
 }
 
 void load_program(uint16_t program_no, rv_u16 * _program) {
     uint16_t addr = page_status_addr_begin + program_store_page_no + program_no;
-    i2c_read(EEPROM_ADDR, addr, I2C_REGADDR_2B, (uint8_t *)_program, size_of_one_saveprogram);
+    if (!is_page_used(addr)) {
+        printf("Paint %d not used, aborting\n", addr);
+        return;
+    }
+    addr *= page_size;
+    i2c_read_pages(EEPROM_ADDR, addr, I2C_REGADDR_2B, (uint8_t *)_program, size_of_one_saveprogram);
     printf("Program %d loaded.\n", program_no);
 }
 
 void erase_all_program_saves(void) {
     for (uint16_t addr = page_status_addr_begin + program_store_page_no;
-            addr <= page_status_addr_begin + program_store_page_no + program_store_page_no_max;
-            addr++) {
+            addr < page_status_addr_begin + program_store_page_no + program_store_page_no_max;
+            addr+=size_of_one_saveprogram_in_page) {
+        set_page_status(addr, 0);
         i2c_write(EEPROM_ADDR, addr, I2C_REGADDR_2B, (uint8_t[]){0}, sizeof(uint8_t));
         Delay_Ms(3);
     }
@@ -206,7 +238,6 @@ void choose_save_program_page(void) {
     }
     clear();
     WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
-
 }
 
 void choose_load_program_page(void) {
@@ -232,6 +263,11 @@ void choose_load_program_page(void) {
             Delay_Ms(1000);
             break;
         }
+        if (JOY_Y_pressed()) {
+            // Use default program[]
+            printf("Use default program[]\n");
+            break;
+        }
         Delay_Ms(200);
     }
     clear();
@@ -242,14 +278,16 @@ void choose_load_program_page(void) {
 void led_display_program_page_status(void) {
     clear();
     for (uint16_t addr = page_status_addr_begin + program_store_page_no;
-            addr <= page_status_addr_begin + program_store_page_no + program_store_page_no_max;
+            addr < page_status_addr_begin + program_store_page_no + program_store_page_no_max;
             addr+=size_of_one_saveprogram_in_page) {
+        const uint16_t _led_no = ((addr - page_status_addr_begin - program_store_page_no) / size_of_one_saveprogram_in_page);
+        printf("LED %d: ", _led_no);
         if (is_page_used(addr)) {
-            set_color(((addr - page_status_addr_begin) / size_of_one_saveprogram_in_page),
+            set_color((_led_no),
                 color_savefile_exist);
         }
         else {
-            set_color((addr - page_status_addr_begin) / size_of_one_saveprogram_in_page,
+            set_color(_led_no,
                 color_savefile_empty);
         }
     }
@@ -276,6 +314,11 @@ uint8_t is_page_used(uint16_t page_no) {
     return data;
 }
 
+void red_screen(void) {
+    fill_color((color_t){.r = 100, .g = 0, .b = 0});
+    WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
+}
+
 int main(void) {
     SystemInit();
     ADC_init();
@@ -289,7 +332,19 @@ int main(void) {
     init_storage();
 
     print_status_storage();
-
+    // Hold button X at startup to reset all paints
+    uint16_t delay_countdown = 50;
+    while (delay_countdown-- > 0) {
+        if (JOY_X_pressed()) {
+            erase_all_program_saves();
+            // Visual indication of paint save reset
+            red_screen();
+            printf("Paint reset\n");
+            printf("DEBUG: %d\n", __LINE__);
+            Delay_Ms(1000);
+        }
+        Delay_Ms(1);
+    }
     // choose which save to load
 
     choose_load_program_page();
@@ -438,15 +493,15 @@ void rv_asm_routine(void) {
             Delay_Ms(100);
             printf("Waiting for Y to be released\n");
         }
+
+        if (JOY_X_pressed()) {
+            printf("Execution stopped\n");
+            break;
+        }
     }
 
     printf("Environment call @ %lX\n", cpu.csr.mepc);
     display_all_registers(&cpu);
-
-    while (!JOY_Y_pressed())
-        ;
-    Delay_Ms(1000);
-    NVIC_SystemReset();
 }
 
 rv_res bus_cb(void * user, rv_u32 addr, rv_u8 * data, rv_u32 is_store, rv_u32 width) {

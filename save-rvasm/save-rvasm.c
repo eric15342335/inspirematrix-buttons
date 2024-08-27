@@ -28,7 +28,7 @@ void display_all_registers(rv * cpu);
 
 // rv16 bit
 #define size_of_one_saveprogram (num_of_instructions * sizeof(rv_u16))
-
+#define size_of_one_saveprogram_in_page (size_of_one_saveprogram / page_size)
 #define page_size 64
 // range of byte that stores status of page[x]
 #define init_status_addr_begin 0
@@ -44,7 +44,16 @@ void display_all_registers(rv * cpu);
 
 #define delay 1000
 #define matrix_hori 16
-#define program_store_page_no
+
+/*
+Given:
+#define paint_page_no (8 * sizeof_paint_data_aspage)
+#define paint_page_no_max (8 * sizeof_paint_data_aspage)
+It is recommended to separate paint storage and
+program storage to different pages with gap.
+*/
+#define program_store_page_no ((8+64) * size_of_one_saveprogram_in_page)
+#define program_store_page_no_max ((8+64+8) * size_of_one_saveprogram_in_page)
 
 void rv_asm_routine(void);
 rv_res bus_cb(void * user, rv_u32 addr, rv_u8 * data, rv_u32 is_store, rv_u32 width);
@@ -52,13 +61,17 @@ void display_all_registers(rv * cpu);
 void init_storage(void);
 void reset_storage(void);
 uint8_t is_storage_initialized(void);
+uint8_t is_page_used(uint16_t page_no);
 
 void choose_save_program_page(void);
 void choose_load_program_page(void);
 void led_display_program_page_status(void);
-void save_program(uint16_t program_no, rv_u16 * program);
-void load_program(uint16_t program_no, rv_u16 * program);
+void save_program(uint16_t program_no, rv_u16 * _program);
+void load_program(uint16_t program_no, rv_u16 * _program);
 void erase_all_program_saves(void);
+
+const color_t color_savefile_exist = {.r = 0, .g = 0, .b = 100};
+const color_t color_savefile_empty = {.r = 0, .g = 100, .b = 0};
 
 // print storage data to console
 void print_status_storage(void);
@@ -149,6 +162,100 @@ rv_u16 program[num_of_instructions] = {
     0x0000,
 };
 
+void save_program(uint16_t program_no, rv_u16 * _program) {
+    uint16_t addr = page_status_addr_begin + program_store_page_no + program_no;
+    i2c_write(EEPROM_ADDR, addr, I2C_REGADDR_2B, (uint8_t *)_program, size_of_one_saveprogram);
+    printf("Program %d saved.\n", program_no);
+}
+
+void load_program(uint16_t program_no, rv_u16 * _program) {
+    uint16_t addr = page_status_addr_begin + program_store_page_no + program_no;
+    i2c_read(EEPROM_ADDR, addr, I2C_REGADDR_2B, (uint8_t *)_program, size_of_one_saveprogram);
+    printf("Program %d loaded.\n", program_no);
+}
+
+void erase_all_program_saves(void) {
+    for (uint16_t addr = page_status_addr_begin + program_store_page_no;
+            addr <= page_status_addr_begin + program_store_page_no + program_store_page_no_max;
+            addr++) {
+        i2c_write(EEPROM_ADDR, addr, I2C_REGADDR_2B, (uint8_t[]){0}, sizeof(uint8_t));
+        Delay_Ms(3);
+    }
+    printf("All program saves erased.\n");
+}
+
+void choose_save_program_page(void) {
+    led_display_program_page_status();
+
+    int8_t button = no_button_pressed;
+    while (1) {
+        button = matrix_pressed_two();
+        if (button != no_button_pressed) {
+            if (is_page_used(button * size_of_one_saveprogram_in_page + program_store_page_no +
+                             page_status_addr_begin)) {
+                printf("Page %d already used\n", button);
+                // Overwrite save
+            }
+            printf("Selected page %d\n", button);
+            save_program(button, program);
+            printf("Program saved\n");
+            Delay_Ms(1000);
+            break;
+        }
+        Delay_Ms(200);
+    }
+    clear();
+    WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
+
+}
+
+void choose_load_program_page(void) {
+    led_display_program_page_status();
+    
+    int8_t button = no_button_pressed;
+    while (1) {
+        button = matrix_pressed_two();
+        if (button != no_button_pressed) {
+            if (!is_page_used(button * size_of_one_saveprogram_in_page + program_store_page_no +
+                             page_status_addr_begin)) {
+                printf("Page %d is not used\n", button);
+                // Fill the screen with red to indicate error
+                fill_color((color_t){.r = 100, .g = 0, .b = 0});
+                WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
+                Delay_Ms(1000);
+                led_display_program_page_status();
+                continue;
+            }
+            printf("Selected page %d\n", button);
+            load_program(button, program);
+            printf("Program loaded\n");
+            Delay_Ms(1000);
+            break;
+        }
+        Delay_Ms(200);
+    }
+    clear();
+    WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
+
+}
+
+void led_display_program_page_status(void) {
+    clear();
+    for (uint16_t addr = page_status_addr_begin + program_store_page_no;
+            addr <= page_status_addr_begin + program_store_page_no + program_store_page_no_max;
+            addr+=size_of_one_saveprogram_in_page) {
+        if (is_page_used(addr)) {
+            set_color(((addr - page_status_addr_begin) / size_of_one_saveprogram_in_page),
+                color_savefile_exist);
+        }
+        else {
+            set_color((addr - page_status_addr_begin) / size_of_one_saveprogram_in_page,
+                color_savefile_empty);
+        }
+    }
+    WS2812BSimpleSend(LED_PINS, (uint8_t *)led_array, NUM_LEDS * 3);
+}
+
 #define instruction_size 16
 typedef enum _which_focus {
     focus_instruction_0 = 0,
@@ -156,6 +263,18 @@ typedef enum _which_focus {
     none = 2,
 } which_focus;
 
+uint8_t is_page_used(uint16_t page_no) {
+    if (page_no < page_status_addr_begin || page_no > page_status_addr_end) {
+        printf("Invalid page number %d\n", page_no);
+        printf("DEBUG: %d\n", __LINE__);
+        while (1)
+            ;
+    }
+    uint8_t data = 0;
+    i2c_read(EEPROM_ADDR, page_no, I2C_REGADDR_2B, &data, sizeof(data));
+    printf("Page %d is %s\n", page_no, data ? "used" : "empty");
+    return data;
+}
 
 int main(void) {
     SystemInit();
@@ -171,11 +290,18 @@ int main(void) {
 
     print_status_storage();
 
-    // display saved instructions
-
     // choose which save to load
 
+    choose_load_program_page();
+
     rv_asm_routine();
+
+    choose_save_program_page();
+
+    while (!JOY_Y_pressed()) {
+        Delay_Ms(100);
+    }
+    NVIC_SystemReset();
 }
 
 void instructionDisplay(int16_t index, which_focus focus) {

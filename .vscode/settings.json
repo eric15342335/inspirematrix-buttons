@@ -30,6 +30,9 @@
         "riscv-disas.h": "c",
         "ch32v003_i2c.h": "c",
         "i2c_tx.h": "c",
-        "oled_min.h": "c"
+        "oled_min.h": "c",
+        "array": "c",
+        "string": "c",
+        "string_view": "c"
     },
 }

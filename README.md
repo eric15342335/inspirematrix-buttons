@@ -105,11 +105,37 @@ Older hardware (InspireMatrix):
   * This folder contains a bunch of test programs that are subject to change, and are not guaranteed to work for
   your specific hardware.
 
+> [!NOTE]
+> Both `savepaint` and `save-rvasm` implements an filesystem structure.
+
 * `savepaint`
-  * Todo
+  * Add saving and loading features.
+  * Combines `paint`, `movingcar`, `snake-game` and `tic-tac-toe`
+  * How to play:
+    * Before first icon appearing, hold Y to clear all the saved paints.
+    * After first icon appearing, use `UP` and `DOWN` to select apps.
+    * Use `LEFT` to use the selected app.
+    * Integrated `paint`:
+      * Press 64 (or `NUM_LEDS` buttons) to toggle between foreground color and background color.
+      * Press X or Y to change the foreground or background color.
+      * Press `UP` button to load a saved paint.
+      * Press `DOWN` button to save the current paint.
+    * Integrated `movingcar`:
+      * Currently 64 buttons are divided into left and right section.
+      * For each row (8 buttons), left four buttons correspond to `Left Wheel Forward`, `Left Wheel Backward`, `Right Wheel Forward`, `Right Wheel Backward`.
+      * For each row (8 buttons), right four buttons correspond to `Red`, `Green`, `Blue` and `Special Command` (Currently not used). The LEDs will display the colors when the motor is running.
+      * E.g. if buttons (counting from left) 1, 3, 5 are pressed, the car will go forward and displays red on the entire screen.
+      * Special: If all 8 buttons are pressed, the program will go back the first instruction to execute.
+    * Integrated `snake-game`:
+      * Press Y to start.
+      * Use `up / down / left / right` to move the snake.
+    * Integrated `tic-tac-toe`:
+      * Press any of the empty spot to play.
+    * When any of the app ends, press `Y` to go back to the main menu. (`NVIC_SystemReset()` is called)
 
 * `save-rvasm`
-  * Todo
+  * Add saving and loading features
+  * Uses `rv-asm`.
 
 * `snake-game`
   * Porting the classic snake game to `InspireMatrix`, which has `8x8`=`64` LEDs and `up / down / left / right` controls.
@@ -119,6 +145,36 @@ Older hardware (InspireMatrix):
   * Press button to start
   * Green is player while Red is the bot
   * Try to win it (very easy)
+
+## `funconfig.h` Explanation
+
+```c
+#ifndef _FUNCONFIG_H // Guard
+#define _FUNCONFIG_H
+
+#define CH32V003 1 // Required
+#define FUNCONF_USE_DEBUGPRINTF 0
+#define FUNCONF_USE_UARTPRINTF 1 // For printf() over UART (Use Hercules to view)
+#define FUNCONF_UART_PRINTF_BAUD 115200 // Baud rate
+// Connect UTX pin to RX pin in WCH-LinkE
+
+// Newly created definitions
+#define horizontalButtons 8
+#define verticalButtons 8
+#define NUM_LEDS (horizontalButtons * verticalButtons)
+
+// Not required for the new InspireComputer board
+// For GameConsole, need to define the following
+// and connect buzzer pin to RX.
+// Affects ch32v003fun.h SystemInit() UART printf initialization.
+// #define CH32V003J4M6_USE_PD6_AS_UART_TX
+
+// Required for WS2812B LEDs `ws2812b_simple.h`
+#define FUNCONF_SYSTICK_USE_HCLK 1
+
+#endif
+
+```
 
 ## Compilation
 

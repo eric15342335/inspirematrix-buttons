@@ -4,6 +4,7 @@ This repository contains various projects and utilities for
 working with the CH32V003 microcontroller.
 
 Older hardware (InspireMatrix):
+
 ![InspireMatrix](inspire_matrix.jpeg)
 
 ## Project Structure

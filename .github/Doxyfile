@@ -1,5 +1,5 @@
 PROJECT_NAME           = "CH32V003 InspireMatrix"
-INPUT                  = data emulator i2c-comm movingnum paint-cursor paint-exe rv rv-dis testing tic-tac-toe README.md
+INPUT                  = data emulator ch32v003_stt eeprom i2c-comm inspire3d-demo movingnum movingcar paint paint-cursor rv-asm rv-dis save-rvasm savepaint snake-game testing tic-tac-toe README.md
 RECURSIVE              = YES
 USE_MDFILE_AS_MAINPAGE = README.md
 BUILTIN_STL_SUPPORT    = YES

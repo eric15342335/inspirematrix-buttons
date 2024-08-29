@@ -38,7 +38,7 @@ color_t color_divide(color_t color, uint8_t divider) {
 
 #define smaller(x, y) ((x) < (y) ? (x) : (y))
 void set_color(uint8_t led, color_t color) {
-    uint8_t divider = 8;
+    uint8_t divider = 1;
     led_array[led].r = smaller(color.r, color.r / divider);
     led_array[led].g = smaller(color.g, color.g / divider);
     led_array[led].b = smaller(color.b, color.b / divider);

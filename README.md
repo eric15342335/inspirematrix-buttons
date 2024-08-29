@@ -136,6 +136,17 @@ Older hardware (InspireMatrix):
 * `save-rvasm`
   * Add saving and loading features
   * Uses `rv-asm`.
+  * How to play:
+    * Before the load save menu appear, hold `X` to clear all the saved paints.
+    * Pick a saved program to load. Each program size is 32 instructions (hence 64 bytes / 1 page in the filesystem).
+    * Press `Y` to load the default program (Smile face) instead of loading a saved program.
+      You must choose this if no program are saved.
+    * Use `UP` and `DOWN` to navigate the instruction pages. The top 32 LEDs in light pink indicates
+      which page is currently displayed. E.g. 1 LED on => page 1 => Instruction 1 and 2.
+    * Use `Y` to execute the program.
+    * The button `32` LEDs are used to display the current instruction, with the active bit highlighted as `blue`.
+    * Notes when writing programs:
+      * You `MUST` end your program with an `ecall` (a.k.a `0x0073`) to exit the program.
 
 * `snake-game`
   * Porting the classic snake game to `InspireMatrix`, which has `8x8`=`64` LEDs and `up / down / left / right` controls.
@@ -194,6 +205,8 @@ Great thanks to these projects (LICENSE included):
 * <https://github.com/cnlohr/ch32v003fun>
 * <https://github.com/brian-smith-github/ch32v003_stt>
 * <https://github.com/mnurzia/rv>
+* <https://github.com/michaeljclark/riscv-disassembler>
+* <https://github.com/hexeguitar/ch32v003fun_libs>
 
 ## Check out our other projects as well
 
